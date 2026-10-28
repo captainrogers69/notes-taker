@@ -1,4 +1,4 @@
-package com.rogers.notes_taker
+package com.rogers.weave
 
 import io.flutter.embedding.android.FlutterActivity
 

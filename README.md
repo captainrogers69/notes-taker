@@ -1,4 +1,4 @@
-# notes_taker
+# weave
 
 A new Flutter project.
 
