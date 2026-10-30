@@ -346,7 +346,7 @@ Shared code: `docs/design/assets/tokens.css` (all tokens) and `docs/design/asset
 
 **Naming:** new variations go in `docs/design/NNN-short-name/` with the next free number; never renumber.
 
-Next: add the mini bar + sheet widgets to architecture-playbook §7, and resolve every ⏳ above.
+Open design work is tracked in [`docs/design/design-checklist.md`](../design/design-checklist.md). Resolve every ⏳ above.
 
 ---
 
