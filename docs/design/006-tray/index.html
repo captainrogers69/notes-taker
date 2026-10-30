@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weave · 006 Hide to tray</title>
+<link rel="stylesheet" href="../assets/weave-sheet.css">
+<link rel="stylesheet" href="tray.css">
+</head>
+<body>
+
+<!-- Desktop: screenshot + fake OS bars. Bar and sheet live in here on macOS / Windows / Linux. -->
+<div class="desk" id="desk">
+  <div class="sysbar macbar" data-for="macos">
+    <span class="apple"></span><b>Code</b><span>File</span><span>Edit</span><span>Selection</span><span>View</span><span>Go</span><span>Window</span><span>Help</span>
+    <span class="grow"></span>
+    <button class="trayicon" id="tray-macos" aria-label="Weave"><span class="ti"></span><b class="tcount"></b></button>
+    <span class="sys"><i class="ico wifi"></i><i class="ico batt"></i><i class="ico cc"></i></span>
+    <span>Thu 30 Oct&nbsp;&nbsp;16:20</span>
+  </div>
+
+  <div class="sysbar winbar" data-for="windows">
+    <span class="grow"></span>
+    <span class="apps"><i class="start"></i><i></i><i></i><i class="on"></i><i></i><i></i></span>
+    <span class="grow"></span>
+    <span class="tray">
+      <span class="chev">^</span>
+      <button class="trayicon" id="tray-windows" aria-label="Weave"><span class="ti"></span><b class="tcount"></b></button>
+      <i class="ico wifi"></i><i class="ico vol"></i><i class="ico batt"></i>
+      <span class="clock">16:20<br>30-10-2026</span>
+    </span>
+  </div>
+
+  <div class="sysbar gnomebar" data-for="linux">
+    <span class="act">Activities</span>
+    <span class="grow"></span>
+    <b>Oct 30&nbsp;&nbsp;16:20</b>
+    <span class="grow"></span>
+    <button class="trayicon" id="tray-linux" aria-label="Weave"><span class="ti"></span><b class="tcount"></b></button>
+    <span class="sys"><i class="ico wifi"></i><i class="ico vol"></i><i class="ico batt"></i></span>
+  </div>
+</div>
+
+<!-- Android: phone with home screen, status bar and notification shade. -->
+<div class="phonestage" id="phonestage">
+  <div class="phone" id="phone">
+    <div class="pstatus" id="pstatus">
+      <span>16:20</span>
+      <span class="pnotif" id="pnotif"><span class="ti"></span></span>
+      <span class="grow"></span>
+      <i class="ico wifi"></i><i class="ico batt"></i>
+    </div>
+    <div class="punch"></div>
+    <div class="phome">
+      <div class="pclock">16:20<small>Thursday, 30 October</small></div>
+      <div class="pgrid" id="pgrid"></div>
+      <div class="pdock"><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="shade" id="shade"></div>
+    <div class="pgesture"></div>
+  </div>
+</div>
+
+<div class="minibar" id="minibar" role="button" tabindex="0" aria-label="Open Weave" aria-expanded="false">
+  <span class="grip"></span>
+  <span class="dot"></span>
+  <span class="name" id="name"></span>
+  <span class="meta" id="meta"></span>
+  <kbd id="hotkey">⌥ Space</kbd>
+</div>
+
+<div class="caption">
+  <b>006 · Hide to tray</b>
+  <div class="bar" id="osCtl" style="margin:8px 0 4px">
+    <button data-os="macos">macOS</button>
+    <button data-os="windows">Windows</button>
+    <button data-os="linux">Linux</button>
+    <button data-os="android">Android</button>
+  </div>
+  <ol id="steps"></ol>
+  <div class="bar">
+    Theme
+    <button data-theme="t-dark" aria-pressed="true">Dark</button>
+    <button data-theme="t-light" aria-pressed="false">Light</button>
+    <a href="../003-mini-bar/index.html">← 003 Mini bar</a>
+  </div>
+</div>
+
+<script src="../assets/weave-sheet.js"></script>
+<script src="tray.js"></script>
+</body>
+</html>

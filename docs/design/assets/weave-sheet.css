@@ -1,5 +1,5 @@
 /* Shared Weave sheet (the window that opens from any trigger). Throwaway prototype, not app code. */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+@import url('tokens.css');
 
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; overflow: hidden; }
@@ -7,26 +7,6 @@ body {
   font-family: Inter, -apple-system, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   background: #1e1e1e url('desktop.png') center / cover no-repeat;
-}
-
-/* ---------- Theme tokens (caption switch sets t-dark / t-light on <html>) ---------- */
-:root, .t-dark {
-  --win-bg: rgba(30, 30, 33, .9);
-  --win-line: rgba(255, 255, 255, .1);
-  --text: #f3f3f4;
-  --muted: rgba(255, 255, 255, .45);
-  --hover: rgba(255, 255, 255, .06);
-  --field: rgba(255, 255, 255, .07);
-  --shadow: 0 24px 60px rgba(0, 0, 0, .55);
-}
-.t-light {
-  --win-bg: rgba(255, 255, 255, .92);
-  --win-line: rgba(0, 0, 0, .08);
-  --text: #1d1d1f;
-  --muted: rgba(0, 0, 0, .42);
-  --hover: rgba(0, 0, 0, .045);
-  --field: rgba(0, 0, 0, .05);
-  --shadow: 0 24px 60px rgba(0, 0, 0, .35);
 }
 
 /* ---------- Sheet ---------- */
@@ -37,10 +17,12 @@ body {
   width: 320px;
   height: 380px;
   overflow: hidden;
-  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
   color: var(--text);
   background: var(--win-bg);
-  backdrop-filter: blur(28px) saturate(1.5);
+  backdrop-filter: var(--blur);
   box-shadow: var(--shadow), inset 0 0 0 1px var(--win-line);
   font-size: 14px;
   opacity: 0;
@@ -59,7 +41,7 @@ body {
   z-index: 1;
 }
 
-.views { display: flex; width: 200%; height: 100%; transition: transform .26s cubic-bezier(.2, .8, .2, 1); }
+.views { flex: 1; min-height: 0; display: flex; width: 200%; transition: transform .26s cubic-bezier(.2, .8, .2, 1); }
 .win.show-lists .views { transform: translateX(-50%); }
 .view { width: 50%; height: 100%; display: flex; flex-direction: column; }
 
@@ -83,7 +65,7 @@ body {
 .win .title { flex: 1; padding-left: 4px; font-weight: 600; font-size: 15px; }
 .win .count { margin-left: auto; padding-right: 6px; color: var(--muted); font-size: 12.5px; white-space: nowrap; }
 .win .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c, var(--accent)); flex: none; }
-.win :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.win :focus-visible { outline: 2px solid var(--accent-ink, var(--accent)); outline-offset: 1px; }
 
 .win .add {
   display: flex;
@@ -95,8 +77,8 @@ body {
   background: var(--field);
   transition: box-shadow .15s;
 }
-.win .add:focus-within { box-shadow: inset 0 0 0 1.5px var(--accent); }
-.win .add .plus { color: var(--accent); font-size: 18px; font-weight: 500; line-height: 1; }
+.win .add:focus-within { box-shadow: inset 0 0 0 1.5px var(--accent-ink, var(--accent)); }
+.win .add .plus { color: var(--accent-ink, var(--accent)); font-size: 18px; font-weight: 500; line-height: 1; }
 .win .add input { all: unset; flex: 1; height: 40px; font: inherit; color: inherit; }
 .win .add input::placeholder { color: var(--muted); }
 .win .add kbd { font: inherit; font-size: 11px; color: var(--muted); opacity: 0; transition: opacity .15s; }
@@ -143,9 +125,18 @@ body {
 .win .row:hover { background: var(--hover); }
 .win .row .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .win .row .n { color: var(--muted); font-size: 12.5px; }
-.win .row .tick { width: 16px; color: var(--accent); font-size: 13px; text-align: center; }
+.win .row .tick { width: 16px; color: var(--accent-ink, var(--accent)); font-size: 13px; text-align: center; }
 .win .row.is-current .name { font-weight: 600; }
 .win .hint { padding: 2px 14px 12px; color: var(--muted); font-size: 11.5px; }
+
+/* Optional footer (tray actions) */
+.win .foot { flex: none; display: flex; align-items: center; gap: 4px; padding: 6px 8px; border-top: 1px solid var(--win-line); }
+.win .foot:empty { display: none; }
+.win .fbtn { all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; padding: 7px 10px; border-radius: 8px; font-size: 12.5px; color: var(--text); }
+.win .fbtn:hover { background: var(--hover); }
+.win .fbtn svg { width: 14px; height: 14px; color: var(--muted); }
+.win .fbtn.on, .win .fbtn.on svg { color: var(--accent-ink, var(--accent)); }
+.win .foot .spacer { flex: 1; }
 
 /* ---------- Caption (prototype instructions, not part of the design) ---------- */
 .caption {

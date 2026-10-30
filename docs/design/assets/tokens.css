@@ -1,0 +1,38 @@
+/* Weave design tokens — single source for every prototype (sheet, mini bar, tray, app).
+   Mode = .t-light / .t-dark on an ancestor (dark is the default).
+   Every text color here is ≥ 4.5:1 on canvas, side, surface and card (WCAG AA), checked by script.
+
+   Note colors: --nX is the fill (dots, strips, check fill); --nX-ink is the text-safe shade
+   (focus rings, "due" chips, active icons). Elements set --accent / --accent-ink to one pair. */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ---------- Shared ---------- */
+:root, .t-dark, .t-light {
+  --n0: #F5C84C; --n1: #6AA6F8; --n2: #5DC48A; --n3: #EE7FA8; --n4: #A88BEB; --n5: #F29A5B;
+  --toast: #2C2C31;
+  --blur: none;
+  /* aliases used by older prototype CSS */
+  --win-bg: var(--surface);
+  --win-line: var(--line);
+  --bg: var(--canvas);
+  --panel: var(--surface);
+}
+
+/* ---------- Dark: crisp cool neutrals, solid surfaces ---------- */
+:root, .t-dark {
+  --canvas: #121418; --side: #171A1F; --surface: #1B1F25; --card: #1F242B;
+  --text: #EEF1F5; --muted: #97A0AC;
+  --line: rgba(200, 220, 255, .09); --hover: rgba(200, 220, 255, .05); --field: rgba(200, 220, 255, .065); --sel: rgba(200, 220, 255, .09);
+  --shadow: 0 24px 60px rgba(0, 0, 0, .55);
+  --n0-ink: #F5C84C; --n1-ink: #6AA6F8; --n2-ink: #5DC48A; --n3-ink: #EE7FA8; --n4-ink: #A88BEB; --n5-ink: #F29A5B;
+}
+
+/* ---------- Light ---------- */
+.t-light {
+  --canvas: #F4F6F9; --side: #ECEFF3; --surface: #FFFFFF; --card: #FFFFFF;
+  --text: #161A20; --muted: #5B6471;
+  --line: rgba(20, 40, 70, .11); --hover: rgba(20, 40, 70, .045); --field: rgba(20, 40, 70, .055); --sel: rgba(20, 40, 70, .08);
+  --shadow: 0 20px 50px rgba(20, 30, 50, .18);
+  --n0-ink: #876508; --n1-ink: #0B65E0; --n2-ink: #2C784D; --n3-ink: #CD1B5D; --n4-ink: #794CE0; --n5-ink: #AC4F0E;
+}

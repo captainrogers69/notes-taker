@@ -18,7 +18,7 @@
     gap: 10px;
     padding: 0 6px 0 10px;
     overflow: hidden;
-    border-radius: 12px;
+    border-radius: 10px;
     color: var(--text);
     background: var(--win-bg);
     backdrop-filter: blur(28px) saturate(1.5);
@@ -77,6 +77,8 @@
     <li>Tap a circle to tick. Done items tuck into "Done".</li>
     <li>Tap <b>‹</b> or the list name to switch or create a list. The bar follows.</li>
     <li>Drag the bar anywhere; it stays where you drop it. Near the bottom the sheet opens upward.</li>
+    <li>Tap <b>⤢</b> (or <b>⌘O</b>) to open the full Weave app on this list.</li>
+    <li>Tap <b>⌄</b> (or <b>⌘H</b>) to hide the bar into the menu bar / tray (see 006).</li>
   </ol>
   <div class="bar">
     Theme
@@ -107,6 +109,9 @@
 
   const sheet = mount({
     trigger: bar,
+    // Hiding hands off to 006, which shows where the bar goes on each platform.
+    hideLabel: () => 'Hide to menu bar',
+    onHide: () => { location.href = '../006-tray/index.html#os=macos&hidden=1'; },
     place(win) {
       const r = bar.getBoundingClientRect();
       const w = win.offsetWidth, h = win.offsetHeight;
