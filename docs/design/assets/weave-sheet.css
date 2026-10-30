@@ -1,0 +1,180 @@
+/* Shared Weave sheet (the window that opens from any trigger). Throwaway prototype, not app code. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; }
+body {
+  font-family: Inter, -apple-system, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: #1e1e1e url('desktop.png') center / cover no-repeat;
+}
+
+/* ---------- Theme tokens (caption switch sets t-dark / t-light on <html>) ---------- */
+:root, .t-dark {
+  --win-bg: rgba(30, 30, 33, .9);
+  --win-line: rgba(255, 255, 255, .1);
+  --text: #f3f3f4;
+  --muted: rgba(255, 255, 255, .45);
+  --hover: rgba(255, 255, 255, .06);
+  --field: rgba(255, 255, 255, .07);
+  --shadow: 0 24px 60px rgba(0, 0, 0, .55);
+}
+.t-light {
+  --win-bg: rgba(255, 255, 255, .92);
+  --win-line: rgba(0, 0, 0, .08);
+  --text: #1d1d1f;
+  --muted: rgba(0, 0, 0, .42);
+  --hover: rgba(0, 0, 0, .045);
+  --field: rgba(0, 0, 0, .05);
+  --shadow: 0 24px 60px rgba(0, 0, 0, .35);
+}
+
+/* ---------- Sheet ---------- */
+.win {
+  --accent: #F5C84C;
+  position: fixed;
+  z-index: 19;
+  width: 320px;
+  height: 380px;
+  overflow: hidden;
+  border-radius: 16px;
+  color: var(--text);
+  background: var(--win-bg);
+  backdrop-filter: blur(28px) saturate(1.5);
+  box-shadow: var(--shadow), inset 0 0 0 1px var(--win-line);
+  font-size: 14px;
+  opacity: 0;
+  transform: scale(.94) translateY(var(--slide-y, 0));
+  transform-origin: var(--origin, right top);
+  pointer-events: none;
+  transition: opacity .16s ease, transform .22s cubic-bezier(.2, .8, .2, 1);
+}
+.win.is-open { opacity: 1; transform: none; pointer-events: auto; }
+.win::before { /* list color strip */
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--accent);
+  z-index: 1;
+}
+
+.views { display: flex; width: 200%; height: 100%; transition: transform .26s cubic-bezier(.2, .8, .2, 1); }
+.win.show-lists .views { transform: translateX(-50%); }
+.view { width: 50%; height: 100%; display: flex; flex-direction: column; }
+
+.win header { display: flex; align-items: center; gap: 6px; padding: 12px 10px 6px; }
+.win .icon, .win .pname, .win .row, .win .done-toggle { all: unset; box-sizing: border-box; cursor: pointer; }
+.win .icon { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px; flex: none; }
+.win .icon svg { width: 17px; height: 17px; }
+.win .icon:hover, .win .pname:hover { background: var(--hover); }
+.win .pname {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+}
+.win .pname .label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.win .caret { color: var(--muted); font-size: 11px; }
+.win .title { flex: 1; padding-left: 4px; font-weight: 600; font-size: 15px; }
+.win .count { margin-left: auto; padding-right: 6px; color: var(--muted); font-size: 12.5px; white-space: nowrap; }
+.win .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c, var(--accent)); flex: none; }
+.win :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.win .add {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 10px 6px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: var(--field);
+  transition: box-shadow .15s;
+}
+.win .add:focus-within { box-shadow: inset 0 0 0 1.5px var(--accent); }
+.win .add .plus { color: var(--accent); font-size: 18px; font-weight: 500; line-height: 1; }
+.win .add input { all: unset; flex: 1; height: 40px; font: inherit; color: inherit; }
+.win .add input::placeholder { color: var(--muted); }
+.win .add kbd { font: inherit; font-size: 11px; color: var(--muted); opacity: 0; transition: opacity .15s; }
+.win .add:focus-within kbd { opacity: 1; }
+
+.win .scroll { flex: 1; overflow: auto; padding: 2px 6px 10px; }
+.win ul { list-style: none; margin: 0; padding: 0; }
+
+.win .item { display: flex; align-items: flex-start; gap: 11px; padding: 8px; border-radius: 9px; }
+.win .item:hover { background: var(--hover); }
+.win .item.is-new { animation: wv-flash 1s ease-out; }
+@keyframes wv-flash { from { background: color-mix(in srgb, var(--accent) 28%, transparent); } }
+.win .check {
+  all: unset;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1.6px solid var(--muted);
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.win .check:hover { border-color: var(--accent); }
+.win .item.is-done .check, .win .item.is-ticking .check { background: var(--accent); border-color: var(--accent); }
+.win .item.is-done .check::after, .win .item.is-ticking .check::after {
+  content: '';
+  width: 8px;
+  height: 4px;
+  border: 2px solid #1b1b1b;
+  border-top: 0;
+  border-right: 0;
+  transform: translateY(-1px) rotate(-45deg);
+}
+.win .item .text { line-height: 1.35; padding-top: 1px; transition: opacity .2s; }
+.win .item.is-done .text, .win .item.is-ticking .text { text-decoration: line-through; opacity: .45; }
+
+.win .done-toggle { display: flex; gap: 6px; margin: 6px 8px 2px; padding: 4px 0; color: var(--muted); font-size: 12.5px; }
+.win .done-toggle:hover { color: var(--text); }
+.win .empty { margin: 28px 0 0; text-align: center; color: var(--muted); font-size: 13px; line-height: 1.6; }
+
+.win .row { width: 100%; display: flex; align-items: center; gap: 11px; padding: 10px; border-radius: 9px; }
+.win .row:hover { background: var(--hover); }
+.win .row .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.win .row .n { color: var(--muted); font-size: 12.5px; }
+.win .row .tick { width: 16px; color: var(--accent); font-size: 13px; text-align: center; }
+.win .row.is-current .name { font-weight: 600; }
+.win .hint { padding: 2px 14px 12px; color: var(--muted); font-size: 11.5px; }
+
+/* ---------- Caption (prototype instructions, not part of the design) ---------- */
+.caption {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 5;
+  width: 340px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, .8);
+  backdrop-filter: blur(10px);
+  color: #ccc;
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+.caption b { color: #fff; font-size: 13.5px; }
+.caption ol { margin: 6px 0 8px; padding-left: 18px; }
+.caption .bar { display: flex; gap: 6px; align-items: center; }
+.caption button {
+  all: unset;
+  cursor: pointer;
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, .1);
+  color: #ddd;
+  font-size: 12px;
+}
+.caption button[aria-pressed="true"] { background: #F5C84C; color: #1b1b1b; }
+.caption a { margin-left: auto; color: #9cc4ff; font-size: 12px; }
+
+@media (prefers-reduced-motion: reduce) { * { transition-duration: 0s !important; animation: none !important; } }

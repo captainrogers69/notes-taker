@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weave · 004 Bubble</title>
+<link rel="stylesheet" href="../assets/weave-sheet.css">
+<style>
+  .bubble {
+    --accent: #F5C84C;
+    position: fixed;
+    z-index: 20;
+    width: 56px;
+    height: 56px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: var(--accent);
+    background: rgba(24, 24, 27, .72);
+    backdrop-filter: blur(16px) saturate(1.4);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .4), inset 0 0 0 1px rgba(255, 255, 255, .12);
+    opacity: .55;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    transition: opacity .25s, transform .3s cubic-bezier(.2, .8, .2, 1),
+      left .32s cubic-bezier(.2, .8, .2, 1), top .32s cubic-bezier(.2, .8, .2, 1);
+  }
+  .bubble svg { width: 26px; height: 26px; }
+  .bubble:hover, .bubble.is-open, .bubble:focus-visible { opacity: 1; transform: none; outline: none; }
+  .bubble.is-dragging { opacity: 1; transform: scale(1.08); cursor: grabbing; transition: opacity .25s, transform .2s; }
+  /* Idle: tuck half behind the screen edge, like mobile quick launchers. */
+  .bubble.is-tucked.on-right { transform: translateX(42%); opacity: .4; }
+  .bubble.is-tucked.on-left  { transform: translateX(-42%); opacity: .4; }
+  .badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    min-width: 19px;
+    height: 19px;
+    padding: 0 5px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #1b1b1b;
+    font-size: 11px;
+    font-weight: 600;
+    box-shadow: 0 0 0 2px rgba(24, 24, 27, .9);
+  }
+  .bubble.on-left .badge { right: auto; left: -2px; }
+  .badge[hidden] { display: none; }
+</style>
+</head>
+<body>
+
+<div class="bubble on-right" id="bubble" role="button" tabindex="0" aria-label="Open Weave" aria-expanded="false">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l4.5 10L12 7l4.5 10L21 7"/></svg>
+  <span class="badge" id="badge"></span>
+</div>
+
+<div class="caption">
+  <b>004 · Weave bubble</b>
+  <ol>
+    <li>Tap the faded <b>W</b> on the right edge. Start typing, press Enter.</li>
+    <li>Tap a circle to tick. Done items tuck into "Done".</li>
+    <li>Tap <b>‹</b> or the list name to switch or create a list.</li>
+    <li>Drag the bubble anywhere; it snaps to a side and half-hides when idle.</li>
+  </ol>
+  <div class="bar">
+    Theme
+    <button data-theme="t-dark" aria-pressed="true">Dark</button>
+    <button data-theme="t-light" aria-pressed="false">Light</button>
+    <a href="../003-mini-bar/index.html">Compare: 003 Mini bar</a>
+  </div>
+</div>
+
+<script src="../assets/weave-sheet.js"></script>
+<script>
+(() => {
+  const { mount, draggable, bindThemeButtons, clamp } = WeaveSheet;
+  const SIZE = 56, EDGE = 14, GAP = 12, TUCK_AFTER = 2500;
+  const bubble = document.getElementById('bubble');
+  const badge = document.getElementById('badge');
+
+  let pos = { x: innerWidth - SIZE - EDGE, y: Math.round(innerHeight * .38) };
+  let origin = pos;
+  let tuckTimer = null;
+  const onRight = () => pos.x > innerWidth / 2;
+
+  function applyPos() {
+    bubble.style.left = pos.x + 'px';
+    bubble.style.top = pos.y + 'px';
+    bubble.classList.toggle('on-right', onRight());
+    bubble.classList.toggle('on-left', !onRight());
+  }
+  function snap() {
+    pos.x = pos.x + SIZE / 2 < innerWidth / 2 ? EDGE : innerWidth - SIZE - EDGE;
+    pos.y = clamp(pos.y, EDGE, innerHeight - SIZE - EDGE);
+    applyPos();
+    sheet.reposition();
+  }
+  function untuck() { clearTimeout(tuckTimer); bubble.classList.remove('is-tucked'); }
+  function scheduleTuck() {
+    clearTimeout(tuckTimer);
+    tuckTimer = setTimeout(() => {
+      if (!sheet.isOpen() && !bubble.matches(':hover')) bubble.classList.add('is-tucked');
+    }, TUCK_AFTER);
+  }
+
+  const sheet = mount({
+    trigger: bubble,
+    place(win) {
+      const w = win.offsetWidth, h = win.offsetHeight;
+      const x = onRight() ? pos.x - GAP - w : pos.x + SIZE + GAP;
+      const y = clamp(pos.y - 8, EDGE, innerHeight - h - EDGE);
+      win.style.left = x + 'px';
+      win.style.top = y + 'px';
+      win.style.setProperty('--origin', `${onRight() ? 'right' : 'left'} ${pos.y + SIZE / 2 - y}px`);
+    },
+    onRender(p, left, color) {
+      bubble.style.setProperty('--accent', color);
+      badge.textContent = left;
+      badge.hidden = left === 0;
+    },
+  });
+
+  bubble.addEventListener('weave:toggle', (e) => (e.detail ? untuck() : scheduleTuck()));
+  bubble.addEventListener('pointerenter', untuck);
+  bubble.addEventListener('pointerleave', () => { if (!sheet.isOpen()) scheduleTuck(); });
+
+  draggable(bubble, {
+    onStart(phase) { if (phase === 'down') { untuck(); origin = { ...pos }; } else sheet.close(); },
+    onMove(dx, dy) { pos = { x: origin.x + dx, y: origin.y + dy }; applyPos(); },
+    onDrop() { snap(); scheduleTuck(); },
+    onTap: sheet.toggle,
+  });
+
+  addEventListener('resize', snap);
+  bindThemeButtons();
+  applyPos();
+  scheduleTuck();
+})();
+</script>
+</body>
+</html>

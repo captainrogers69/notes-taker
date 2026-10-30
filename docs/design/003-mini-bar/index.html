@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weave · 003 Mini bar</title>
+<link rel="stylesheet" href="../assets/weave-sheet.css">
+<style>
+  /* Same surface, line, shadow, text and accent tokens as the sheet (weave-sheet.css),
+     so the bar reads as the sheet's collapsed form. */
+  .minibar {
+    --accent: #F5C84C;
+    position: fixed;
+    z-index: 20;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 6px 0 10px;
+    overflow: hidden;
+    border-radius: 12px;
+    color: var(--text);
+    background: var(--win-bg);
+    backdrop-filter: blur(28px) saturate(1.5);
+    box-shadow: var(--shadow), inset 0 0 0 1px var(--win-line);
+    font-size: 14px;
+    white-space: nowrap;
+    opacity: .5;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    transition: opacity .2s, transform .15s;
+  }
+  .minibar::before { /* list color strip, like the sheet's */
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    background: var(--accent);
+  }
+  .minibar:hover, .minibar.is-open, .minibar:focus-visible { opacity: 1; outline: none; }
+  .minibar.is-dragging { opacity: 1; cursor: grabbing; transform: scale(1.03); }
+  .minibar .grip {
+    width: 8px;
+    height: 14px;
+    margin-top: 2px;
+    background: radial-gradient(circle, var(--muted) 1.2px, transparent 1.4px) 0 0 / 4px 4.6px;
+  }
+  .minibar .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); flex: none; }
+  .minibar .name { font-size: 15px; font-weight: 600; max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
+  .minibar .meta { color: var(--muted); font-size: 12.5px; }
+  .minibar kbd {
+    margin-left: 2px;
+    padding: 3px 8px;
+    border-radius: 8px;
+    background: var(--field);
+    color: var(--muted);
+    font: inherit;
+    font-size: 11px;
+  }
+</style>
+</head>
+<body>
+
+<div class="minibar" id="minibar" role="button" tabindex="0" aria-label="Open Weave" aria-expanded="false">
+  <span class="grip"></span>
+  <span class="dot"></span>
+  <span class="name" id="name"></span>
+  <span class="meta" id="meta"></span>
+  <kbd>⌥ Space</kbd>
+</div>
+
+<div class="caption">
+  <b>003 · Mini bar</b>
+  <ol>
+    <li>Tap the faded bar at the top. Start typing, press Enter.</li>
+    <li>Tap a circle to tick. Done items tuck into "Done".</li>
+    <li>Tap <b>‹</b> or the list name to switch or create a list. The bar follows.</li>
+    <li>Drag the bar anywhere; it stays where you drop it. Near the bottom the sheet opens upward.</li>
+  </ol>
+  <div class="bar">
+    Theme
+    <button data-theme="t-dark" aria-pressed="true">Dark</button>
+    <button data-theme="t-light" aria-pressed="false">Light</button>
+    <a href="../004-weave-bubble/index.html">Compare: 004 Bubble</a>
+  </div>
+</div>
+
+<script src="../assets/weave-sheet.js"></script>
+<script>
+(() => {
+  const { mount, draggable, bindThemeButtons, clamp } = WeaveSheet;
+  const EDGE = 12, GAP = 8;
+  const bar = document.getElementById('minibar');
+  const nameEl = document.getElementById('name');
+  const metaEl = document.getElementById('meta');
+
+  let pos = { x: Math.round(innerWidth / 2 - 110), y: 64 };
+  let origin = pos;
+
+  function applyPos() {
+    pos.x = clamp(pos.x, EDGE, innerWidth - bar.offsetWidth - EDGE);
+    pos.y = clamp(pos.y, EDGE, innerHeight - bar.offsetHeight - EDGE);
+    bar.style.left = pos.x + 'px';
+    bar.style.top = pos.y + 'px';
+  }
+
+  const sheet = mount({
+    trigger: bar,
+    place(win) {
+      const r = bar.getBoundingClientRect();
+      const w = win.offsetWidth, h = win.offsetHeight;
+      const below = r.bottom + GAP + h <= innerHeight - EDGE;
+      const x = clamp(r.left, EDGE, innerWidth - w - EDGE);
+      const y = below ? r.bottom + GAP : Math.max(EDGE, r.top - GAP - h);
+      win.style.left = x + 'px';
+      win.style.top = y + 'px';
+      win.style.setProperty('--slide-y', below ? '-8px' : '8px');
+      win.style.setProperty('--origin', `${r.left + 24 - x}px ${below ? 'top' : 'bottom'}`);
+    },
+    onRender(p, left, color) {
+      bar.style.setProperty('--accent', color);
+      nameEl.textContent = p.name;
+      metaEl.textContent = left ? `${left} left` : 'All done';
+      applyPos(); // width changes with the list name
+    },
+  });
+
+  draggable(bar, {
+    onStart(phase) { if (phase === 'down') origin = { ...pos }; else sheet.close(); },
+    onMove(dx, dy) { pos = { x: origin.x + dx, y: origin.y + dy }; applyPos(); },
+    onTap: sheet.toggle,
+  });
+
+  addEventListener('resize', applyPos);
+  bindThemeButtons();
+  applyPos();
+})();
+</script>
+</body>
+</html>
