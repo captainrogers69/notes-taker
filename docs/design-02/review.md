@@ -51,7 +51,7 @@ Automated audit (CDP, light and dark): **contrast 0 failures**, every control ha
 | B4 | ✅ High | `dragging-alternative` | The mini bar can only be moved by dragging, and list rows show a drag grip with no keyboard or button alternative (WCAG 2.5.7). | 01 bar, 03 list rows |
 | B5 | ✅ Medium | `web-target-size` | Toggles are 32×18 and the details chevron is 28×20; both are under 24px tall. | 03 settings, list |
 | B6 | ⏸ Medium | `contrast` (idle state) | The bar at 50% idle opacity drops its text below 4.5:1 over most wallpapers. It is intended, but a user who needs contrast cannot read the bar without hovering. | 01 bar |
-| B7 | Medium | `tab-bar-ios` / `platform-adaptive` | iOS and Android use the same hamburger menu. iOS users expect a tab bar, and Android users expect predictive back. | 03 phone |
+| B7 | ✅ Medium | `tab-bar-ios` / `platform-adaptive` | iOS and Android use the same hamburger menu. iOS users expect a tab bar, and Android users expect predictive back. | 03 phone |
 | B8 | ✅ Medium | `voiceover-sr` | Colour swatches are announced as "Colour 1…6"; they should be named (Yellow, Blue…). The sheet dialog is labelled "Weave", not the list name. | 03 list, sheet |
 | B9 | ✅ Low | `truncation-strategy` | Phone thread labels cut off at 14 characters ("Pay electrici…"), with no way to see the full text. | 03 phone thread |
 | B10 | ✅ Low | `readable-font-size` | Inputs are 14px, so iOS Safari zooms in on focus on the web build. This does not apply to native Flutter. | Web build only |
@@ -103,11 +103,12 @@ Re-checked: `lint.mjs` 0 FAIL; `inspect.mjs` 0 FAIL on every page. Up next, list
 | B9 | Thread labels carry the full text as a tooltip, and clicking or tapping one opens that task (on phones, its sheet). |
 | B10 | On phones, inputs, selects and the editable title are 16px, so iOS Safari no longer zooms on focus. |
 
+| B7 | **Decided: a bottom tab bar on both phones** (2026-11-03): Up next · Lists · Search · Settings, replacing the ☰ menu. iOS uses icon + label with the home-indicator inset and a chevron "‹ Lists" back. Android uses a Material 3 navigation bar (80dp, a pill behind the current tab) and a back arrow. Lists is a new phone screen (note tiles, New list, Archive and trash), and Search has its own screen. A list or Archive opens inside the Lists tab, with the tab still showing. Up next shows a due-today badge. The add field sits just above the tabs. In the Flutter build, Android's back gesture (with predictive back) must pop the same way as the arrow; the HTML prototype can't show the system gesture. |
+
 Checks: `inspect.mjs` 0 FAIL / 0 WARN on Up next, settings and all six lists. The click-through tests pass with a clean console.
 
 **Still open:**
 - B6: **decided, keep 50%** (2026-11-03). The bar is meant to recede; it reaches full strength on hover, while open, and while dragging. Not fixing.
-- B7: iOS tab bar and Android predictive back. This is a layout decision for the phone shell.
 - C: the motion audit is written. Its findings wait on your review before any fix.
 
 ---

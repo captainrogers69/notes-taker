@@ -253,7 +253,7 @@
   function nextScreen() {
     if (phone()) return `
       <h1>Up next</h1><p class="subline">${upNextFinding()}</p>
-      ${threadCard()}${todayCard()}${laterCard()}${listsCard()}`;
+      ${threadCard()}${todayCard()}${laterCard()}`;
     return `
       <div class="titlerow"><div class="tt"><h1>Up next</h1><p class="subline">${upNextFinding()}</p></div></div>
       <div class="grid eq">
@@ -486,6 +486,7 @@
   }
 
   function screen() {
+    if (state.view === 'lists' || state.view === 'search') state.view = 'next'; // phone-only tabs
     if (state.query) return searchScreen();
     return { next: nextScreen, list: listScreen, settings: settingsScreen, archive: archiveScreen }[state.view]();
   }
@@ -495,14 +496,43 @@
     return `<div class="chrome"><span class="lights"><i></i><i></i><i></i></span><span class="grow"></span></div>`;
   }
 
+  // ---------- Phone tabs: Lists and Search ----------
+  function phoneLists() {
+    const open = D.lists.reduce((n, l) => n + D.open(l).length, 0);
+    return `
+      <h1>Lists</h1><p class="subline num">${D.lists.length} lists · ${open} open</p>
+      <section class="card" aria-label="Your lists">${listsCard().replace(/^[\s\S]*?<ul class="notes">/, '<ul class="notes">').replace(/<\/section>\s*$/, '')}</section>
+      <div class="card" style="padding:4px 8px">
+        <button class="navrow" data-act="newlist">${I.plus}<span class="label">New list</span></button>
+        <button class="navrow" data-act="nav" data-view="archive">${I.archive}<span class="label">Archive and trash</span><span class="n">${archived.length + trashed.length}</span></button>
+      </div>`;
+  }
+
+  function phoneSearch() {
+    const q = state.query.trim();
+    const box = `<label class="search psearch">${I.search}<input data-search placeholder="Search every list" value="${esc(state.query)}" aria-label="Search notes"></label>`;
+    if (!q) return `<h1>Search</h1>${box}<p class="subline">Searches every task and note, offline too.</p>`;
+    return box + searchScreen().replace(/<div class="titlerow">[\s\S]*?<\/div><\/div>/, (m) => m.replace('<h1>Search</h1>', '')).replace('style="max-width:742px"', '');
+  }
+
   // ---------- Phone shell ----------
   function phoneShell() {
     const l = cur();
     const sel = state.sel && findItem(state.sel);
-    const inList = state.view === 'list' && !state.query;
-    const top = inList
-      ? `<button class="ibtn" data-act="nav" data-view="next" aria-label="Back to Up next">${I.back}</button><span class="ttl"></span><button class="ibtn" data-act="psheet" data-sheet="share" aria-label="Share">${I.share}</button><button class="ibtn" data-act="psheet" data-sheet="more" aria-label="More">${I.more}</button>`
-      : `<button class="ibtn" data-act="pmenu" aria-label="Menu">${I.menu}</button><span class="ttl"><span style="display:inline-flex;align-items:center;gap:8px">${I.mark}Weave</span></span><button class="ibtn" data-act="nav" data-view="settings" aria-label="Settings">${I.gear}</button>`;
+    const inList = state.view === 'list';
+    const sub = inList || state.view === 'archive'; // pushed inside the Lists tab
+    // Back: iOS shows a chevron with the parent's name; Android a plain arrow (the system back gesture does the same).
+    const back = state.os === 'android'
+      ? `<button class="ibtn" data-act="nav" data-view="lists" aria-label="Back to Lists">${I.back}</button>`
+      : `<button class="backlink" data-act="nav" data-view="lists">${I.back}Lists</button>`;
+    const top = sub
+      ? `${back}<span class="ttl"></span>${inList ? `<button class="ibtn" data-act="psheet" data-sheet="share" aria-label="Share">${I.share}</button><button class="ibtn" data-act="psheet" data-sheet="more" aria-label="More">${I.more}</button>` : ''}`
+      : `<span class="ttl"><span style="display:inline-flex;align-items:center;gap:8px">${I.mark}Weave</span></span>`;
+    const tab = sub ? 'lists' : state.view;
+    const tabs = [['next', I.sun, 'Up next'], ['lists', I.list, 'Lists'], ['search', I.search, 'Search'], ['settings', I.gear, 'Settings']];
+    const dueToday = D.today().filter((x) => !x.it.d).length;
+    const tabbar = `<nav class="ptabs" aria-label="Main">${tabs.map(([v, icon, label]) => `
+      <button data-act="nav" data-view="${v}" ${tab === v ? 'aria-current="page"' : ''}><span class="ic">${icon}${v === 'next' && dueToday ? `<span class="badge num">${dueToday}</span>` : ''}</span><span class="tl">${label}</span></button>`).join('')}</nav>`;
     const showAdd = state.view === 'next' || inList;
     const sheet = state.psheet === 'item' && sel ? details(sel).replace('class="card"', 'class=""')
       : state.psheet === 'share' ? `<h2>Share ${esc(l.name)}</h2><div class="sharerow"><button class="btn" data-act="share" data-as="Text">Text</button><button class="btn" data-act="share" data-as="Markdown">Markdown</button><button class="btn" data-act="share" data-as="Image">Image</button></div>`
@@ -515,14 +545,12 @@
       <div class="phonestage"><div class="device"><div class="pscreen">
         <div class="pstatus"><span>16:20</span><span>${state.os === 'ios' ? '' : '5G 82%'}</span></div>
         <div class="ptop">${top}</div>
-        <main class="pbody">${state.query ? searchScreen() : { next: nextScreen, list: listScreen, settings: settingsScreen, archive: archiveScreen }[state.view]()}</main>
+        <main class="pbody">${{ next: nextScreen, lists: phoneLists, search: phoneSearch, list: listScreen, settings: settingsScreen, archive: archiveScreen }[state.view]()}</main>
         ${showAdd ? `<div class="paddbar">${capture(inList ? l : null, { phoneBar: true })}</div>` : ''}
+        ${tabbar}
         <div class="homebar"></div>
         <div class="psheet-scrim ${state.psheet ? 'on' : ''}" data-act="closesheet"></div>
         <div class="psheet ${state.psheet ? 'on' : ''}" role="dialog" aria-label="Details"><div class="handle"></div>${sheet}</div>
-        <div class="pmenu ${state.pmenu ? 'on' : ''}"><div class="pstatus"><span>16:20</span><span></span></div>
-          <div class="ptop"><button class="ibtn" data-act="pmenu" aria-label="Close menu">${I.close}</button><span class="ttl">Weave</span><span style="width:44px"></span></div>
-          <div class="pbody">${sidebar().replace('class="side"', 'class=""')}</div></div>
       </div></div></div>`;
   }
 
@@ -536,7 +564,7 @@
     document.documentElement.style.setProperty('--accent-ink', state.view === 'list' ? D.ink(l) : 'var(--n0-ink)');
     const focused = document.activeElement && document.activeElement.matches('[data-search]');
     app.innerHTML = ph ? phoneShell() : `${chrome()}<div class="desk">${sidebar()}<main class="canvas">${screen()}</main></div>`;
-    if (focused) { const s = app.querySelector('[data-search]'); s.focus(); s.setSelectionRange(s.value.length, s.value.length); }
+    if (focused) { const s = app.querySelector('[data-search]'); if (s) { s.focus(); s.setSelectionRange(s.value.length, s.value.length); } }
     state.newItem = null;
     document.querySelectorAll('[data-os]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.os === state.os)));
     document.fonts.ready.then(() => app.querySelectorAll('[data-thread]').forEach(drawThread));

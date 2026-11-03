@@ -298,8 +298,26 @@ h1 [data-rename]:focus { box-shadow: 0 2px 0 var(--text); }
 .paddbar .capture .field { height: 44px; }
 .paddbar .parse { margin: 6px 4px 0; min-height: 0; }
 .paddbar .parse:empty { display: none; }
-.os-ios .paddbar { padding-bottom: 30px; }
-.os-android .paddbar { padding-bottom: 22px; }
+/* Bottom tab bar (iOS and Android): Up next · Lists · Search · Settings. The add bar sits just above it. */
+.ptabs { flex: none; display: flex; border-top: 1px solid var(--border); background: var(--surface); }
+.ptabs button { all: unset; box-sizing: border-box; cursor: pointer; flex: 1; min-height: 49px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: var(--muted); font-size: 11px; font-weight: 500; }
+.ptabs .ic { position: relative; display: grid; place-items: center; }
+.ptabs .ic svg { width: 24px; height: 24px; }
+.ptabs [aria-current="page"] { color: var(--text); }
+.ptabs .badge { position: absolute; top: -3px; left: 15px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--primary); color: var(--on-primary); font-size: 10px; line-height: 16px; text-align: center; }
+.os-ios .ptabs { padding-bottom: 30px; }          /* home indicator */
+.os-ios .ptabs [aria-current="page"] .ic svg { stroke-width: 2; }
+/* Android (Material 3 navigation bar): 80dp, labels under a pill that marks the current tab */
+.os-android .ptabs { height: 80px; padding-bottom: 14px; border-top: 0; background: var(--ground); }
+.os-android .ptabs button { gap: 4px; font-size: 12px; }
+.os-android .ptabs .ic { width: 64px; height: 32px; border-radius: 16px; }
+.os-android .ptabs [aria-current="page"] .ic { background: var(--raised); }
+.os-android .ptabs .badge { left: 34px; top: 0; }
+.paddbar { padding-bottom: 8px; }
+/* iOS back: chevron + parent's name */
+.backlink { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 2px; height: 44px; padding: 0 8px 0 2px; font-size: 16px; color: var(--text); }
+.backlink svg { width: 20px; height: 20px; }
+.psearch { height: 44px; margin: 4px 0 12px; }
 .homebar { position: absolute; left: 50%; bottom: 8px; width: 134px; height: 5px; border-radius: 3px; background: var(--text); transform: translateX(-50%); opacity: .8; }
 .os-android .homebar { width: 108px; height: 4px; }
 .lay-phone.bare .homebar { display: none; }
@@ -327,6 +345,7 @@ h1 [data-rename]:focus { box-shadow: 0 2px 0 var(--text); }
 
 /* Phone overrides */
 .lay-phone input, .lay-phone select, .lay-phone textarea, .lay-phone [contenteditable] { font-size: 16px; }
+.lay-phone h1 [contenteditable] { font-size: inherit; } /* the title is 24px already */
 .lay-phone .titlerow { margin-bottom: 16px; }
 .lay-phone .srow { grid-template-columns: 1fr; gap: 12px; padding: 24px 0; }
 .lay-phone .srow .desc { max-width: none; }
