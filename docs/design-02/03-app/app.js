@@ -321,7 +321,7 @@
       return `<circle cx="${cx}" cy="9" r="5.5" fill="${D.color(l)}" stroke="${D.ink(l)}"/>`;
     }).join('');
     const said = due.map((i) => `${i.due.t} ${esc(i.t)}${i.d ? ' (done)' : D.isOverdue(i) ? ' (overdue)' : ''}`).join(', ');
-    return `<div class="lstrip"><span aria-hidden="true">07</span>
+    return /* taste-skill-ignore: hour labels, not numbering */ `<div class="lstrip"><span aria-hidden="true">07</span>
       <svg viewBox="0 0 ${W} 18" height="18" role="img" aria-label="Today on ${esc(l.name)}: ${said}. Now ${D.NOW.clock}.">
         <line x1="6" x2="${W - 6}" y1="9" y2="9" stroke="var(--control)" stroke-width="2" stroke-linecap="round"/>
         <line x1="6" x2="${nx}" y1="9" y2="9" stroke="var(--text)" stroke-width="2" stroke-linecap="round"/>
@@ -515,6 +515,26 @@
     return box + searchScreen().replace(/<div class="titlerow">[\s\S]*?<\/div><\/div>/, (m) => m.replace('<h1>Search</h1>', '')).replace('style="max-width:742px"', '');
   }
 
+  // The phone sheet survives re-renders by starting in the state it was last drawn in, then switching
+  // to the new one after a reflow — so opening slides up and closing slides down (with its old content),
+  // and edits inside an open sheet don't replay the motion.
+  let lastSheet = { open: false, html: '' };
+  function sheetLayer(html) {
+    const open = !!state.psheet;
+    const body = open ? html : lastSheet.html;
+    const was = lastSheet.open;
+    lastSheet = { open, html: open ? html : '' };
+    return `
+        <div class="psheet-scrim ${was ? 'on' : ''}" data-act="closesheet" data-to="${open ? 'on' : ''}"></div>
+        <div class="psheet ${was ? 'on' : ''}" role="dialog" aria-label="Details" aria-hidden="${!open}" data-to="${open ? 'on' : ''}"><div class="handle"></div>${body}</div>`;
+  }
+  function settleSheet() {
+    app.querySelectorAll('.psheet, .psheet-scrim').forEach((el) => {
+      void el.offsetHeight; // commit the starting state so the change below transitions
+      el.classList.toggle('on', el.dataset.to === 'on');
+    });
+  }
+
   // ---------- Phone shell ----------
   function phoneShell() {
     const l = cur();
@@ -549,8 +569,7 @@
         ${showAdd ? `<div class="paddbar">${capture(inList ? l : null, { phoneBar: true })}</div>` : ''}
         ${tabbar}
         <div class="homebar"></div>
-        <div class="psheet-scrim ${state.psheet ? 'on' : ''}" data-act="closesheet"></div>
-        <div class="psheet ${state.psheet ? 'on' : ''}" role="dialog" aria-label="Details"><div class="handle"></div>${sheet}</div>
+        ${sheetLayer(sheet)}
       </div></div></div>`;
   }
 
@@ -566,6 +585,7 @@
     app.innerHTML = ph ? phoneShell() : `${chrome()}<div class="desk">${sidebar()}<main class="canvas">${screen()}</main></div>`;
     if (focused) { const s = app.querySelector('[data-search]'); if (s) { s.focus(); s.setSelectionRange(s.value.length, s.value.length); } }
     state.newItem = null;
+    if (ph) settleSheet(); else lastSheet = { open: false, html: '' };
     document.querySelectorAll('[data-os]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.os === state.os)));
     document.fonts.ready.then(() => app.querySelectorAll('[data-thread]').forEach(drawThread));
     renderPop();

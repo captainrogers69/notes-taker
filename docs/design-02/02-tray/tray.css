@@ -63,6 +63,8 @@
 .notif li { gap: 12px; height: 44px; }
 .shade .empty-shade { color: #b4b4b4; font-size: 13px; padding: 12px 4px; }
 
-/* The bar flying into the tray / back */
-.minibar.flying { transition: left .4s var(--ease), top .4s var(--ease), opacity .4s, transform .4s var(--ease); transform: scale(.4); opacity: 0 !important; pointer-events: none; }
+/* The bar flying into the tray / back: transform + opacity only (its left/top never animate), 260ms ease-out-quint.
+   The translate and scale are set inline from the tray icon's position. */
+.minibar.flying { transition: transform .26s cubic-bezier(.22, 1, .36, 1), opacity .26s cubic-bezier(.22, 1, .36, 1); transform-origin: left top; pointer-events: none; }
+.minibar.flying-start { transition: none; transform-origin: left top; pointer-events: none; }
 .minibar.gone { display: none; }

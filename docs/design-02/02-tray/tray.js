@@ -92,28 +92,45 @@
   }
 
   // ---------- Hide and show the bar ----------
+  // The vector from the bar to the tray icon, as a transform (the bar's own left/top stay put).
+  function toTray() {
+    const b = bar.getBoundingClientRect(), r = trays[st.os].getBoundingClientRect();
+    return `translate(${Math.round(r.left - b.left)}px, ${Math.round(r.top - b.top)}px) scale(.4)`;
+  }
+  // Run fn once the bar's transform transition ends; the timer covers reduced motion, where no transition runs.
+  function afterFly(fn) {
+    let done = false;
+    const finish = () => { if (done) return; done = true; bar.removeEventListener('transitionend', onEnd); fn(); };
+    const onEnd = (e) => { if (e.target === bar && e.propertyName === 'transform') finish(); };
+    bar.addEventListener('transitionend', onEnd);
+    setTimeout(finish, 320);
+  }
   function hideBar() {
     const t = trays[st.os];
     if (st.os === 'android') { st.hidden = true; sheet.render(); return; }
-    const r = t.getBoundingClientRect();
     bar.classList.add('flying');
-    bar.style.left = r.left + 'px';
-    bar.style.top = r.top + 'px';
-    setTimeout(() => {
+    bar.style.transform = toTray();
+    bar.style.opacity = '0';
+    afterFly(() => {
       bar.classList.remove('flying'); bar.classList.add('gone');
+      bar.style.transform = ''; bar.style.opacity = '';
       st.hidden = true;
       t.classList.add('pop'); setTimeout(() => t.classList.remove('pop'), 400);
       steps();
-    }, 400);
+    });
   }
   function showBar() {
     st.hidden = false;
     if (st.os !== 'android') {
-      const r = trays[st.os].getBoundingClientRect();
       bar.classList.remove('gone');
-      bar.style.left = r.left + 'px'; bar.style.top = r.top + 'px';
-      bar.classList.add('flying');
-      requestAnimationFrame(() => requestAnimationFrame(() => { bar.classList.remove('flying'); applyPos(); }));
+      applyPos();
+      bar.classList.add('flying-start');      // jump, unseen, to the tray icon…
+      bar.style.transform = toTray();
+      bar.style.opacity = '0';
+      void bar.offsetHeight;
+      bar.classList.replace('flying-start', 'flying'); // …then glide back to where it was
+      bar.style.transform = ''; bar.style.opacity = '';
+      afterFly(() => bar.classList.remove('flying'));
     }
     sheet.render();
     steps();

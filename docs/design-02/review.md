@@ -109,10 +109,19 @@ Checks: `inspect.mjs` 0 FAIL / 0 WARN on Up next, settings and all six lists. Th
 
 **Still open:**
 - B6: **decided, keep 50%** (2026-11-03). The bar is meant to recede; it reaches full strength on hover, while open, and while dragging. Not fixing.
-- C: the motion audit is written. Its findings wait on your review before any fix.
+- C: motion audit, critical items fixed (below). The 4 important items and 6 opportunities are not started.
+
+### Motion audit fixes: critical (2026-11-03)
+
+| Finding | Fix |
+|---|---|
+| Phone sheets snap in and out (re-render replaced them) | Each render starts the sheet in the state it was last drawn in, then switches after a reflow. Opening slides up (280ms, `cubic-bezier(.32,.72,0,1)`), and closing slides down in 200ms with its old content still showing. Edits inside an open sheet don't replay the motion. The scrim fades with it. The old ☰ side menu no longer exists (it became the tab bar). `03-app/app.js` `sheetLayer` / `settleSheet`, `03-app/app.css` `.psheet`. |
+| Bar flies into the tray by animating `left`/`top` | The bar's `left`/`top` never change during the flight. Only `transform: translate() scale(.4)` and `opacity` animate, over 260ms with an ease-out-quint curve. The animation ends on `transitionend`, with a 320ms fallback for reduced motion, where no transition runs. Showing the bar reverses it from the tray icon. `02-tray/tray.js` `toTray` / `afterFly`, `02-tray/tray.css` `.flying`. |
+
+Verified mid-flight in a headless browser: the sheet is part-way at 70ms on open and 60ms on close; the bar's `left` stays fixed while its transform scales to ~.49 at 90ms (macOS and Windows). All click-through tests pass with a clean console; inspect 0 FAIL / 0 WARN; lint 0 FAIL.
 
 ---
 
 ## Next
 
-Review the motion audit, decide B7, run round 2 of the AI passes on the new screenshots, then go to designer review (plan step 2).
+Decide on the motion audit's important items, run round 2 of the AI passes on the new screenshots, then go to designer review (plan step 2).
