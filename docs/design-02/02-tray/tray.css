@@ -21,8 +21,8 @@
 .trayitem:focus-visible { outline: 2px solid #fff; }
 .trayitem.paused { opacity: .55; }
 .mark { width: 16px; height: 16px; flex: none; }
-.trayitem.pop .mark { animation: pop .35s var(--ease); }
-@keyframes pop { 40% { transform: scale(1.35); } }
+.trayitem.pop .mark { animation: pop 240ms var(--ease-out); }
+@keyframes pop { 40% { transform: scale(1.12); } }
 
 /* Android */
 .phonestage { position: fixed; inset: 0; display: none; place-items: center; background: var(--ground); }

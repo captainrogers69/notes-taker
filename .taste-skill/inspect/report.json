@@ -1,7 +1,10 @@
 {
- "url": "http://localhost:8765/03-app/index.html#list=1",
- "at": "2026-11-03T11:34:16.870Z",
- "allow": [],
+ "url": "http://localhost:8765/02-tray/index.html",
+ "at": "2026-11-03T11:54:11.801Z",
+ "allow": [
+  "button-fx",
+  "hero-void"
+ ],
  "viewports": [
   {
    "width": 1440,
@@ -9,7 +12,7 @@
    "load": "load",
    "screens": 1,
    "filled": [
-    0.49
+    0.11
    ],
    "motion": {
     "elements": 0,
@@ -27,12 +30,12 @@
     "page": {
      "height": 900,
      "screens": 1,
-     "words": 138,
+     "words": 125,
      "img": 0,
      "video": 0,
      "canvas": 0,
-     "svg": 31,
-     "sections": 2,
+     "svg": 18,
+     "sections": 0,
      "horizontalOverflow": 0,
      "overflowCulprits": [],
      "uiFragments": 0,
@@ -48,27 +51,27 @@
      "videosNoPoster": 0
     },
     "hero": {
-     "text": "Errands",
-     "words": 1,
-     "chars": 7,
+     "text": "02 · Hide to tray",
+     "words": 5,
+     "chars": 17,
      "lines": 1,
-     "size": 24,
-     "vw": 1.7,
+     "size": 16,
+     "vw": 1.1,
      "font": "Geist",
      "weight": 500,
-     "tracking": -0.01,
-     "leading": 1.33,
-     "top": 68,
+     "tracking": 0,
+     "leading": 1.25,
+     "top": 646,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
      "position": "left"
     },
     "h1": {
-     "text": "Errands",
-     "words": 1,
+     "text": "02 · Hide to tray",
+     "words": 5,
      "lines": 1,
-     "size": 24,
+     "size": 16,
      "font": "Geist"
     },
     "headings": [],
@@ -94,11 +97,9 @@
       12,
       13,
       14,
-      15,
-      16,
-      24
+      16
      ],
-     "sizeCount": 6,
+     "sizeCount": 4,
      "notLoaded": [],
      "body": {
       "font": "Geist",
@@ -106,14 +107,14 @@
       "leading": 1.54,
       "weight": 400,
       "tracking": 0,
-      "contrast": 6.4
+      "contrast": 12.7
      },
-     "measureChars": 63,
+     "measureChars": 45,
      "max": {
-      "size": 24,
-      "vw": 1.7,
+      "size": 16,
+      "vw": 1.1,
       "font": "Geist",
-      "text": "Errands"
+      "text": "02 · Hide to tray"
      },
      "monoShare": 0,
      "monoProseShare": 0,
@@ -131,87 +132,81 @@
      {
       "text": "07",
       "size": 12,
-      "top": 333
+      "top": 69
      }
     ],
     "color": {
-     "bodyBg": "#f4f5f2",
+     "bodyBg": "#1f1f1e",
      "bodyBgHsl": {
-      "h": 80,
-      "s": 0.13,
-      "l": 0.95
+      "h": 60,
+      "s": 0.02,
+      "l": 0.12
      },
-     "dark": false,
+     "dark": true,
      "sectionBgs": [],
      "textColors": [
       {
-       "color": "#5e5f5e",
-       "share": 0.56
+       "color": "#d6d6d6",
+       "share": 0.41
       },
       {
-       "color": "#0b0b0a",
-       "share": 0.32
+       "color": "#5e5e5f",
+       "share": 0.2
       },
       {
-       "color": "#e6e6e6",
+       "color": "#0a0b0b",
+       "share": 0.18
+      },
+      {
+       "color": "#f3f3f2",
+       "share": 0.07
+      },
+      {
+       "color": "#e6e7e7",
        "share": 0.06
-      },
-      {
-       "color": "#6a6b6a",
-       "share": 0.03
-      },
-      {
-       "color": "#c4252b",
-       "share": 0.02
       }
      ],
      "button": {
-      "bg": "#efeeef",
+      "bg": "#fefffe",
       "hsl": {
-       "h": 300,
-       "s": 0.03,
-       "l": 0.94
+       "h": 120,
+       "s": 1,
+       "l": 1
       },
-      "fg": "#0b0b0a"
+      "fg": "#0a0b0b"
      },
      "lowContrast": []
     },
     "buttons": {
-     "count": 4,
-     "inHero": 4,
-     "radius": 6,
-     "height": 36,
-     "withShadow": 0,
+     "count": 2,
+     "inHero": 2,
+     "radius": 8,
+     "height": 40,
+     "withShadow": 1,
      "withGradient": 0,
      "mono": 0,
      "upper": 0,
      "heroLabels": [
-      "Errands In the mini bar 4",
-      "In mini bar",
-      "Share",
-      "Uncheck all"
+      "Errands 4 left · 1 overdue",
+      "Windows"
      ]
     },
     "surfaces": {
      "shadowStatic": 0,
-     "shadowOverlay": 0,
+     "shadowOverlay": 2,
      "shadowSamples": [],
      "gradients": 0,
      "scrims": 0,
      "gradientSamples": [],
      "gradientText": 0,
-     "hairlines": 16,
+     "hairlines": 1,
      "hairlineSamples": [
-      "div.chrome 1440px",
-      "nav.side 256px",
-      "li.row 717px",
-      "li.row 717px",
-      "li.row 717px"
+      "div.foot 337px"
      ],
-     "outlinedBoxes": 2,
+     "outlinedBoxes": 0,
      "dashed": 0,
      "blurred": 0,
-     "roundedBoxes": 2,
+     "roundedBoxes": 3,
      "boxRadius": 8,
      "squareMedia": 0,
      "roundedMedia": 0,
@@ -220,13 +215,7 @@
      "cardRows": []
     },
     "heroMedia": [],
-    "nav": {
-     "links": 0,
-     "fixed": true,
-     "height": 864,
-     "floatingPill": false,
-     "blur": false
-    },
+    "nav": null,
     "fontsLoaded": [
      "geist"
     ]
@@ -238,41 +227,32 @@
     },
     "pageH": 900,
     "margins": {
-     "left": 12,
-     "right": 53
+     "left": null,
+     "right": null
     },
     "sections": [],
     "gaps": [],
     "h1s": [
      {
-      "text": "Errands",
-      "size": 24,
-      "top": 68,
+      "text": "02 · Hide to tray",
+      "size": 16,
+      "top": 646,
       "firstScreen": true
      }
     ],
     "edgeText": [],
-    "edges": [
-     {
-      "x": 314,
-      "n": 1
-     },
-     {
-      "x": 1064,
-      "n": 1
-     }
-    ],
-    "leftBlocks": 2,
-    "bodySize": 13,
+    "edges": [],
+    "leftBlocks": 0,
+    "bodySize": 16,
     "stage": false,
     "explains": false,
     "slivers": [],
-    "voidShare": 0.16,
+    "voidShare": 0.6,
     "voidBox": {
-     "x": 300,
-     "y": 660,
-     "w": 1140,
-     "h": 180
+     "x": 360,
+     "y": 180,
+     "w": 1080,
+     "h": 720
     }
    },
    "app": {
@@ -280,832 +260,26 @@
      "w": 1440,
      "h": 900
     },
-    "dark": false,
-    "ground": "#f4f5f2",
-    "sidebar": {
-     "w": 256,
-     "tag": "nav",
-     "links": 11,
-     "share": 0.18
-    },
-    "topbar": {
-     "h": 36
-    },
-    "canvas": {
-     "left": 40,
-     "right": 32
-    },
-    "hero": {
-     "text": "Errands",
-     "words": 1,
-     "chars": 7,
-     "lines": 1,
-     "size": 24,
-     "vw": 1.7,
-     "font": "Geist",
-     "weight": 500,
-     "tracking": -0.01,
-     "leading": 1.33,
-     "top": 68,
-     "tag": "h1",
-     "kind": "heading",
-     "align": "left",
-     "position": "left"
-    },
-    "charts": 0,
-    "layout": {
-     "panels": 2,
-     "firstScreen": 2,
-     "ragged": [],
-     "voids": []
-    },
-    "tiles": 0,
-    "panels": {
-     "count": 2,
-     "radii": [
-      [
-       8,
-       2
-      ]
-     ],
-     "heavyBorders": 0,
-     "borderSamples": [],
-     "heavyShadows": 0,
-     "softShadows": 0,
-     "shadowSamples": [],
-     "glass": 0
-    },
-    "chips": {
-     "count": 1,
-     "hues": 1,
-     "samples": [
-      {
-       "hue": 44,
-       "size": 28,
-       "radius": "50%"
-      }
-     ]
-    },
-    "numbers": {
-     "cells": 0,
-     "leftAligned": 0,
-     "figures": 2,
-     "tabularShare": 1,
-     "kpiMax": 12
-    },
-    "rows": null,
-    "chartHues": 0,
-    "placeholders": [],
-    "type": {
-     "under13": 0.09,
-     "tiny": 0,
-     "tinySamples": [],
-     "sizes": [
-      12,
-      13,
-      14,
-      15,
-      16,
-      24
-     ]
-    },
-    "title": {
-     "text": "Errands",
-     "size": 24,
-     "top": 68
-    },
-    "colourShare": 0.004
-   },
-   "consoleErrors": []
-  },
-  {
-   "width": 768,
-   "height": 1024,
-   "load": "load",
-   "screens": 2,
-   "filled": [
-    0.6,
-    0.68
-   ],
-   "motion": {
-    "elements": 0,
-    "css": 0,
-    "transitions": 0,
-    "scripted": 0,
-    "videos": 0,
-    "playingVideos": 0
-   },
-   "metrics": {
-    "viewport": {
-     "w": 768,
-     "h": 1024
-    },
-    "page": {
-     "height": 1153,
-     "screens": 1.1,
-     "words": 138,
-     "img": 0,
-     "video": 0,
-     "canvas": 0,
-     "svg": 31,
-     "sections": 2,
-     "horizontalOverflow": 0,
-     "overflowCulprits": [],
-     "uiFragments": 0,
-     "uiAbuse": false,
-     "realPictures": 0,
-     "videoCount": 0,
-     "uiPictures": 0,
-     "pictureSamples": [],
-     "blendText": 0,
-     "sideScrollers": 0,
-     "brokenImages": [],
-     "emoji": [],
-     "videosNoPoster": 0
-    },
-    "hero": {
-     "text": "Errands",
-     "words": 1,
-     "chars": 7,
-     "lines": 1,
-     "size": 24,
-     "vw": 3.1,
-     "font": "Geist",
-     "weight": 500,
-     "tracking": -0.01,
-     "leading": 1.33,
-     "top": 60,
-     "tag": "h1",
-     "kind": "heading",
-     "align": "left",
-     "position": "left"
-    },
-    "h1": {
-     "text": "Errands",
-     "words": 1,
-     "lines": 1,
-     "size": 24,
-     "font": "Geist"
-    },
-    "headings": [],
-    "headingSummary": {
-     "count": 0,
-     "maxLines": 0,
-     "over2Lines": 0,
-     "statements": 0,
-     "centered": 0,
-     "medianWords": null,
-     "mixedFontHeadings": 0
-    },
-    "type": {
-     "families": [
-      {
-       "family": "Geist",
-       "share": 1,
-       "mono": false
-      }
-     ],
-     "familyCount": 1,
-     "sizes": [
-      12,
-      13,
-      14,
-      15,
-      16,
-      24
-     ],
-     "sizeCount": 6,
-     "notLoaded": [],
-     "body": {
-      "font": "Geist",
-      "size": 13,
-      "leading": 1.54,
-      "weight": 400,
-      "tracking": 0,
-      "contrast": 6.4
-     },
-     "measureChars": 63,
-     "max": {
-      "size": 24,
-      "vw": 3.1,
-      "font": "Geist",
-      "text": "Errands"
-     },
-     "monoShare": 0,
-     "monoProseShare": 0,
-     "monoFamilies": [],
-     "monoSamples": [],
-     "microLabels": 0,
-     "microLabelShare": 0,
-     "microSamples": [],
-     "upperShare": 0,
-     "centerShare": 0,
-     "smallText": 1
-    },
-    "eyebrows": [],
-    "numbered": [
-     {
-      "text": "07",
-      "size": 12,
-      "top": 784
-     }
-    ],
-    "color": {
-     "bodyBg": "#f4f5f2",
-     "bodyBgHsl": {
-      "h": 80,
-      "s": 0.13,
-      "l": 0.95
-     },
-     "dark": false,
-     "sectionBgs": [
-      {
-       "color": "#fefffe",
-       "top": 613,
-       "hsl": {
-        "h": 120,
-        "s": 1,
-        "l": 1
-       }
-      }
-     ],
-     "textColors": [
-      {
-       "color": "#5e5f5e",
-       "share": 0.56
-      },
-      {
-       "color": "#0b0b0a",
-       "share": 0.32
-      },
-      {
-       "color": "#e6e6e6",
-       "share": 0.06
-      },
-      {
-       "color": "#6a6b6a",
-       "share": 0.03
-      },
-      {
-       "color": "#c4252b",
-       "share": 0.02
-      }
-     ],
-     "button": {
-      "bg": "#efeeef",
-      "hsl": {
-       "h": 300,
-       "s": 0.03,
-       "l": 0.94
-      },
-      "fg": "#0b0b0a"
-     },
-     "lowContrast": []
-    },
-    "buttons": {
-     "count": 4,
-     "inHero": 4,
-     "radius": 6,
-     "height": 36,
-     "withShadow": 0,
-     "withGradient": 0,
-     "mono": 0,
-     "upper": 0,
-     "heroLabels": [
-      "Errands In the mini bar 4",
-      "In mini bar",
-      "Share",
-      "Uncheck all"
-     ]
-    },
-    "surfaces": {
-     "shadowStatic": 0,
-     "shadowOverlay": 0,
-     "shadowSamples": [],
-     "gradients": 0,
-     "scrims": 0,
-     "gradientSamples": [],
-     "gradientText": 0,
-     "hairlines": 18,
-     "hairlineSamples": [
-      "div.chrome 768px",
-      "nav.side 224px",
-      "li.row 470px",
-      "li.row 470px",
-      "li.row 470px"
-     ],
-     "outlinedBoxes": 2,
-     "dashed": 0,
-     "blurred": 0,
-     "roundedBoxes": 2,
-     "boxRadius": 8,
-     "squareMedia": 0,
-     "roundedMedia": 0,
-     "mediaRadius": 0,
-     "textShadow": 0,
-     "cardRows": []
-    },
-    "heroMedia": [],
-    "nav": {
-     "links": 0,
-     "fixed": true,
-     "height": 988,
-     "floatingPill": false,
-     "blur": false
-    },
-    "fontsLoaded": [
-     "geist"
-    ]
-   },
-   "layout": {
-    "viewport": {
-     "w": 768,
-     "h": 1024
-    },
-    "pageH": 1153,
-    "margins": {
-     "left": 12,
-     "right": 41
-    },
-    "sections": [
-     {
-      "sel": "section.card.span-8",
-      "tag": "section",
-      "top": 174,
-      "height": 427,
-      "words": 24,
-      "media": 0,
-      "middle": 0,
-      "heading": null,
-      "left": 269,
-      "right": 41,
-      "textLeft": 269,
-      "textRight": 56,
-      "fullBleed": false,
-      "footer": false,
-      "hero": true,
-      "continues": false,
-      "pinned": false
-     },
-     {
-      "sel": "div.span-4",
-      "tag": "div",
-      "top": 613,
-      "height": 492,
-      "words": 35,
-      "media": 0,
-      "middle": 157,
-      "heading": {
-       "text": "This list",
-       "size": 16,
-       "tag": "h2"
-      },
-      "left": 269,
-      "right": 45,
-      "textLeft": 269,
-      "textRight": 45,
-      "fullBleed": false,
-      "footer": true,
-      "hero": false,
-      "continues": false,
-      "pinned": false
-     }
-    ],
-    "gaps": [],
-    "h1s": [
-     {
-      "text": "Errands",
-      "size": 24,
-      "top": 60,
-      "firstScreen": true
-     }
-    ],
-    "edgeText": [],
-    "edges": [
-     {
-      "x": 269,
-      "n": 2
-     }
-    ],
-    "leftBlocks": 2,
-    "bodySize": 13,
-    "stage": false,
-    "explains": false,
-    "slivers": [],
-    "voidShare": 0,
-    "voidBox": null
-   },
-   "app": {
-    "viewport": {
-     "w": 768,
-     "h": 1024
-    },
-    "dark": false,
-    "ground": "#f4f5f2",
-    "sidebar": {
-     "w": 224,
-     "tag": "nav",
-     "links": 11,
-     "share": 0.29
-    },
-    "topbar": {
-     "h": 36
-    },
-    "canvas": {
-     "left": 24,
-     "right": 30
-    },
-    "hero": {
-     "text": "Errands",
-     "words": 1,
-     "chars": 7,
-     "lines": 1,
-     "size": 24,
-     "vw": 3.1,
-     "font": "Geist",
-     "weight": 500,
-     "tracking": -0.01,
-     "leading": 1.33,
-     "top": 60,
-     "tag": "h1",
-     "kind": "heading",
-     "align": "left",
-     "position": "left"
-    },
-    "charts": 0,
-    "layout": {
-     "panels": 2,
-     "firstScreen": 2,
-     "ragged": [],
-     "voids": []
-    },
-    "tiles": 0,
-    "panels": {
-     "count": 2,
-     "radii": [
-      [
-       8,
-       2
-      ]
-     ],
-     "heavyBorders": 0,
-     "borderSamples": [],
-     "heavyShadows": 0,
-     "softShadows": 0,
-     "shadowSamples": [],
-     "glass": 0
-    },
-    "chips": {
-     "count": 1,
-     "hues": 1,
-     "samples": [
-      {
-       "hue": 44,
-       "size": 28,
-       "radius": "50%"
-      }
-     ]
-    },
-    "numbers": {
-     "cells": 0,
-     "leftAligned": 0,
-     "figures": 2,
-     "tabularShare": 1,
-     "kpiMax": 12
-    },
-    "rows": null,
-    "chartHues": 0,
-    "placeholders": [],
-    "type": {
-     "under13": 0.09,
-     "tiny": 0,
-     "tinySamples": [],
-     "sizes": [
-      12,
-      13,
-      14,
-      15,
-      16,
-      24
-     ]
-    },
-    "title": {
-     "text": "Errands",
-     "size": 24,
-     "top": 60
-    },
-    "colourShare": 0.008
-   },
-   "consoleErrors": []
-  },
-  {
-   "width": 390,
-   "height": 844,
-   "load": "load",
-   "screens": 1,
-   "filled": [
-    0.47
-   ],
-   "motion": {
-    "elements": 0,
-    "css": 0,
-    "transitions": 0,
-    "scripted": 0,
-    "videos": 0,
-    "playingVideos": 0
-   },
-   "metrics": {
-    "viewport": {
-     "w": 390,
-     "h": 844
-    },
-    "page": {
-     "height": 844,
-     "screens": 1,
-     "words": 53,
-     "img": 0,
-     "video": 0,
-     "canvas": 0,
-     "svg": 17,
-     "sections": 1,
-     "horizontalOverflow": 0,
-     "overflowCulprits": [],
-     "uiFragments": 0,
-     "uiAbuse": false,
-     "realPictures": 0,
-     "videoCount": 0,
-     "uiPictures": 0,
-     "pictureSamples": [],
-     "blendText": 0,
-     "sideScrollers": 0,
-     "brokenImages": [],
-     "emoji": [],
-     "videosNoPoster": 0
-    },
-    "hero": {
-     "text": "Errands",
-     "words": 1,
-     "chars": 7,
-     "lines": 1,
-     "size": 24,
-     "vw": 6.2,
-     "font": "Geist",
-     "weight": 500,
-     "tracking": -0.01,
-     "leading": 1.33,
-     "top": 52,
-     "tag": "h1",
-     "kind": "heading",
-     "align": "left",
-     "position": "left"
-    },
-    "h1": {
-     "text": "Errands",
-     "words": 1,
-     "lines": 1,
-     "size": 24,
-     "font": "Geist"
-    },
-    "headings": [
-     {
-      "text": "Errands",
-      "words": 1,
-      "chars": 7,
-      "lines": 1,
-      "size": 24,
-      "vw": 6.2,
-      "font": "Geist",
-      "weight": 500,
-      "tracking": -0.01,
-      "leading": 1.33,
-      "upper": false,
-      "italic": false,
-      "mono": false,
-      "align": "left",
-      "position": "center",
-      "widthRatio": 0.92,
-      "top": 52,
-      "tag": "h1",
-      "kind": "heading"
-     }
-    ],
-    "headingSummary": {
-     "count": 1,
-     "maxLines": 1,
-     "over2Lines": 0,
-     "statements": 0,
-     "centered": 0,
-     "medianWords": null,
-     "mixedFontHeadings": 0
-    },
-    "type": {
-     "families": [
-      {
-       "family": "Geist",
-       "share": 1,
-       "mono": false
-      }
-     ],
-     "familyCount": 1,
-     "sizes": [
-      10,
-      11,
-      13,
-      14,
-      16,
-      24
-     ],
-     "sizeCount": 6,
-     "notLoaded": [],
-     "body": null,
-     "measureChars": null,
-     "max": {
-      "size": 24,
-      "vw": 6.2,
-      "font": "Geist",
-      "text": "Errands"
-     },
-     "monoShare": 0,
-     "monoProseShare": 0,
-     "monoFamilies": [],
-     "monoSamples": [],
-     "microLabels": 0,
-     "microLabelShare": 0,
-     "microSamples": [],
-     "upperShare": 0,
-     "centerShare": 0,
-     "smallText": 0
-    },
-    "eyebrows": [],
-    "numbered": [],
-    "color": {
-     "bodyBg": "#f4f5f2",
-     "bodyBgHsl": {
-      "h": 80,
-      "s": 0.13,
-      "l": 0.95
-     },
-     "dark": false,
-     "sectionBgs": [
-      {
-       "color": "#f4f5f2",
-       "top": 0,
-       "hsl": {
-        "h": 80,
-        "s": 0.13,
-        "l": 0.95
-       }
-      },
-      {
-       "color": "#fefffe",
-       "top": 144,
-       "hsl": {
-        "h": 120,
-        "s": 1,
-        "l": 1
-       }
-      }
-     ],
-     "textColors": [
-      {
-       "color": "#0b0b0a",
-       "share": 0.48
-      },
-      {
-       "color": "#5e5f5e",
-       "share": 0.45
-      },
-      {
-       "color": "#c4252b",
-       "share": 0.06
-      },
-      {
-       "color": "#fefffe",
-       "share": 0
-      }
-     ],
-     "button": null,
-     "lowContrast": []
-    },
-    "buttons": {
-     "count": 1,
-     "inHero": 1,
-     "radius": 6,
-     "height": 30,
-     "withShadow": 0,
-     "withGradient": 0,
-     "mono": 0,
-     "upper": 0,
-     "heroLabels": [
-      "Uncheck all"
-     ]
-    },
-    "surfaces": {
-     "shadowStatic": 0,
-     "shadowOverlay": 0,
-     "shadowSamples": [],
-     "gradients": 0,
-     "scrims": 0,
-     "gradientSamples": [],
-     "gradientText": 0,
-     "hairlines": 7,
-     "hairlineSamples": [
-      "li.row 340px",
-      "li.row 340px",
-      "li.row 340px",
-      "li.row 340px",
-      "div.donebar 324px"
-     ],
-     "outlinedBoxes": 1,
-     "dashed": 0,
-     "blurred": 0,
-     "roundedBoxes": 1,
-     "boxRadius": 8,
-     "squareMedia": 0,
-     "roundedMedia": 0,
-     "mediaRadius": 0,
-     "textShadow": 0,
-     "cardRows": []
-    },
-    "heroMedia": [],
-    "nav": {
-     "links": 0,
-     "fixed": false,
-     "height": 50,
-     "floatingPill": false,
-     "blur": false
-    },
-    "fontsLoaded": [
-     "geist"
-    ]
-   },
-   "layout": {
-    "viewport": {
-     "w": 390,
-     "h": 844
-    },
-    "pageH": 844,
-    "margins": {
-     "left": 8,
-     "right": 8
-    },
-    "sections": [],
-    "gaps": [
-     {
-      "top": 436,
-      "height": 356
-     }
-    ],
-    "h1s": [
-     {
-      "text": "Errands",
-      "size": 24,
-      "top": 52,
-      "firstScreen": true
-     }
-    ],
-    "edgeText": [],
-    "edges": [
-     {
-      "x": 42,
-      "n": 1
-     }
-    ],
-    "leftBlocks": 1,
-    "bodySize": 14,
-    "stage": false,
-    "explains": false,
-    "slivers": [],
-    "voidShare": 0,
-    "voidBox": null
-   },
-   "app": {
-    "viewport": {
-     "w": 390,
-     "h": 844
-    },
-    "dark": false,
-    "ground": "#f4f5f2",
+    "dark": true,
+    "ground": "#1f1f1e",
     "sidebar": null,
-    "topbar": {
-     "h": 48
-    },
+    "topbar": null,
     "canvas": {
-     "left": 8,
-     "right": 8
+     "left": 13,
+     "right": 136
     },
     "hero": {
-     "text": "Errands",
-     "words": 1,
-     "chars": 7,
+     "text": "02 · Hide to tray",
+     "words": 5,
+     "chars": 17,
      "lines": 1,
-     "size": 24,
-     "vw": 6.2,
+     "size": 16,
+     "vw": 1.1,
      "font": "Geist",
      "weight": 500,
-     "tracking": -0.01,
-     "leading": 1.33,
-     "top": 52,
+     "tracking": 0,
+     "leading": 1.25,
+     "top": 646,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
@@ -1113,18 +287,18 @@
     },
     "charts": 0,
     "layout": {
-     "panels": 1,
-     "firstScreen": 1,
+     "panels": 2,
+     "firstScreen": 2,
      "ragged": [],
      "voids": []
     },
     "tiles": 0,
     "panels": {
-     "count": 1,
+     "count": 2,
      "radii": [
       [
        8,
-       1
+       2
       ]
      ],
      "heavyBorders": 0,
@@ -1142,15 +316,15 @@
     "numbers": {
      "cells": 0,
      "leftAligned": 0,
-     "figures": 0,
-     "tabularShare": null,
-     "kpiMax": null
+     "figures": 2,
+     "tabularShare": 1,
+     "kpiMax": 12
     },
     "rows": null,
     "chartHues": 0,
     "placeholders": [],
     "type": {
-     "under13": 0.25,
+     "under13": 0.13,
      "tiny": 0,
      "tinySamples": [],
      "sizes": [
@@ -1158,30 +332,698 @@
       12,
       13,
       14,
-      15,
-      16,
-      24
+      16
      ]
     },
     "title": {
-     "text": "Errands",
-     "size": 24,
-     "top": 52
+     "text": "02 · Hide to tray",
+     "size": 16,
+     "top": 646
     },
-    "colourShare": 0.001
+    "colourShare": 0
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 768,
+   "height": 1024,
+   "load": "load",
+   "screens": 1,
+   "filled": [
+    0.17
+   ],
+   "motion": {
+    "elements": 0,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "page": {
+     "height": 1024,
+     "screens": 1,
+     "words": 125,
+     "img": 0,
+     "video": 0,
+     "canvas": 0,
+     "svg": 18,
+     "sections": 0,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "02 · Hide to tray",
+     "words": 5,
+     "chars": 17,
+     "lines": 1,
+     "size": 16,
+     "vw": 2.1,
+     "font": "Geist",
+     "weight": 500,
+     "tracking": 0,
+     "leading": 1.25,
+     "top": 770,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "02 · Hide to tray",
+     "words": 5,
+     "lines": 1,
+     "size": 16,
+     "font": "Geist"
+    },
+    "headings": [],
+    "headingSummary": {
+     "count": 0,
+     "maxLines": 0,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": null,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Geist",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      12,
+      13,
+      14,
+      16
+     ],
+     "sizeCount": 4,
+     "notLoaded": [],
+     "body": {
+      "font": "Geist",
+      "size": 13,
+      "leading": 1.54,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 12.7
+     },
+     "measureChars": 45,
+     "max": {
+      "size": 16,
+      "vw": 2.1,
+      "font": "Geist",
+      "text": "02 · Hide to tray"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0,
+     "smallText": 1
+    },
+    "eyebrows": [],
+    "numbered": [
+     {
+      "text": "07",
+      "size": 12,
+      "top": 69
+     }
+    ],
+    "color": {
+     "bodyBg": "#1f1f1e",
+     "bodyBgHsl": {
+      "h": 60,
+      "s": 0.02,
+      "l": 0.12
+     },
+     "dark": true,
+     "sectionBgs": [],
+     "textColors": [
+      {
+       "color": "#d6d6d6",
+       "share": 0.41
+      },
+      {
+       "color": "#5e5e5f",
+       "share": 0.2
+      },
+      {
+       "color": "#0a0b0b",
+       "share": 0.18
+      },
+      {
+       "color": "#f3f3f2",
+       "share": 0.07
+      },
+      {
+       "color": "#e6e7e7",
+       "share": 0.06
+      }
+     ],
+     "button": {
+      "bg": "#fefffe",
+      "hsl": {
+       "h": 120,
+       "s": 1,
+       "l": 1
+      },
+      "fg": "#0a0b0b"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 2,
+     "inHero": 2,
+     "radius": 8,
+     "height": 40,
+     "withShadow": 1,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Errands 4 left · 1 overdue",
+      "Windows"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 2,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 1,
+     "hairlineSamples": [
+      "div.foot 337px"
+     ],
+     "outlinedBoxes": 0,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 3,
+     "boxRadius": 8,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [],
+    "nav": null,
+    "fontsLoaded": [
+     "geist"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "pageH": 1024,
+    "margins": {
+     "left": null,
+     "right": null
+    },
+    "sections": [],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "02 · Hide to tray",
+      "size": 16,
+      "top": 770,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [],
+    "leftBlocks": 0,
+    "bodySize": 16,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "dark": true,
+    "ground": "#1f1f1e",
+    "sidebar": null,
+    "topbar": null,
+    "canvas": {
+     "left": 13,
+     "right": 136
+    },
+    "hero": {
+     "text": "02 · Hide to tray",
+     "words": 5,
+     "chars": 17,
+     "lines": 1,
+     "size": 16,
+     "vw": 2.1,
+     "font": "Geist",
+     "weight": 500,
+     "tracking": 0,
+     "leading": 1.25,
+     "top": 770,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 2,
+     "firstScreen": 2,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 2,
+     "radii": [
+      [
+       8,
+       2
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 2,
+     "tabularShare": 1,
+     "kpiMax": 12
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.13,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      11,
+      12,
+      13,
+      14,
+      16
+     ]
+    },
+    "title": {
+     "text": "02 · Hide to tray",
+     "size": 16,
+     "top": 770
+    },
+    "colourShare": 0
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 390,
+   "height": 844,
+   "load": "load",
+   "screens": 1,
+   "filled": [
+    0.41
+   ],
+   "motion": {
+    "elements": 0,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "page": {
+     "height": 844,
+     "screens": 1,
+     "words": 125,
+     "img": 0,
+     "video": 0,
+     "canvas": 0,
+     "svg": 18,
+     "sections": 0,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "02 · Hide to tray",
+     "words": 5,
+     "chars": 17,
+     "lines": 1,
+     "size": 16,
+     "vw": 4.1,
+     "font": "Geist",
+     "weight": 500,
+     "tracking": 0,
+     "leading": 1.25,
+     "top": 590,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "02 · Hide to tray",
+     "words": 5,
+     "lines": 1,
+     "size": 16,
+     "font": "Geist"
+    },
+    "headings": [],
+    "headingSummary": {
+     "count": 0,
+     "maxLines": 0,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": null,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Geist",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      12,
+      13,
+      14,
+      16
+     ],
+     "sizeCount": 4,
+     "notLoaded": [],
+     "body": {
+      "font": "Geist",
+      "size": 13,
+      "leading": 1.54,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 12.7
+     },
+     "measureChars": 45,
+     "max": {
+      "size": 16,
+      "vw": 4.1,
+      "font": "Geist",
+      "text": "02 · Hide to tray"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0,
+     "smallText": 1
+    },
+    "eyebrows": [],
+    "numbered": [
+     {
+      "text": "07",
+      "size": 12,
+      "top": 69
+     }
+    ],
+    "color": {
+     "bodyBg": "#1f1f1e",
+     "bodyBgHsl": {
+      "h": 60,
+      "s": 0.02,
+      "l": 0.12
+     },
+     "dark": true,
+     "sectionBgs": [
+      {
+       "color": "#fefffe",
+       "top": 0,
+       "hsl": {
+        "h": 120,
+        "s": 1,
+        "l": 1
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#d6d6d6",
+       "share": 0.41
+      },
+      {
+       "color": "#5e5e5f",
+       "share": 0.2
+      },
+      {
+       "color": "#0a0b0b",
+       "share": 0.18
+      },
+      {
+       "color": "#f3f3f2",
+       "share": 0.07
+      },
+      {
+       "color": "#e6e7e7",
+       "share": 0.06
+      }
+     ],
+     "button": {
+      "bg": "#fefffe",
+      "hsl": {
+       "h": 120,
+       "s": 1,
+       "l": 1
+      },
+      "fg": "#0a0b0b"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 2,
+     "inHero": 2,
+     "radius": 8,
+     "height": 40,
+     "withShadow": 1,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Errands 4 left · 1 overdue",
+      "Windows"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 2,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 1,
+     "hairlineSamples": [
+      "div.foot 337px"
+     ],
+     "outlinedBoxes": 0,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 3,
+     "boxRadius": 8,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [],
+    "nav": null,
+    "fontsLoaded": [
+     "geist"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "pageH": 844,
+    "margins": {
+     "left": null,
+     "right": null
+    },
+    "sections": [],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "02 · Hide to tray",
+      "size": 16,
+      "top": 590,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [],
+    "leftBlocks": 0,
+    "bodySize": 16,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "dark": true,
+    "ground": "#1f1f1e",
+    "sidebar": null,
+    "topbar": {
+     "h": 42
+    },
+    "canvas": {
+     "left": 13,
+     "right": 50
+    },
+    "hero": {
+     "text": "02 · Hide to tray",
+     "words": 5,
+     "chars": 17,
+     "lines": 1,
+     "size": 16,
+     "vw": 4.1,
+     "font": "Geist",
+     "weight": 500,
+     "tracking": 0,
+     "leading": 1.25,
+     "top": 590,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 2,
+     "firstScreen": 2,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 2,
+     "radii": [
+      [
+       8,
+       2
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 2,
+     "tabularShare": 1,
+     "kpiMax": 12
+    },
+    "rows": null,
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.13,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      11,
+      12,
+      13,
+      14,
+      16
+     ]
+    },
+    "title": {
+     "text": "02 · Hide to tray",
+     "size": 16,
+     "top": 590
+    },
+    "colourShare": 0
    },
    "consoleErrors": []
   }
  ],
- "findings": [
-  {
-   "level": "WARN",
-   "id": "blank-gap",
-   "width": 390,
-   "message": "A 356px stretch at 436px holds nothing.",
-   "fix": "Check that it is a deliberate rest (once per page at most); otherwise close it to the normal section gap."
-  }
- ],
+ "findings": [],
  "images": [
   {
    "viewport": "desktop",

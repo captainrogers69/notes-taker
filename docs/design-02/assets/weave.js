@@ -47,7 +47,7 @@
       ${!open.length && done.length ? '<p class="empty">All done. Ticked items are below.</p>' : ''}
       ${done.length ? `
         <button class="done-row" data-act="done" aria-expanded="${state.showDone}">${I.chevRight} Done · ${done.length}</button>
-        ${state.showDone ? `<ul>${done.map(itemRow).join('')}</ul>` : ''}` : ''}`;
+        <div class="donewrap ${state.showDone ? 'open' : ''}" ${state.showDone ? '' : 'inert'}><ul>${done.map(itemRow).join('')}</ul></div>` : ''}`;
   }
 
   // The day thread in one line (07:00–23:00): the part already lived in ink, this list's tasks due today
@@ -129,6 +129,15 @@
       if (onRender) onRender(l);
     }
 
+    // Opens or closes the Done section in place (no re-render), so the rows can grow open with the chevron.
+    function toggleDone(root, btn, open) {
+      btn.setAttribute('aria-expanded', String(open));
+      const w = root.querySelector('.donewrap');
+      if (!w) return;
+      w.classList.toggle('open', open);
+      w.inert = !open;
+    }
+
     // The list menu opens and closes in place (no re-render), so it can animate in and fade out.
     function setMenu(v, { keyboard = false } = {}) {
       state.menu = v;
@@ -183,7 +192,7 @@
       if (act === 'move') { move.run(); place(win); return; }
       if (act === 'menu') return setMenu(!state.menu, { keyboard: e.detail === 0 }); // detail 0 = Enter/Space
       if (act === 'open') { state.cur = +b.dataset.id; state.menu = false; state.showDone = false; win.querySelector('.add input').value = ''; render(); return focusInput(); }
-      if (act === 'done') { state.showDone = !state.showDone; render(); return; }
+      if (act === 'done') { state.showDone = !state.showDone; toggleDone(win, b, state.showDone); return; }
       if (act === 'tick') {
         const it = current().items.find((i) => i.id === +b.dataset.id);
         if (it.d) { it.d = false; render(); return; }

@@ -127,6 +127,8 @@ h1 [data-rename]:focus { box-shadow: 0 2px 0 var(--text); }
 .thread svg .lbl.done { fill: var(--muted); text-decoration: line-through; }
 .thread svg .lbl.late { fill: var(--negative); }
 .thread svg .now { fill: var(--text); font-weight: 500; }
+.thread svg .finale { opacity: 0; stroke-dasharray: 1; stroke-dashoffset: 1; animation: finale 1s var(--ease-out); }
+@keyframes finale { 0% { opacity: 1; stroke-dashoffset: 1; } 60% { opacity: 1; stroke-dashoffset: 0; } 100% { opacity: 0; stroke-dashoffset: 0; } }
 .thread .legend { display: flex; gap: 16px; color: var(--muted); font-size: var(--fs-small); margin-left: auto; }
 .thread .legend span { display: inline-flex; align-items: center; gap: 6px; }
 
@@ -199,12 +201,15 @@ h1 [data-rename]:focus { box-shadow: 0 2px 0 var(--text); }
 .items .chips .when { width: auto; }
 .items .noteline { padding: 6px 0 10px; }
 .items .noteline .ed { width: 100%; color: var(--muted); }
-.items .row.is-new { animation: newrow 1.2s ease-out; }
+.items .row.is-new { animation: newrow 600ms var(--ease-out); }
 @keyframes newrow { from { background: color-mix(in srgb, var(--accent) 28%, transparent); } }
 .donebar { display: flex; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--rule); }
 .donebar .toggle { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; height: 30px; }
 .donebar .toggle svg { transition: transform var(--dur) var(--ease-out); }
 .donebar .toggle[aria-expanded="true"] svg { transform: rotate(90deg); }
+.donewrap { display: grid; grid-template-rows: 0fr; transition: grid-template-rows var(--dur) var(--ease-out); }
+.donewrap > ul { overflow: hidden; min-height: 0; }
+.donewrap.open { grid-template-rows: 1fr; }
 
 /* Right rail: details */
 .kv { display: grid; grid-template-columns: auto 1fr; gap: 0; }

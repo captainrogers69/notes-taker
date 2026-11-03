@@ -236,6 +236,8 @@
       svg += `<line x1="${hx}" x2="${hx}" y1="${axisY + 4}" y2="${axisY + 7}" stroke="var(--control)"/>`;
       svg += `<text x="${anchor === 'start' ? hx - 6 : anchor === 'end' ? hx + 6 : hx}" y="${axisY + 26}" text-anchor="${anchor}" class="num">${lbl}</text>`;
     });
+    // The day's last tick: ink runs along the rest of today once, then fades (see dayDone). Hidden without motion.
+    if (drawThread.finale) svg += `<line class="finale" pathLength="1" x1="${nowX}" x2="${W - 6}" y1="${axisY}" y2="${axisY}" stroke="var(--text)" stroke-width="3" stroke-linecap="round"/>`;
     svg += `<line x1="${nowX}" x2="${nowX}" y1="0" y2="${axisY + 10}" stroke="var(--text)" stroke-width="1.5"/>`;
     svg += `<text x="${nowS + nowW / 2}" y="${axisY + 26}" text-anchor="middle" class="now num">${nowLbl}</text>`;
     marks.forEach((mk) => {
@@ -251,6 +253,17 @@
       });
     });
     host.innerHTML = svg + '</svg>';
+  }
+
+  // Once a day, when the last task due today is ticked with the thread on screen, the next draw plays the finale.
+  function dayDone() {
+    const today = D.today();
+    if (!today.length || !today.every(({ it }) => it.d) || !app.querySelector('[data-thread]')) return;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const key = 'weave-finale', day = new Date().toDateString();
+    try { if (localStorage.getItem(key) === day) return; localStorage.setItem(key, day); } catch { /* storage off: still play */ }
+    drawThread.finale = true;
+    setTimeout(() => { drawThread.finale = false; }, 2000); // later redraws are plain
   }
 
   function nextScreen() {
@@ -307,7 +320,7 @@
           <button class="toggle" data-act="done" aria-expanded="${state.showDone}">${I.chevRight} Done · ${done.length}</button>
           <span class="grow"></span><button class="btn ghost sm" data-act="uncheckall">Uncheck all</button>
         </div>
-        ${state.showDone ? `<ul class="rows items">${done.map(itemRow).join('')}</ul>` : ''}</div>` : ''}`;
+        <div class="donewrap ${state.showDone ? 'open' : ''}" ${state.showDone ? '' : 'inert'}><ul class="rows items">${done.map(itemRow).join('')}</ul></div></div>` : ''}`;
   }
 
   // Today on one list, as one line (07:00–23:00): the lived part in ink, its tasks as marks.
@@ -679,7 +692,7 @@
           // Fill (120ms), fade the row (120ms), then the rows below close up (FLIP). Ticking several rows quickly never cancels one.
           state.ticking.add(it.id); row.classList.add('is-ticking');
           setTimeout(() => { state.leaving.add(it.id); app.querySelectorAll(`.row[data-id="${it.id}"]`).forEach((r) => r.classList.add('is-leaving')); }, 120);
-          setTimeout(() => { it.d = true; state.ticking.delete(it.id); state.leaving.delete(it.id); flipRender(it.id); toast(`Checked "${it.t}"`, () => { it.d = false; }); }, 240);
+          setTimeout(() => { it.d = true; state.ticking.delete(it.id); state.leaving.delete(it.id); dayDone(); flipRender(it.id); toast(`Checked "${it.t}"`, () => { it.d = false; }); }, 240);
           return;
         }
         it.d = !it.d; break;
@@ -688,7 +701,14 @@
       case 'move': { moveItem(findItem(+b.dataset.id), +b.dataset.dir); break; }
       case 'select': state.sel = +b.dataset.id; if (phone()) state.psheet = 'item'; break;
       case 'deselect': state.sel = null; break;
-      case 'done': state.showDone = !state.showDone; break;
+      case 'done': { // in place, so the rows grow open with the chevron
+        state.showDone = !state.showDone;
+        app.querySelectorAll('.donefoot').forEach((f) => {
+          f.querySelector('[data-act="done"]').setAttribute('aria-expanded', String(state.showDone));
+          const w = f.querySelector('.donewrap'); w.classList.toggle('open', state.showDone); w.inert = !state.showDone;
+        });
+        return;
+      }
       case 'uncheckall': { const was = D.done(l); was.forEach((i) => { i.d = false; }); state.psheet = null; render(); toast(`Unchecked ${was.length} in ${l.name}`, () => was.forEach((i) => { i.d = true; })); return; }
       case 'set': {
         const it = findItem(state.sel); const v = b.dataset.val;

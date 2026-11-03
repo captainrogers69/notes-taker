@@ -102,6 +102,14 @@
   bindTheme();
   applyPos();
   if (/(^|[#&])open/.test(location.hash)) sheet.open();
+
+  // First run: the bar unrolls from its dot, once ever (#first replays it).
+  const firstRun = /(^|[#&])first/.test(location.hash) || (() => { try { return !localStorage.getItem('weave-unrolled'); } catch { return false; } })();
+  if (firstRun && !sheet.isOpen()) {
+    try { localStorage.setItem('weave-unrolled', '1'); } catch { /* storage off */ }
+    bar.classList.add('unroll');
+    bar.addEventListener('animationend', (e) => { if (e.target === bar) bar.classList.remove('unroll'); });
+  }
 })();
 </script>
 </body>

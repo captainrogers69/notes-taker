@@ -36,6 +36,11 @@ svg { display: block; }
   transition: opacity var(--dur) var(--ease-out), transform var(--dur-fast) var(--ease-out);
 }
 .minibar:hover, .minibar.is-open, .minibar:focus-visible { opacity: 1; outline: none; }
+/* First run only: the bar unrolls rightward from its colour dot, then the name and count fade in. */
+.minibar.unroll { animation: wv-unroll 420ms var(--ease-out) both; }
+.minibar.unroll .name, .minibar.unroll .meta { animation: wv-unroll-text 240ms var(--ease-out) 220ms both; }
+@keyframes wv-unroll { from { clip-path: inset(0 calc(100% - 40px) 0 0 round var(--radius-card)); } to { clip-path: inset(0 0 0 0 round var(--radius-card)); } }
+@keyframes wv-unroll-text { from { opacity: 0; transform: translateX(-6px); } }
 .minibar:focus-visible { box-shadow: var(--float-shadow), 0 0 0 2px var(--text); }
 .minibar.is-dragging { opacity: 1; cursor: grabbing; transform: scale(1.03); }
 .minibar .grip { color: var(--faint); }
@@ -105,8 +110,8 @@ svg { display: block; }
 .sheet .add input { all: unset; flex: 1; min-width: 0; font: inherit; color: inherit; }
 .sheet .add input::placeholder { color: var(--faint); }
 .sheet .add kbd { font: 12px var(--mono); color: var(--faint); }
-.sheet .parse { display: none; align-items: center; gap: 6px; padding: 6px 2px 0; color: var(--muted); font-size: var(--fs-small); }
-.sheet .parse.on { display: flex; }
+.sheet .parse { display: flex; visibility: hidden; min-height: 24px; box-sizing: border-box; align-items: center; gap: 6px; padding: 6px 2px 0; color: var(--muted); font-size: var(--fs-small); }
+.sheet .parse.on { visibility: visible; } /* the line's height is always reserved, so the list doesn't nudge while you type */
 .sheet .parse svg { color: var(--accent-ink); }
 
 .sheet .scroll { flex: 1; min-height: 0; overflow: auto; padding: 8px 4px 8px; }
@@ -115,7 +120,7 @@ svg { display: block; }
 
 .item { display: flex; align-items: flex-start; gap: 12px; padding: 9px 12px 9px 12px; border-radius: var(--radius-control); }
 .item:hover { background: var(--hover); }
-.item.is-new { animation: wv-new 1.2s ease-out; }
+.item.is-new { animation: wv-new 600ms var(--ease-out); }
 @keyframes wv-new { from { background: color-mix(in srgb, var(--accent) 30%, transparent); } }
 .item .text { flex: 1; min-width: 0; line-height: 20px; }
 .item .when { flex: none; color: var(--muted); font-size: var(--fs-small); line-height: 20px; font-variant-numeric: tabular-nums; }
@@ -144,6 +149,10 @@ svg { display: block; }
 .done-row:hover { color: var(--text); }
 .done-row svg { transition: transform var(--dur) var(--ease-out); }
 .done-row[aria-expanded="true"] svg { transform: rotate(90deg); }
+/* Done section opens with its chevron: rows are always rendered, the grid row grows from 0fr to 1fr. */
+.donewrap { display: grid; grid-template-rows: 0fr; transition: grid-template-rows var(--dur) var(--ease-out); }
+.donewrap > ul { overflow: hidden; min-height: 0; }
+.donewrap.open { grid-template-rows: 1fr; }
 .sheet .empty { margin: 16px 12px; padding: 12px; border: 1px dashed var(--control); border-radius: var(--radius-control); color: var(--muted); font-size: 13px; }
 
 .sheet .foot { flex: none; display: flex; align-items: center; gap: 4px; min-height: 40px; padding: 4px 8px 4px 14px; border-top: 1px solid var(--rule); color: var(--muted); font-size: var(--fs-small); }

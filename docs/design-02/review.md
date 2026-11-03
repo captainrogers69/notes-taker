@@ -109,7 +109,7 @@ Checks: `inspect.mjs` 0 FAIL / 0 WARN on Up next, settings and all six lists. Th
 
 **Still open:**
 - B6: **decided, keep 50%** (2026-11-03). The bar is meant to recede; it reaches full strength on hover, while open, and while dragging. Not fixing.
-- C: motion audit, critical and important items fixed (below). The 6 opportunities are not started.
+- C: motion audit, all 12 items fixed (below).
 
 ### Motion audit checklist
 
@@ -126,12 +126,12 @@ From [`motion-audits/notes-taker-2026-11-03.html`](../../motion-audits/notes-tak
 - [x] M6 · Default `ease` and scattered durations → `--dur-fast`, `--dur` and `--ease-out` tokens on every transition (`tokens.css` and all stylesheets)
 
 **Opportunities**
-- [ ] M7 · New-task highlight 1.2s → 600ms (`weave.css:117`, `app.css`)
-- [ ] M8 · Reserve the height of the parse line under the sheet's field, so the list stops nudging while you type (`weave.css:108`)
-- [ ] M9 · "Done · n" section expands with its chevron (180ms `grid-template-rows`) (`weave.js:49`, `app.js`)
-- [ ] M10 · Tray icon pop 1.35 → 1.12, 240ms (`tray.css:24`)
-- [ ] M11 · Day's-last-tick ink stroke along the thread, once a day, skipped under reduced motion (`app.js` `drawThread`)
-- [ ] M12 · First-run bar unroll from the mark, once only (`01-mini-bar`)
+- [x] M7 · New-task highlight 1.2s → 600ms (`weave.css:117`, `app.css`)
+- [x] M8 · Reserve the height of the parse line under the sheet's field, so the list stops nudging while you type (`weave.css:108`)
+- [x] M9 · "Done · n" section expands with its chevron (180ms `grid-template-rows`) (`weave.js:49`, `app.js`)
+- [x] M10 · Tray icon pop 1.35 → 1.12, 240ms (`tray.css:24`)
+- [x] M11 · Day's-last-tick ink stroke along the thread, once a day, skipped under reduced motion (`app.js` `drawThread`)
+- [x] M12 · First-run bar unroll from the mark, once only (`01-mini-bar`)
 
 ### Motion audit fixes: critical (2026-11-03)
 
@@ -151,10 +151,32 @@ Verified mid-flight in a headless browser: the sheet is part-way at 70ms on open
 | M5 · Exits as heavy as enters | The sheet enters from scale .96 (180ms opacity, 200ms transform) and leaves as a 120ms fade at scale .99. Opening it with ⌥Space is instant. The toast rises 16px on enter and leaves as a 150ms fade with no drop. `assets/weave.css` `.sheet.pre`, `03-app/app.css` `.toast.pre`. |
 | M6 · Default `ease` and scattered durations | `--dur-fast` (120ms), `--dur` (180ms), `--ease-out` and `--ease-sheet` in `tokens.css`. Every transition in the three stylesheets uses them. The two longer flights (the 260ms tray flight and the 280ms phone sheet) are named exceptions. |
 
-Verified mid-animation in a headless browser: the sheet at 50ms is part-way in (scale .991, opacity .82) and part-way out (opacity .07); a clicked menu is at opacity .82 after 40ms while a keyboard-opened one is instant; two quick ticks both fade and the rows below slide; the toast fades out without moving. The click-through tests pass with a clean console on 01, 02 (macOS, Windows, Android) and 03. Lint 0 FAIL. The inspector gives 0 FAIL / 0 WARN on every screen except one WARN on the phone list page: the space between a short list and the add field pinned above the tab bar. That space is intended.
+Verified mid-animation in a headless browser: the sheet at 50ms is part-way in (scale .991, opacity .82) and part-way out (opacity .07); a clicked menu is at opacity .82 after 40ms while a keyboard-opened one is instant; two quick ticks both fade and the rows below slide; the toast fades out without moving. The click-through tests pass with a clean console on 01, 02 (macOS, Windows, Android) and 03. Lint 0 FAIL. The inspector gave 0 FAIL / 0 WARN on every screen except one WARN on the phone list page: the space between a short list and the add field pinned above the tab bar. That space is intended, and the warning didn't recur in the next run.
+
+### Motion audit fixes: opportunities (2026-11-03)
+
+| Finding | Fix |
+|---|---|
+| M7 · New-task highlight 1.2s | 600ms on `--ease-out`, in the sheet and in the app's list. `assets/weave.css` `.item.is-new`, `03-app/app.css` `.row.is-new`. |
+| M8 · List nudges while you type | The sheet's parse line always keeps its 24px. It turns visible instead of being inserted. The list stays at the same height whether the field is empty, typed in or cleared. `assets/weave.css` `.sheet .parse`. |
+| M9 · "Done · n" snaps open | The done rows are always rendered in a `.donewrap` grid that grows from `0fr` to `1fr` over 180ms with the chevron. The toggle changes the DOM in place instead of re-rendering. Closed rows are `inert`, so keyboard and screen readers skip them. `assets/weave.js` `toggleDone`, `03-app/app.js` `case 'done'`, both stylesheets. |
+| M10 · Tray icon pop 1.35 | It scales to 1.12 over 240ms on `--ease-out`. `02-tray/tray.css`. |
+| M11 · Day's-last-tick stroke | When the last task due today is ticked with the thread on screen, ink runs from Now to 23:00 along the thread (600ms) and fades by 1s. It plays once a day (stored in `localStorage`) and not at all under reduced motion. `03-app/app.js` `dayDone` / `drawThread.finale`, `03-app/app.css` `.finale`. |
+| M12 · First-run bar unroll | On the first visit the bar unrolls rightward from its colour dot (clip-path, 420ms), then the name and count fade in. It plays once ever; `#first` in the URL replays it. Under reduced motion the bar appears whole. `01-mini-bar/index.html`, `assets/weave.css` `.minibar.unroll`. |
+
+Verified in a headless browser:
+- The Done section is part-way open at 80ms and fully open by 380ms. It closes back to 0 and is inert while closed, in the sheet and in the list.
+- The list stays at y=292 while you type and after you clear the field.
+- Ticking the last of today's 4 tasks draws the stroke, which has faded by 1.5s.
+- The unroll runs on a fresh visit (caught mid-clip) and not on the second visit.
+
+Checks:
+- The click-through tests pass with a clean console on 01, 02 (macOS, Windows, Android) and 03.
+- Lint gives 0 FAIL.
+- The inspector gives 0 FAIL / 0 WARN on every screen, with the standing allowances for 01 and 02 (the bar's shadow and the desktop around it).
 
 ---
 
 ## Next
 
-Decide on the motion audit's opportunities (M7–M12), run round 2 of the AI passes on the new screenshots, then go to designer review (plan step 2).
+Run round 2 of the AI passes on the new screenshots, then go to designer review (plan step 2).
