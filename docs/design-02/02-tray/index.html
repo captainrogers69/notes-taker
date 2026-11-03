@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" class="t-light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weave · 02 Hide to tray</title>
+<link rel="stylesheet" href="../assets/weave.css">
+<link rel="stylesheet" href="tray.css">
+</head>
+<body>
+
+<div class="sysbar macbar">
+  <b>Code</b><span>File</span><span>Edit</span><span>View</span><span>Window</span>
+  <span class="grow"></span>
+  <button class="trayitem" id="tray-macos" aria-label="Weave" aria-expanded="false"></button>
+  <span class="num">Tue 3 Nov&nbsp;&nbsp;16:20</span>
+</div>
+
+<div class="sysbar winbar">
+  <span class="apps"><i></i><i></i><i></i><i></i><i></i></span>
+  <button class="trayitem" id="tray-windows" aria-label="Weave" aria-expanded="false"></button>
+  <span class="clock num">16:20<br>03-11-2026</span>
+</div>
+
+<div class="phonestage">
+  <div class="phone">
+    <div class="pstatus"><span class="num">16:20</span><span id="pmark"></span><span class="grow"></span><span>5G</span><span class="num">82%</span></div>
+    <div class="shade" id="shade"></div>
+  </div>
+</div>
+
+<div class="minibar" id="minibar" role="button" tabindex="0" aria-label="Open Weave" aria-expanded="false">
+  <span class="grip" id="grip"></span>
+  <span class="dot" id="dot"></span>
+  <span class="name" id="name"></span>
+  <span class="meta" id="meta"></span>
+</div>
+
+<aside class="proto">
+  <h1>02 · Hide to tray</h1>
+  <div class="ctl" style="margin-bottom:10px">
+    <button data-os="macos">macOS</button>
+    <button data-os="windows">Windows</button>
+    <button data-os="android">Android</button>
+  </div>
+  <ol id="steps"></ol>
+  <div class="ctl">
+    <button data-theme="t-light">Light</button>
+    <button data-theme="t-dark">Dark</button>
+    <a href="../index.html">All prototypes</a>
+  </div>
+</aside>
+
+<script src="../assets/data.js"></script>
+<script src="../assets/icons.js"></script>
+<script src="../assets/weave.js"></script>
+<script src="tray.js"></script>
+</body>
+</html>

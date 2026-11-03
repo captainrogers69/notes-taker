@@ -1,0 +1,42 @@
+// One outline icon set, 16px on a 16 grid, 1.5px stroke, currentColor. Grey by default in CSS.
+(function () {
+  const s = (d, size = 16) => `<svg width="${size}" height="${size}" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  window.WeaveIcons = {
+    s,
+    grip: `<svg width="8" height="14" viewBox="0 0 8 14" fill="currentColor" aria-hidden="true"><circle cx="2" cy="2" r="1.2"/><circle cx="6" cy="2" r="1.2"/><circle cx="2" cy="7" r="1.2"/><circle cx="6" cy="7" r="1.2"/><circle cx="2" cy="12" r="1.2"/><circle cx="6" cy="12" r="1.2"/></svg>`,
+    tick: `<svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 5.2 4.1 7.3 8 2.9"/></svg>`,
+    check: s('<path d="M3.5 8.5 6.5 11.5 12.5 4.5"/>'),
+    chevDown: s('<path d="M4.5 6.5 8 10l3.5-3.5"/>'),
+    chevRight: s('<path d="M6.5 4.5 10 8l-3.5 3.5"/>', 12),
+    back: s('<path d="M10 3.5 5.5 8l4.5 4.5"/>'),
+    expand: s('<path d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9"/>'),
+    hide: s('<path d="M4.5 5 8 8.5 11.5 5"/><path d="M3 12h10"/>'),
+    bell: s('<path d="M4 11V7.5a4 4 0 0 1 8 0V11l1 1.5H3z"/><path d="M6.5 14h3"/>'),
+    clock: s('<circle cx="8" cy="8" r="5.5"/><path d="M8 5v3l2 1.5"/>'),
+    repeat: s('<path d="M3 7V6a2 2 0 0 1 2-2h7.5"/><path d="m10.5 2 2 2-2 2"/><path d="M13 9v1a2 2 0 0 1-2 2H3.5"/><path d="m5.5 14-2-2 2-2"/>'),
+    cloud: s('<path d="M4.5 12.5a3 3 0 0 1-.3-6A4 4 0 0 1 12 6a3.2 3.2 0 0 1 .3 6.5z"/><path d="m6 9.5 1.5 1.5 2.5-3"/>'),
+    lock: s('<rect x="3.5" y="7" width="9" height="6.5" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/>'),
+    search: s('<circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/>'),
+    plus: s('<path d="M8 3v10M3 8h10"/>'),
+    sun: s('<circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"/>'),
+    list: s('<path d="M6 4.5h7.5M6 8h7.5M6 11.5h7.5"/><circle cx="3" cy="4.5" r=".6" fill="currentColor"/><circle cx="3" cy="8" r=".6" fill="currentColor"/><circle cx="3" cy="11.5" r=".6" fill="currentColor"/>'),
+    archive: s('<rect x="2" y="3" width="12" height="3" rx="1"/><path d="M3 6v6.5a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V6M6.5 9h3"/>'),
+    trash: s('<path d="M2.5 4.5h11M6 4.5V3h4v1.5M4 4.5l.7 9h6.6l.7-9"/>'),
+    gear: s('<circle cx="8" cy="8" r="2"/><path d="M8 1.8v1.6M8 12.6v1.6M1.8 8h1.6M12.6 8h1.6M3.6 3.6l1.1 1.1M11.3 11.3l1.1 1.1M3.6 12.4l1.1-1.1M11.3 4.7l1.1-1.1"/>'),
+    screen: s('<rect x="2" y="3" width="12" height="8.5" rx="1.5"/><path d="M5.5 14h5"/><rect x="4.5" y="5.5" width="5" height="2" rx=".6"/>'),
+    pin: s('<path d="M6 2.5h4l-.5 4 2 2H4.5l2-2z"/><path d="M8 8.5v5"/>'),
+    share: s('<path d="M8 10V2.5M5 5.5l3-3 3 3"/><path d="M3.5 8.5v4a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1v-4"/>'),
+    more: s('<circle cx="3.5" cy="8" r=".9" fill="currentColor"/><circle cx="8" cy="8" r=".9" fill="currentColor"/><circle cx="12.5" cy="8" r=".9" fill="currentColor"/>'),
+    menu: s('<path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/>'),
+    pause: s('<path d="M6 4v8M10 4v8"/>'),
+    show: s('<rect x="2.5" y="5" width="11" height="6" rx="1.5"/>'),
+    text: s('<path d="M3.5 4h9M8 4v8.5"/>'),
+    close: s('<path d="M4 4l8 8M12 4l-8 8"/>'),
+    device: s('<rect x="4.5" y="2" width="7" height="12" rx="1.5"/><path d="M7.3 12h1.4"/>'),
+    laptop: s('<rect x="3" y="3.5" width="10" height="7" rx="1"/><path d="M1.5 12.5h13"/>'),
+    // The Weave mark: a W drawn as one thread. markMono for OS tray / status bar (template image).
+    mark: `<svg class="mark" viewBox="0 0 16 16" aria-hidden="true"><rect width="16" height="16" rx="4" fill="#F5C84C"/><path d="M3.2 5 5.6 11.2 8 6.4l2.4 4.8L12.8 5" fill="none" stroke="#111" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    markMono: `<svg class="mark" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4 5 12 8 6l3 6 3-8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    key: s('<circle cx="5.5" cy="10.5" r="3"/><path d="m7.6 8.4 5.4-5.4M11 5l1.5 1.5"/>'),
+  };
+})();

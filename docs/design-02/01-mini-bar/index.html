@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" class="t-light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weave · 01 Mini bar</title>
+<link rel="stylesheet" href="../assets/weave.css">
+</head>
+<body>
+
+<div class="minibar" id="minibar" role="button" tabindex="0" aria-label="Open Weave" aria-expanded="false" title="Open Weave (⌥ Space)">
+  <span class="grip" id="grip"></span>
+  <span class="dot" id="dot"></span>
+  <span class="name" id="name"></span>
+  <span class="meta" id="meta"></span>
+</div>
+
+<aside class="proto">
+  <h1>01 · Mini bar</h1>
+  <ol>
+    <li>Click the faded bar. Type <i>call the bank tomorrow 10am</i> and watch the line under the field, then press Enter.</li>
+    <li>Tick the overdue bill: the bar switches from "1 overdue" to the next time.</li>
+    <li>Click the list name (or Backspace in an empty field) to switch or create a list.</li>
+    <li>Drag the bar anywhere. Near the bottom, the sheet opens upward.</li>
+  </ol>
+  <div class="ctl">
+    <button data-theme="t-light">Light</button>
+    <button data-theme="t-dark">Dark</button>
+    <a href="../index.html">All prototypes</a>
+  </div>
+</aside>
+
+<script src="../assets/data.js"></script>
+<script src="../assets/icons.js"></script>
+<script src="../assets/weave.js"></script>
+<script>
+(() => {
+  const { mount, draggable, bindTheme, barMeta, clamp } = WeaveSheet;
+  const D = WeaveData;
+  const EDGE = 12, GAP = 8;
+  const bar = document.getElementById('minibar');
+  document.getElementById('grip').innerHTML = WeaveIcons.grip;
+
+  let pos = { x: Math.round(innerWidth / 2 - 120), y: 72 };
+  let origin = pos;
+  function applyPos() {
+    pos.x = clamp(pos.x, EDGE, innerWidth - bar.offsetWidth - EDGE);
+    pos.y = clamp(pos.y, EDGE, innerHeight - bar.offsetHeight - EDGE);
+    bar.style.left = pos.x + 'px';
+    bar.style.top = pos.y + 'px';
+  }
+
+  const sheet = mount({
+    trigger: bar,
+    hide: { label: 'Hide to menu bar', run: () => { location.href = '../02-tray/index.html#os=macos&hidden=1'; } },
+    place(win) {
+      const r = bar.getBoundingClientRect();
+      const w = win.offsetWidth, h = Math.min(win.scrollHeight, 460);
+      const below = r.bottom + GAP + h <= innerHeight - EDGE;
+      const x = clamp(r.left, EDGE, innerWidth - w - EDGE);
+      const y = below ? r.bottom + GAP : Math.max(EDGE, r.top - GAP - h);
+      win.style.left = x + 'px';
+      win.style.top = y + 'px';
+      win.style.setProperty('--slide-y', below ? '-6px' : '6px');
+      win.style.setProperty('--origin', `${r.left + 24 - x}px ${below ? 'top' : 'bottom'}`);
+    },
+    onRender(l) {
+      bar.style.setProperty('--accent', D.color(l));
+      document.getElementById('dot').style.setProperty('--ci', D.ink(l));
+      document.getElementById('name').textContent = l.name;
+      document.getElementById('meta').innerHTML = barMeta(l);
+      applyPos();
+    },
+  });
+
+  draggable(bar, {
+    onStart(phase) { if (phase === 'down') origin = { ...pos }; else sheet.close(); },
+    onMove(dx, dy) { pos = { x: origin.x + dx, y: origin.y + dy }; applyPos(); },
+    onTap: sheet.toggle,
+  });
+  addEventListener('resize', applyPos);
+  bindTheme();
+  applyPos();
+  if (/(^|[#&])open/.test(location.hash)) sheet.open();
+})();
+</script>
+</body>
+</html>

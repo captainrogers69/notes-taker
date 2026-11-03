@@ -1,0 +1,80 @@
+/* Weave design-02 tokens — "Achromatic ledger" (tasteskill app style, seed 686191426).
+   The chrome holds no colour. The only hue on a screen is the current list's own colour,
+   and it goes on that list's data: check fills, its dots on the day thread.
+   Mode = .t-light / .t-dark on <html>. Light is the default.
+
+   Note palette (F7): --nX is the fill (dots, check fill, thread marks);
+   --nX-ink is the edge / text-safe shade (≥ 3:1 for marks, ≥ 4.5:1 as text on --surface). */
+
+/* ---------- Shared ---------- */
+:root {
+  --font: "Geist", Inter, system-ui, -apple-system, sans-serif;
+  --mono: var(--font); /* no monospace: hotkeys are set in the text face */
+
+  --n0: #F5C84C; --n1: #6AA6F8; --n2: #5DC48A; --n3: #EE7FA8; --n4: #A88BEB; --n5: #F29A5B;
+
+  --radius-card: 8px;
+  --radius-control: 6px;
+  --radius-chip: 4px;
+  --gap: 12px;
+  --pad: 24px;
+  --row-height: 44px;
+  --control-height: 36px;
+  --sidebar-width: 256px;
+
+  --fs-title: 24px;
+  --fs-section: 16px;
+  --fs-figure: 30px;
+  --fs-body: 14px;
+  --fs-small: 13px;
+
+  --ease: cubic-bezier(.2, .8, .2, 1);
+}
+
+/* ---------- Light ---------- */
+:root, .t-light {
+  --ground: #f5f5f3;   /* one level off white, low chroma: plain paper, not cream */
+  --surface: #ffffff;
+  --raised: #eeeeee;   /* secondary button, active nav pill */
+  --hover: #f3f3f2;
+  --border: #e6e6e6;
+  --rule: #f0f0f0;
+  --control: #d4d4d4;
+  --text: #0a0a0a;
+  --muted: #5f5f5f;    /* 6.4:1 on white, 6.0:1 on ground */
+  --faint: #6b6b6b;    /* placeholders, 5.3:1 */
+  --primary: #141414;  /* the one filled button: near-black, white label */
+  --on-primary: #ffffff;
+  --negative: #c4242a;
+  --positive: #2e7d32;
+  --pill-neutral-bg: #eeeeee; --pill-neutral-ink: #3d3d3d;
+  --pill-negative-bg: #ffedea; --pill-negative-ink: #831c1e;
+  --float-shadow: 0 12px 32px rgba(0, 0, 0, .14), 0 0 0 1px rgba(0, 0, 0, .06); /* only on what floats */
+  --n0-ink: #876508; --n1-ink: #0B65E0; --n2-ink: #2C784D; --n3-ink: #CD1B5D; --n4-ink: #794CE0; --n5-ink: #AC4F0E;
+  color-scheme: light;
+}
+
+/* ---------- Dark: true neutrals, elevation by lightness ---------- */
+.t-dark {
+  --ground: #0f0f0f;
+  --surface: #171717;
+  --raised: #262626;
+  --hover: #1f1f1f;
+  --border: #2a2a2a;
+  --rule: #212121;
+  --control: #444444;
+  --text: #f2f2f2;
+  --muted: #b4b4b4;
+  --faint: #949494;
+  --primary: #f2f2f2;
+  --on-primary: #0a0a0a;
+  --negative: #ef6b6b;
+  --positive: #3fc07a;
+  --pill-neutral-bg: #262626; --pill-neutral-ink: #d4d4d4;
+  --pill-negative-bg: #2c1a1a; --pill-negative-ink: #ef8a8a;
+  --float-shadow: 0 16px 40px rgba(0, 0, 0, .6), 0 0 0 1px #2e2e2e;
+  --n0-ink: #F5C84C; --n1-ink: #6AA6F8; --n2-ink: #5DC48A; --n3-ink: #EE7FA8; --n4-ink: #A88BEB; --n5-ink: #F29A5B;
+  color-scheme: dark;
+}
+
+.num { font-variant-numeric: tabular-nums; }

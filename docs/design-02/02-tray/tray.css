@@ -1,0 +1,65 @@
+/* 02 · Hide to tray — fake OS chrome around the shared sheet. Prototype only. */
+
+/* The OS bars are the OS's, not Weave's: they keep their own look. */
+.sysbar { position: fixed; z-index: 30; display: none; align-items: center; gap: 16px; color: #f2f2f2; font-size: 13px; }
+.os-macos .macbar, .os-windows .winbar { display: flex; }
+.macbar { top: 0; left: 0; right: 0; height: 26px; padding: 0 20px; background: rgba(28, 28, 30, .92); }
+.macbar b { font-weight: 600; }
+.winbar { bottom: 0; left: 0; right: 0; height: 48px; padding: 0 20px; background: #202020; }
+.winbar .apps { display: flex; gap: 8px; margin: 0 auto; }
+.winbar .apps i { width: 34px; height: 34px; border-radius: 4px; background: #2d2d2d; }
+.winbar .clock { text-align: right; font-size: 12px; line-height: 16px; }
+.sysbar .grow { flex: 1; }
+
+/* Weave's own tray item: the mark and the open count, no colour, no badge. */
+.trayitem {
+  all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+  height: 22px; padding: 0 8px; border-radius: 4px; font-size: 13px; font-variant-numeric: tabular-nums;
+}
+.winbar .trayitem { height: 40px; }
+.trayitem:hover, .trayitem.is-open { background: rgba(255, 255, 255, .16); }
+.trayitem:focus-visible { outline: 2px solid #fff; }
+.trayitem.paused { opacity: .55; }
+.mark { width: 16px; height: 16px; flex: none; }
+.trayitem.pop .mark { animation: pop .35s var(--ease); }
+@keyframes pop { 40% { transform: scale(1.35); } }
+
+/* Android */
+.phonestage { position: fixed; inset: 0; display: none; place-items: center; background: var(--ground); }
+.os-android .phonestage { display: grid; }
+.os-android .minibar { display: none; }
+.phone { position: relative; width: 360px; height: 760px; border-radius: 36px; overflow: hidden; background: #1b1d22; box-shadow: 0 0 0 10px #0b0b0b; }
+.pstatus { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 20px; color: #fff; font-size: 13px; font-variant-numeric: tabular-nums; }
+.pstatus .grow { flex: 1; }
+.pstatus .mark { width: 14px; height: 14px; }
+.shade { position: absolute; inset: 0; padding: 40px 12px; background: rgba(12, 12, 12, .92); }
+.shade .qs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
+.shade .tile { all: unset; cursor: pointer; height: 56px; border-radius: 16px; background: #2a2a2a; color: #e6e6e6; font-size: 11px; display: grid; place-items: center; text-align: center; line-height: 14px; padding: 0 4px; }
+.shade .tile.on { background: #e6e6e6; color: #0a0a0a; }
+
+.notif { border-radius: 20px; padding: 14px 16px 10px; background: var(--surface); color: var(--text); }
+.notif .top { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
+.notif .top .mark { width: 14px; height: 14px; }
+.notif h2 { margin: 8px 0 2px; font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+.notif .sub { color: var(--muted); font-size: 13px; }
+.notif .sub .late { color: var(--negative); }
+.notif ul { list-style: none; margin: 8px 0 4px; padding: 0; }
+.notif li { display: flex; align-items: center; gap: 12px; height: 36px; font-size: 14px; }
+.notif li .t { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.notif li .when { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.notif li .when.late { color: var(--negative); }
+.notif .acts { display: flex; gap: 4px; margin: 4px -8px 0; }
+.notif .acts button { all: unset; cursor: pointer; height: 36px; padding: 0 10px; border-radius: 18px; color: var(--text); font-size: 13px; font-weight: 500; }
+.notif .acts button:hover { background: var(--hover); }
+.notif .reply { display: none; gap: 8px; margin-top: 8px; }
+.notif .reply.on { display: flex; }
+.notif .reply input { all: unset; flex: 1; height: 40px; padding: 0 14px; border-radius: 20px; background: var(--raised); font: inherit; }
+.notif .reply button { all: unset; cursor: pointer; height: 40px; padding: 0 16px; border-radius: 20px; background: var(--primary); color: var(--on-primary); font-size: 13px; font-weight: 500; }
+.notif .sentnote { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
+.shade .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; background: var(--c); border: 1px solid var(--ci); }
+.shade .check { width: 18px; height: 18px; }
+.shade .empty-shade { color: #b4b4b4; font-size: 13px; padding: 12px 4px; }
+
+/* The bar flying into the tray / back */
+.minibar.flying { transition: left .4s var(--ease), top .4s var(--ease), opacity .4s, transform .4s var(--ease); transform: scale(.4); opacity: 0 !important; pointer-events: none; }
+.minibar.gone { display: none; }

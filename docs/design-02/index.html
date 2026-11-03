@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" class="t-light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weave · Design 02</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: var(--font); font-size: 14px; line-height: 20px; color: var(--text); background: var(--ground); -webkit-font-smoothing: antialiased; }
+  main { max-width: 1120px; margin: 0 auto; padding: 48px 32px 64px; }
+  header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 32px; }
+  header svg { width: 32px; height: 32px; flex: none; margin-top: 2px; }
+  h1 { margin: 0; font-size: 24px; line-height: 32px; font-weight: 500; letter-spacing: -0.01em; }
+  header p { margin: 4px 0 0; color: var(--muted); max-width: 640px; }
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  a.card { display: flex; flex-direction: column; color: inherit; text-decoration: none; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; transition: border-color .15s; }
+  a.card:hover { border-color: var(--text); }
+  a.card:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .shot { aspect-ratio: 16 / 10; background: var(--raised) center / cover no-repeat; }
+  .body { padding: 16px 20px 20px; }
+  h2 { margin: 0 0 6px; font-size: 16px; line-height: 24px; font-weight: 500; }
+  .body p { margin: 0; color: var(--muted); }
+  section.notes { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 32px; margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--border); }
+  section.notes h2 { margin-top: 4px; }
+  dl { display: grid; grid-template-columns: 160px 1fr; margin: 0; }
+  dt, dd { margin: 0; padding: 10px 0; border-top: 1px solid var(--rule); }
+  dt { color: var(--muted); }
+  dt:first-of-type, dt:first-of-type + dd { border-top: 0; }
+  .sw { display: inline-flex; gap: 6px; vertical-align: middle; }
+  .sw i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  @media (max-width: 900px) { .grid, section.notes { grid-template-columns: 1fr; } }
+  @media (max-width: 480px) { main { padding: 24px 16px 48px; } dl { grid-template-columns: 1fr; } dd { border-top: 0; padding-top: 0; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <svg viewBox="0 0 16 16" aria-hidden="true"><rect width="16" height="16" rx="4" fill="#F5C84C"/><path d="M3.2 5 5.6 11.2 8 6.4l2.4 4.8L12.8 5" fill="none" stroke="#111" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div>
+      <h1>Weave, design 02</h1>
+      <p>A redesign of the mini bar, the tray and the full app. The chrome carries no colour; each list's own colour is the only hue on screen, and it marks that list's tasks. Clickable prototypes, light and dark.</p>
+    </div>
+  </header>
+
+  <div class="grid">
+    <a class="card" href="01-mini-bar/index.html#open">
+      <div class="shot" style="background-image:url('assets/preview-01.jpg')"></div>
+      <div class="body"><h2>01 · Mini bar and sheet</h2><p>The bar says what is left and the one thing to know: an overdue task or the next time. Type "tomorrow 6pm" and the sheet shows the due time before you press Enter.</p></div>
+    </a>
+    <a class="card" href="02-tray/index.html#os=macos&hidden=1&open=tray">
+      <div class="shot" style="background-image:url('assets/preview-02.jpg')"></div>
+      <div class="body"><h2>02 · Hide to tray</h2><p>One action hides the bar into the macOS menu bar, the Windows tray or an Android notification. The same sheet opens from there, with Show bar and Pause reminders.</p></div>
+    </a>
+    <a class="card" href="03-app/index.html">
+      <div class="shot" style="background-image:url('assets/preview-03.jpg')"></div>
+      <div class="body"><h2>03 · Weave app</h2><p>Opens on Up next: everything due today across lists, on a day thread from 07:00 to 23:00. Lists, task details, archive and trash, and settings, on desktop and phone.</p></div>
+    </a>
+  </div>
+
+  <section class="notes" aria-labelledby="h-dir">
+    <div><h2 id="h-dir">Direction</h2><p style="color:var(--muted);margin:0">Dealt by the taste skill's app draw and adopted whole. Rationale and open questions are in README.md beside this page.</p></div>
+    <dl>
+      <dt>Style</dt><dd>Achromatic ledger (seed 686191426): ink chrome, one near-black primary, one hue on the data</dd>
+      <dt>Hue</dt><dd>The list's own colour, on its checks and its marks on the thread <span class="sw"><i style="background:var(--n0)"></i><i style="background:var(--n1)"></i><i style="background:var(--n2)"></i><i style="background:var(--n3)"></i><i style="background:var(--n4)"></i><i style="background:var(--n5)"></i></span></dd>
+      <dt>Type</dt><dd>Geist, 400 and 500; 13 / 14 / 16 / 24 px; tabular figures on every time and count</dd>
+      <dt>Shape</dt><dd>Radius 8 cards, 6 controls; 1px borders; shadows only on what floats (bar, sheet, menus)</dd>
+      <dt>Only Weave has</dt><dd>The day thread: today's tasks as marks on one line, the part already lived drawn in ink</dd>
+    </dl>
+  </section>
+</main>
+</body>
+</html>
