@@ -1,0 +1,1334 @@
+{
+ "url": "http://localhost:8765/03-app/index.html",
+ "at": "2026-11-03T10:42:24.378Z",
+ "allow": [],
+ "viewports": [
+  {
+   "width": 1440,
+   "height": 900,
+   "load": "load",
+   "screens": 2,
+   "filled": [
+    0.64,
+    0.73
+   ],
+   "motion": {
+    "elements": 0,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "page": {
+     "height": 1142,
+     "screens": 1.3,
+     "words": 281,
+     "img": 0,
+     "video": 0,
+     "canvas": 0,
+     "svg": 24,
+     "sections": 5,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 1,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Up next",
+     "words": 2,
+     "chars": 7,
+     "lines": 1,
+     "size": 24,
+     "vw": 1.7,
+     "font": "Geist",
+     "weight": 500,
+     "tracking": -0.01,
+     "leading": 1.33,
+     "top": 68,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "Up next",
+     "words": 2,
+     "lines": 1,
+     "size": 24,
+     "font": "Geist"
+    },
+    "headings": [],
+    "headingSummary": {
+     "count": 0,
+     "maxLines": 0,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": null,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Geist",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      12,
+      13,
+      14,
+      15,
+      16,
+      24
+     ],
+     "sizeCount": 6,
+     "notLoaded": [],
+     "body": {
+      "font": "Geist",
+      "size": 13,
+      "leading": 1.54,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 6.5
+     },
+     "measureChars": 63,
+     "max": {
+      "size": 24,
+      "vw": 1.7,
+      "font": "Geist",
+      "text": "Up next"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0,
+     "smallText": 1
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#f5f4f2",
+     "bodyBgHsl": {
+      "h": 40,
+      "s": 0.13,
+      "l": 0.95
+     },
+     "dark": false,
+     "sectionBgs": [],
+     "textColors": [
+      {
+       "color": "#5f5e5e",
+       "share": 0.47
+      },
+      {
+       "color": "#0a0b0b",
+       "share": 0.44
+      },
+      {
+       "color": "#c4252b",
+       "share": 0.04
+      },
+      {
+       "color": "#e6e7e7",
+       "share": 0.03
+      },
+      {
+       "color": "#6a6b6a",
+       "share": 0.01
+      }
+     ],
+     "button": {
+      "bg": "#efeeef",
+      "hsl": {
+       "h": 300,
+       "s": 0.03,
+       "l": 0.94
+      },
+      "fg": "#0a0b0b"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 4,
+     "inHero": 4,
+     "radius": 6,
+     "height": 72,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Up next 4",
+      "Errands In the mini bar 4 left · 1 overd",
+      "Groceries 4 left · no times set",
+      "Ideas 1 left · no times set"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 1,
+     "shadowOverlay": 0,
+     "shadowSamples": [
+      "div.pbar.paper → rgba(0, 0, 0, 0.14) 0px 12px 32px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px"
+     ],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 6,
+     "hairlineSamples": [
+      "div.chrome 1440px",
+      "nav.side 256px",
+      "li.row 717px",
+      "li.row 717px",
+      "li.row 717px"
+     ],
+     "outlinedBoxes": 8,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 9,
+     "boxRadius": 8,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [
+     {
+      "type": "svg",
+      "ratio": 0.11
+     }
+    ],
+    "nav": {
+     "links": 0,
+     "fixed": true,
+     "height": 864,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "geist"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "pageH": 1142,
+    "margins": {
+     "left": 12,
+     "right": 53
+    },
+    "sections": [],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Up next",
+      "size": 24,
+      "top": 68,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 309,
+      "n": 3
+     },
+     {
+      "x": 1064,
+      "n": 2
+     },
+     {
+      "x": 288,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 6,
+    "bodySize": 13,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0.04,
+    "voidBox": {
+     "x": 0,
+     "y": 540,
+     "w": 300,
+     "h": 180
+    }
+   },
+   "app": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "dark": false,
+    "ground": "#f5f4f2",
+    "sidebar": {
+     "w": 256,
+     "tag": "nav",
+     "links": 11,
+     "share": 0.18
+    },
+    "topbar": {
+     "h": 36
+    },
+    "canvas": {
+     "left": 50,
+     "right": 53
+    },
+    "hero": {
+     "text": "Up next",
+     "words": 2,
+     "chars": 7,
+     "lines": 1,
+     "size": 24,
+     "vw": 1.7,
+     "font": "Geist",
+     "weight": 500,
+     "tracking": -0.01,
+     "leading": 1.33,
+     "top": 68,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 1,
+    "layout": {
+     "panels": 5,
+     "firstScreen": 4,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 12,
+     "radii": [
+      [
+       6,
+       7
+      ],
+      [
+       8,
+       5
+      ]
+     ],
+     "heavyBorders": 1,
+     "borderSamples": [
+      "#f4ccda on #ffffff (1.45:1)"
+     ],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
+    },
+    "rows": null,
+    "chartHues": 2,
+    "placeholders": [],
+    "type": {
+     "under13": 0.04,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      12,
+      13,
+      14,
+      15,
+      16,
+      24
+     ]
+    },
+    "title": {
+     "text": "Up next",
+     "size": 24,
+     "top": 68
+    },
+    "colourShare": 0.002
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 768,
+   "height": 1024,
+   "load": "load",
+   "screens": 2,
+   "filled": [
+    0.67,
+    0.66
+   ],
+   "motion": {
+    "elements": 0,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "page": {
+     "height": 1781,
+     "screens": 1.7,
+     "words": 260,
+     "img": 0,
+     "video": 0,
+     "canvas": 0,
+     "svg": 24,
+     "sections": 5,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 1,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Up next",
+     "words": 2,
+     "chars": 7,
+     "lines": 1,
+     "size": 24,
+     "vw": 3.1,
+     "font": "Geist",
+     "weight": 500,
+     "tracking": -0.01,
+     "leading": 1.33,
+     "top": 60,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "Up next",
+     "words": 2,
+     "lines": 1,
+     "size": 24,
+     "font": "Geist"
+    },
+    "headings": [],
+    "headingSummary": {
+     "count": 0,
+     "maxLines": 0,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": null,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Geist",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      12,
+      13,
+      14,
+      15,
+      16,
+      24
+     ],
+     "sizeCount": 6,
+     "notLoaded": [],
+     "body": {
+      "font": "Geist",
+      "size": 13,
+      "leading": 1.54,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 6.5
+     },
+     "measureChars": 63,
+     "max": {
+      "size": 24,
+      "vw": 3.1,
+      "font": "Geist",
+      "text": "Up next"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0,
+     "smallText": 1
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#f5f4f2",
+     "bodyBgHsl": {
+      "h": 40,
+      "s": 0.13,
+      "l": 0.95
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#ffffff",
+       "top": 340,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 1
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#5f5e5e",
+       "share": 0.46
+      },
+      {
+       "color": "#0a0b0b",
+       "share": 0.45
+      },
+      {
+       "color": "#c4252b",
+       "share": 0.04
+      },
+      {
+       "color": "#e6e7e7",
+       "share": 0.03
+      },
+      {
+       "color": "#6a6b6a",
+       "share": 0.01
+      }
+     ],
+     "button": {
+      "bg": "#efeeef",
+      "hsl": {
+       "h": 300,
+       "s": 0.03,
+       "l": 0.94
+      },
+      "fg": "#0a0b0b"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 7,
+     "inHero": 1,
+     "radius": 6,
+     "height": 72,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Up next 4"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 1,
+     "shadowOverlay": 0,
+     "shadowSamples": [
+      "div.pbar.paper → rgba(0, 0, 0, 0.14) 0px 12px 32px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px"
+     ],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 9,
+     "hairlineSamples": [
+      "div.chrome 768px",
+      "nav.side 224px",
+      "li.row 470px",
+      "li.row 470px",
+      "li.row 470px"
+     ],
+     "outlinedBoxes": 5,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 6,
+     "boxRadius": 8,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 0,
+     "fixed": true,
+     "height": 988,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "geist"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "pageH": 1781,
+    "margins": {
+     "left": 12,
+     "right": 45
+    },
+    "sections": [
+     {
+      "sel": "div.span-12",
+      "tag": "div",
+      "top": 154,
+      "height": 174,
+      "words": 6,
+      "media": 1,
+      "middle": 0,
+      "heading": {
+       "text": "Today's thread",
+       "size": 16,
+       "tag": "h2"
+      },
+      "left": 269,
+      "right": 45,
+      "textLeft": 269,
+      "textRight": 45,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "div.span-8.stack",
+      "tag": "div",
+      "top": 340,
+      "height": 714,
+      "words": 72,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Today",
+       "size": 16,
+       "tag": "h2"
+      },
+      "left": 266,
+      "right": 45,
+      "textLeft": 269,
+      "textRight": 45,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "div.span-4.stack",
+      "tag": "div",
+      "top": 1066,
+      "height": 667,
+      "words": 80,
+      "media": 1,
+      "middle": 0,
+      "heading": {
+       "text": "Lists",
+       "size": 16,
+       "tag": "h2"
+      },
+      "left": 269,
+      "right": 45,
+      "textLeft": 269,
+      "textRight": 45,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Up next",
+      "size": 24,
+      "top": 60,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 269,
+      "n": 5
+     },
+     {
+      "x": 248,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 6,
+    "bodySize": 13,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "dark": false,
+    "ground": "#f5f4f2",
+    "sidebar": {
+     "w": 224,
+     "tag": "nav",
+     "links": 11,
+     "share": 0.29
+    },
+    "topbar": {
+     "h": 36
+    },
+    "canvas": {
+     "left": 38,
+     "right": 45
+    },
+    "hero": {
+     "text": "Up next",
+     "words": 2,
+     "chars": 7,
+     "lines": 1,
+     "size": 24,
+     "vw": 3.1,
+     "font": "Geist",
+     "weight": 500,
+     "tracking": -0.01,
+     "leading": 1.33,
+     "top": 60,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 1,
+    "layout": {
+     "panels": 5,
+     "firstScreen": 3,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 12,
+     "radii": [
+      [
+       6,
+       7
+      ],
+      [
+       8,
+       5
+      ]
+     ],
+     "heavyBorders": 1,
+     "borderSamples": [
+      "#f4ccda on #ffffff (1.45:1)"
+     ],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
+    },
+    "rows": null,
+    "chartHues": 2,
+    "placeholders": [],
+    "type": {
+     "under13": 0.05,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      12,
+      13,
+      14,
+      15,
+      16,
+      24
+     ]
+    },
+    "title": {
+     "text": "Up next",
+     "size": 24,
+     "top": 60
+    },
+    "colourShare": 0.005
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 390,
+   "height": 844,
+   "load": "load",
+   "screens": 1,
+   "filled": [
+    0.77
+   ],
+   "motion": {
+    "elements": 0,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 0,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "page": {
+     "height": 844,
+     "screens": 1,
+     "words": 165,
+     "img": 0,
+     "video": 0,
+     "canvas": 0,
+     "svg": 28,
+     "sections": 4,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 0,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Up next",
+     "words": 2,
+     "chars": 7,
+     "lines": 1,
+     "size": 24,
+     "vw": 6.2,
+     "font": "Geist",
+     "weight": 500,
+     "tracking": -0.01,
+     "leading": 1.33,
+     "top": 52,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "Up next",
+     "words": 2,
+     "lines": 1,
+     "size": 24,
+     "font": "Geist"
+    },
+    "headings": [
+     {
+      "text": "Up next",
+      "words": 2,
+      "chars": 7,
+      "lines": 1,
+      "size": 24,
+      "vw": 6.2,
+      "font": "Geist",
+      "weight": 500,
+      "tracking": -0.01,
+      "leading": 1.33,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.92,
+      "top": 52,
+      "tag": "h1",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 1,
+     "maxLines": 1,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": null,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Geist",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      13,
+      14,
+      16,
+      24
+     ],
+     "sizeCount": 4,
+     "notLoaded": [],
+     "body": null,
+     "measureChars": null,
+     "max": {
+      "size": 24,
+      "vw": 6.2,
+      "font": "Geist",
+      "text": "Up next"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0.01,
+     "smallText": 0
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#f5f4f2",
+     "bodyBgHsl": {
+      "h": 40,
+      "s": 0.13,
+      "l": 0.95
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#f5f4f2",
+       "top": 0,
+       "hsl": {
+        "h": 40,
+        "s": 0.13,
+        "l": 0.95
+       }
+      },
+      {
+       "color": "#ffffff",
+       "top": 322,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 1
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#5f5e5e",
+       "share": 0.48
+      },
+      {
+       "color": "#0a0b0b",
+       "share": 0.46
+      },
+      {
+       "color": "#c4252b",
+       "share": 0.06
+      }
+     ],
+     "button": {
+      "bg": "#efeeef",
+      "hsl": {
+       "h": 300,
+       "s": 0.03,
+       "l": 0.94
+      },
+      "fg": "#0a0b0b"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 4,
+     "inHero": 1,
+     "radius": 6,
+     "height": 72,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": []
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 5,
+     "hairlineSamples": [
+      "li.row 340px",
+      "li.row 340px",
+      "li.row 340px",
+      "li.row 340px",
+      "div.paddbar 390px"
+     ],
+     "outlinedBoxes": 7,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 7,
+     "boxRadius": 8,
+     "squareMedia": 0,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [
+     {
+      "type": "svg",
+      "ratio": 0.1
+     }
+    ],
+    "nav": {
+     "links": 0,
+     "fixed": false,
+     "height": 24,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "geist"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "pageH": 844,
+    "margins": {
+     "left": 16,
+     "right": 12
+    },
+    "sections": [
+     {
+      "sel": "section.card.thread",
+      "tag": "section",
+      "top": 144,
+      "height": 166,
+      "words": 8,
+      "media": 1,
+      "middle": 0,
+      "heading": {
+       "text": "Today's thread",
+       "size": 16,
+       "tag": "h2"
+      },
+      "left": 33,
+      "right": 33,
+      "textLeft": 33,
+      "textRight": 85,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "section.card",
+      "tag": "section",
+      "top": 322,
+      "height": 416,
+      "words": 34,
+      "media": 0,
+      "middle": 92,
+      "heading": {
+       "text": "Today",
+       "size": 16,
+       "tag": "h2"
+      },
+      "left": 20,
+      "right": 33,
+      "textLeft": 33,
+      "textRight": 33,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "section.card",
+      "tag": "section",
+      "top": 750,
+      "height": 212,
+      "words": 3,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Later this week",
+       "size": 16,
+       "tag": "h2"
+      },
+      "left": 20,
+      "right": 161,
+      "textLeft": 33,
+      "textRight": 241,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "section.card",
+      "tag": "section",
+      "top": 974,
+      "height": 343,
+      "words": 0,
+      "media": 0,
+      "middle": 8,
+      "heading": null,
+      "left": 33,
+      "right": 33,
+      "textLeft": null,
+      "textRight": null,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Up next",
+      "size": 24,
+      "top": 52,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 33,
+      "n": 3
+     },
+     {
+      "x": 16,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 4,
+    "bodySize": 16,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "dark": false,
+    "ground": "#f5f4f2",
+    "sidebar": null,
+    "topbar": {
+     "h": 48
+    },
+    "canvas": {
+     "left": 16,
+     "right": 12
+    },
+    "hero": {
+     "text": "Up next",
+     "words": 2,
+     "chars": 7,
+     "lines": 1,
+     "size": 24,
+     "vw": 6.2,
+     "font": "Geist",
+     "weight": 500,
+     "tracking": -0.01,
+     "leading": 1.33,
+     "top": 52,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 1,
+    "layout": {
+     "panels": 4,
+     "firstScreen": 3,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 10,
+     "radii": [
+      [
+       6,
+       6
+      ],
+      [
+       8,
+       4
+      ]
+     ],
+     "heavyBorders": 1,
+     "borderSamples": [
+      "#f4ccda on #ffffff (1.45:1)"
+     ],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
+    },
+    "rows": null,
+    "chartHues": 2,
+    "placeholders": [],
+    "type": {
+     "under13": 0.05,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      12,
+      13,
+      14,
+      15,
+      16,
+      24
+     ]
+    },
+    "title": {
+     "text": "Up next",
+     "size": 24,
+     "top": 52
+    },
+    "colourShare": 0.004
+   },
+   "consoleErrors": []
+  }
+ ],
+ "findings": [],
+ "images": [
+  {
+   "viewport": "desktop",
+   "width": 1440,
+   "fold": "/Users/mayank/Downloads/notes-taker/.taste-skill/inspect/desktop-fold.jpg",
+   "pages": [
+    "/Users/mayank/Downloads/notes-taker/.taste-skill/inspect/desktop-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "tablet",
+   "width": 768,
+   "fold": "/Users/mayank/Downloads/notes-taker/.taste-skill/inspect/tablet-fold.jpg",
+   "pages": [
+    "/Users/mayank/Downloads/notes-taker/.taste-skill/inspect/tablet-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "mobile",
+   "width": 390,
+   "fold": "/Users/mayank/Downloads/notes-taker/.taste-skill/inspect/mobile-fold.jpg",
+   "pages": [
+    "/Users/mayank/Downloads/notes-taker/.taste-skill/inspect/mobile-page-01.jpg"
+   ],
+   "film": []
+  }
+ ]
+}

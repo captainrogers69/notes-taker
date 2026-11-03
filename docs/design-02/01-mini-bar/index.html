@@ -8,7 +8,7 @@
 </head>
 <body>
 
-<div class="minibar" id="minibar" role="button" tabindex="0" aria-label="Open Weave" aria-expanded="false" title="Open Weave (⌥ Space)">
+<div class="minibar paper" id="minibar" role="button" tabindex="0" aria-label="Open Weave. Arrow keys move the bar." aria-expanded="false" title="Open Weave (⌥ Space)">
   <span class="grip" id="grip"></span>
   <span class="dot" id="dot"></span>
   <span class="name" id="name"></span>
@@ -21,7 +21,7 @@
     <li>Click the faded bar. Type <i>call the bank tomorrow 10am</i> and watch the line under the field, then press Enter.</li>
     <li>Tick the overdue bill: the bar switches from "1 overdue" to the next time.</li>
     <li>Click the list name (or Backspace in an empty field) to switch or create a list.</li>
-    <li>Drag the bar anywhere. Near the bottom, the sheet opens upward.</li>
+    <li>Drag the bar anywhere, or focus it and use the arrow keys (Shift for bigger steps), or press <i>Move to corner</i> in the sheet. Near the bottom, the sheet opens upward.</li>
   </ol>
   <div class="ctl">
     <button data-theme="t-light">Light</button>
@@ -50,9 +50,19 @@
     bar.style.top = pos.y + 'px';
   }
 
+  // One-click alternative to dragging: each press moves the bar to the next corner, clockwise.
+  let corner = -1;
+  function nextCorner() {
+    corner = (corner + 1) % 4;
+    const right = corner === 0 || corner === 1, bottom = corner === 1 || corner === 2;
+    pos = { x: right ? innerWidth : 0, y: bottom ? innerHeight : 0 };
+    applyPos();
+  }
+
   const sheet = mount({
     trigger: bar,
     hide: { label: 'Hide to menu bar', run: () => { location.href = '../02-tray/index.html#os=macos&hidden=1'; } },
+    move: { label: 'Move to corner', run: nextCorner },
     place(win) {
       const r = bar.getBoundingClientRect();
       const w = win.offsetWidth, h = Math.min(win.scrollHeight, 460);
@@ -77,6 +87,16 @@
     onStart(phase) { if (phase === 'down') origin = { ...pos }; else sheet.close(); },
     onMove(dx, dy) { pos = { x: origin.x + dx, y: origin.y + dy }; applyPos(); },
     onTap: sheet.toggle,
+  });
+  // Keyboard alternative to dragging: arrow keys move the focused bar, Shift for bigger steps.
+  bar.addEventListener('keydown', (e) => {
+    const step = e.shiftKey ? 64 : 16;
+    const d = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
+    if (!d) return;
+    e.preventDefault();
+    sheet.close();
+    pos = { x: pos.x + d[0], y: pos.y + d[1] };
+    applyPos();
   });
   addEventListener('resize', applyPos);
   bindTheme();

@@ -12,6 +12,8 @@
     expand: s('<path d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9"/>'),
     hide: s('<path d="M4.5 5 8 8.5 11.5 5"/><path d="M3 12h10"/>'),
     bell: s('<path d="M4 11V7.5a4 4 0 0 1 8 0V11l1 1.5H3z"/><path d="M6.5 14h3"/>'),
+    alert: s('<circle cx="8" cy="8" r="6"/><path d="M8 4.8v3.8M8 11.1v.1"/>', 12).replace('<svg', '<svg class="ic-late"'),
+    corner: s('<rect x="2.5" y="2.5" width="11" height="11" rx="2"/><rect x="8.5" y="4.5" width="3" height="2" rx=".5" fill="currentColor"/>'),
     clock: s('<circle cx="8" cy="8" r="5.5"/><path d="M8 5v3l2 1.5"/>'),
     repeat: s('<path d="M3 7V6a2 2 0 0 1 2-2h7.5"/><path d="m10.5 2 2 2-2 2"/><path d="M13 9v1a2 2 0 0 1-2 2H3.5"/><path d="m5.5 14-2-2 2-2"/>'),
     cloud: s('<path d="M4.5 12.5a3 3 0 0 1-.3-6A4 4 0 0 1 12 6a3.2 3.2 0 0 1 .3 6.5z"/><path d="m6 9.5 1.5 1.5 2.5-3"/>'),

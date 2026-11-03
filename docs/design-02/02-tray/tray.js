@@ -139,7 +139,7 @@
           <li class="${it.d ? 'is-done' : ''}">
             <button class="check" data-a="tick" data-id="${it.id}" aria-label="Check ${D.esc(it.t)}">${I.tick}</button>
             <span class="t">${D.esc(it.t)}</span>
-            <span class="when ${D.isOverdue(it) ? 'late' : ''}">${it.due.t}</span>
+            ${D.isOverdue(it) ? `<span class="when late">${D.lateWhen(it.due.t, I.alert)}</span>` : `<span class="when">${it.due.t}</span>`}
           </li>`).join('')}</ul>
         <div class="acts">
           <button data-a="reply">Add task</button>
@@ -188,6 +188,14 @@
     onStart(phase) { if (phase === 'down') origin = { ...pos }; else sheet.close(); },
     onMove(dx, dy) { pos = { x: origin.x + dx, y: origin.y + dy }; applyPos(); },
     onTap: () => { st.from = 'bar'; sheet.toggle(); },
+  });
+  // Keyboard alternative to dragging (WCAG 2.5.7): arrow keys move the focused bar, Shift for bigger steps.
+  bar.addEventListener('keydown', (e) => {
+    const step = e.shiftKey ? 64 : 16;
+    const d = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
+    if (!d) return;
+    e.preventDefault(); sheet.close();
+    pos = { x: pos.x + d[0], y: pos.y + d[1] }; applyPos();
   });
   new MutationObserver(() => { if (!sheet.isOpen()) Object.values(trays).forEach((t) => t.classList.remove('is-open')); })
     .observe(sheet.win, { attributes: true, attributeFilter: ['class'] });

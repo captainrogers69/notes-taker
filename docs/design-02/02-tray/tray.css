@@ -47,7 +47,7 @@
 .notif li { display: flex; align-items: center; gap: 12px; height: 36px; font-size: 14px; }
 .notif li .t { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .notif li .when { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
-.notif li .when.late { color: var(--negative); }
+.notif li .when.late { color: var(--negative); font-weight: 500; }
 .notif .acts { display: flex; gap: 4px; margin: 4px -8px 0; }
 .notif .acts button { all: unset; cursor: pointer; height: 36px; padding: 0 10px; border-radius: 18px; color: var(--text); font-size: 13px; font-weight: 500; }
 .notif .acts button:hover { background: var(--hover); }
@@ -57,7 +57,10 @@
 .notif .reply button { all: unset; cursor: pointer; height: 40px; padding: 0 16px; border-radius: 20px; background: var(--primary); color: var(--on-primary); font-size: 13px; font-weight: 500; }
 .notif .sentnote { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
 .shade .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; background: var(--c); border: 1px solid var(--ci); }
-.shade .check { width: 18px; height: 18px; }
+/* Android: the tick keeps its 18px circle but gets a 44px target */
+.shade .check { width: 44px; height: 44px; margin: -13px -13px -13px -13px; }
+.shade .check::before { inset: 13px; }
+.notif li { gap: 12px; height: 44px; }
 .shade .empty-shade { color: #b4b4b4; font-size: 13px; padding: 12px 4px; }
 
 /* The bar flying into the tray / back */

@@ -65,8 +65,10 @@ svg { display: block; }
   transition: opacity .16s ease, transform .2s var(--ease);
 }
 .sheet.is-open { opacity: 1; transform: none; pointer-events: auto; }
+.sheet.no-anim { transition: none; } /* opened or closed from the keyboard: no motion */
 .sheet :focus-visible { outline: 2px solid var(--text); outline-offset: 1px; border-radius: var(--radius-control); }
 
+.sheet .top { border-radius: var(--radius-card) var(--radius-card) 0 0; padding-bottom: 12px; }
 .sheet .head { display: flex; align-items: center; gap: 4px; padding: 10px 10px 0 8px; }
 .sheet .switch {
   all: unset; box-sizing: border-box; cursor: pointer;
@@ -74,7 +76,7 @@ svg { display: block; }
   height: 32px; padding: 0 8px; border-radius: var(--radius-control);
   font-size: var(--fs-section); font-weight: 500;
 }
-.sheet .switch:hover, .sheet .switch[aria-expanded="true"] { background: var(--hover); }
+.sheet .switch:hover, .sheet .switch[aria-expanded="true"] { background: color-mix(in srgb, var(--text) 6%, transparent); }
 .sheet .switch .label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sheet .switch svg { color: var(--muted); flex: none; }
 .sheet .grow { flex: 1; }
@@ -82,10 +84,14 @@ svg { display: block; }
   all: unset; box-sizing: border-box; cursor: pointer; flex: none;
   width: 32px; height: 32px; display: grid; place-items: center; border-radius: var(--radius-control); color: var(--muted);
 }
-.sheet .icon:hover { background: var(--hover); color: var(--text); }
+.sheet .icon:hover { background: color-mix(in srgb, var(--text) 6%, transparent); color: var(--text); }
 
-.sheet .sub { padding: 2px 16px 10px; color: var(--muted); font-size: var(--fs-small); line-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sheet .sub { padding: 2px 16px 8px; color: var(--muted); font-size: var(--fs-small); line-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sheet .sub .late { color: var(--negative); }
+
+/* The day thread, one line: today 07–23, the lived part in ink, this list's tasks as marks */
+.sheet .strip { display: flex; align-items: center; gap: 8px; padding: 0 16px 10px; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.sheet .strip svg { flex: 1; min-width: 0; overflow: visible; }
 
 .sheet .add { margin: 0 10px; }
 .sheet .add .field {
@@ -112,21 +118,24 @@ svg { display: block; }
 @keyframes wv-new { from { background: color-mix(in srgb, var(--accent) 30%, transparent); } }
 .item .text { flex: 1; min-width: 0; line-height: 20px; }
 .item .when { flex: none; color: var(--muted); font-size: var(--fs-small); line-height: 20px; font-variant-numeric: tabular-nums; }
-.item .when.late { color: var(--negative); }
+.item .when.late { color: var(--negative); font-weight: 500; }
 .item.is-done .text, .item.is-ticking .text { text-decoration: line-through; color: var(--muted); }
 .item.indent { padding-left: 42px; }
 
+/* The tick: an 18px circle drawn inside a 24px target (WCAG 2.5.8). */
 .check {
-  all: unset; flex: none; cursor: pointer;
-  width: 18px; height: 18px; margin-top: 1px;
-  display: grid; place-items: center;
-  border-radius: 50%;
-  border: 1.5px solid var(--control);
+  all: unset; flex: none; cursor: pointer; position: relative;
+  width: 24px; height: 24px; margin: -2px -3px;
+  display: grid; place-items: center; border-radius: 50%;
+}
+.check::before {
+  content: ''; position: absolute; inset: 3px; border-radius: 50%;
+  border: 1.5px solid var(--control); background: var(--surface);
   transition: background .15s, border-color .15s;
 }
-.check:hover { border-color: var(--accent-ink); }
-.check svg { opacity: 0; color: #111; }
-.is-done > .check, .is-ticking > .check { background: var(--accent); border-color: var(--accent-ink); }
+.check:hover::before { border-color: var(--accent-ink); }
+.check svg { position: relative; opacity: 0; color: #111; }
+.is-done > .check::before, .is-ticking > .check::before { background: var(--accent); border-color: var(--accent-ink); }
 .is-done > .check svg, .is-ticking > .check svg { opacity: 1; }
 
 .done-row { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 6px; margin: 4px 12px 0; padding: 6px 0; color: var(--muted); font-size: var(--fs-small); }

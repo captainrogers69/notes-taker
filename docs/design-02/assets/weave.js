@@ -32,7 +32,7 @@
     <li class="item ${it.d ? 'is-done' : ''} ${it.indent ? 'indent' : ''} ${it.id === state.newItem ? 'is-new' : ''}">
       <button class="check" data-act="tick" data-id="${it.id}" aria-label="${it.d ? 'Uncheck' : 'Check'} ${esc(it.t)}">${I.tick}</button>
       <span class="text">${esc(it.t)}</span>
-      ${it.due && !it.d ? `<span class="when ${D.isOverdue(it) ? 'late' : ''}">${D.dueLabel(it.due)}</span>` : ''}
+      ${it.due && !it.d ? (D.isOverdue(it) ? `<span class="when late">${D.lateWhen(D.dueLabel(it.due), I.alert)}</span>` : `<span class="when">${D.dueLabel(it.due)}</span>`) : ''}
     </li>`;
 
   function body(l) {
@@ -49,6 +49,29 @@
         ${state.showDone ? `<ul>${done.map(itemRow).join('')}</ul>` : ''}` : ''}`;
   }
 
+  // The day thread in one line (07:00–23:00): the part already lived in ink, this list's tasks due today
+  // as marks — filled in the list colour, a red ring when overdue, hollow when done.
+  function strip(l) {
+    const due = D.checks(l).filter((i) => i.due && i.due.d === 0 && i.due.t);
+    if (!due.length) return '';
+    const W = 260, S = 7 * 60, E = 23 * 60;
+    const x = (m) => 6 + Math.round(((Math.min(E, Math.max(S, m)) - S) / (E - S)) * (W - 12));
+    const nx = x(D.NOW.min);
+    const marks = due.map((i) => {
+      const cx = x(D.toMin(i.due.t));
+      if (i.d) return `<circle cx="${cx}" cy="8" r="3.5" fill="var(--surface)" stroke="var(--muted)" stroke-width="1.5"/>`;
+      if (D.isOverdue(i)) return `<circle cx="${cx}" cy="8" r="4" fill="var(--surface)" stroke="var(--negative)" stroke-width="2"/>`;
+      return `<circle cx="${cx}" cy="8" r="5" fill="var(--accent)" stroke="var(--accent-ink)"/>`;
+    }).join('');
+    const said = due.map((i) => `${i.due.t} ${esc(i.t)}${i.d ? ' (done)' : D.isOverdue(i) ? ' (overdue)' : ''}`).join(', ');
+    return /* taste-skill-ignore: hour labels, not numbering */ `<div class="strip"><span aria-hidden="true">07</span>
+      <svg viewBox="0 0 ${W} 16" height="16" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Today on this list: ${said}. Now ${D.NOW.clock}.">
+        <line x1="6" x2="${W - 6}" y1="8" y2="8" stroke="var(--control)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="6" x2="${nx}" y1="8" y2="8" stroke="var(--text)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="${nx}" x2="${nx}" y1="1" y2="15" stroke="var(--text)" stroke-width="1.5"/>${marks}</svg>
+      <span aria-hidden="true">23</span></div>`;
+  }
+
   function menuHtml() {
     return D.lists.map((l) => `
       <button class="mrow ${l.id === state.cur ? 'cur' : ''}" data-act="open" data-id="${l.id}" role="menuitemradio" aria-checked="${l.id === state.cur}">
@@ -60,8 +83,9 @@
       <form data-form="list"><input name="t" autocomplete="off" placeholder="New list…" aria-label="New list name"></form>`;
   }
 
-  // mount({ trigger, place, onRender, hide: { label, run }, footer(l), onAction(act, el), ignore, container })
-  function mount({ trigger, place, onRender, hide, footer, onAction, ignore = [], container = document.body }) {
+  // mount({ trigger, place, onRender, hide: { label, run }, move: { label, run }, footer(l), onAction(act, el), ignore, container })
+  // move: a one-click alternative to dragging the bar (WCAG 2.5.7).
+  function mount({ trigger, place, onRender, hide, move, footer, onAction, ignore = [], container = document.body }) {
     const win = document.createElement('div');
     win.className = 'sheet';
     win.setAttribute('role', 'dialog');
@@ -74,7 +98,9 @@
       win.style.setProperty('--accent', D.color(l));
       win.style.setProperty('--accent-ink', D.ink(l));
       const typed = win.querySelector('.add input')?.value || '';
+      win.setAttribute('aria-label', `Weave: ${l.name}`);
       win.innerHTML = `
+        <div class="top paper">
         <div class="head">
           <button class="switch" data-act="menu" aria-haspopup="menu" aria-expanded="${state.menu}" title="Switch list">
             <span class="dot" style="--ci:var(--accent-ink)"></span><span class="label">${esc(l.name)}</span>${I.chevDown}
@@ -84,6 +110,7 @@
           <button class="icon" data-act="app" aria-label="Open in Weave" title="Open in Weave (${MOD}O)">${I.expand}</button>
         </div>
         <div class="sub">${subline(l)}</div>
+        ${strip(l)}
         <form class="add" data-form="item">
           <label class="field">
             <input name="t" autocomplete="off" placeholder="Add a task…" aria-label="Add a task to ${esc(l.name)}" value="${esc(typed)}">
@@ -91,9 +118,10 @@
           </label>
           <div class="parse" aria-live="polite">${I.clock}<span></span></div>
         </form>
+        </div>
         <div class="scroll">${body(l)}</div>
         <div class="foot">${footer ? footer(l) : `
-          <span class="sync">${I.cloud} Synced · ${D.devices.length} devices</span><span class="grow"></span><kbd>⌥ Space</kbd>`}</div>
+          <span class="sync">${I.cloud} Synced · ${D.devices.length} devices</span><span class="grow"></span>${move ? `<button class="fbtn" data-act="move" title="Or drag the bar, or use the arrow keys on it">${I.corner} ${move.label}</button>` : '<kbd>⌥ Space</kbd>'}`}</div>
         <div class="menu ${state.menu ? 'on' : ''}" role="menu" aria-label="Lists">${menuHtml()}</div>`;
       state.newItem = null;
       updateParse();
@@ -123,6 +151,7 @@
       const act = b.dataset.act;
       if (act === 'app') return openApp();
       if (act === 'hide') { setOpen(false); return hide.run(); }
+      if (act === 'move') { move.run(); place(win); return; }
       if (act === 'menu') { state.menu = !state.menu; render(); return focusInput(); }
       if (act === 'open') { state.cur = +b.dataset.id; state.menu = false; state.showDone = false; win.querySelector('.add input').value = ''; render(); return focusInput(); }
       if (act === 'done') { state.showDone = !state.showDone; render(); return; }
@@ -164,7 +193,7 @@
     }
 
     win.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') { if (state.menu) { state.menu = false; render(); return focusInput(); } return setOpen(false); }
+      if (e.key === 'Escape') { if (state.menu) { state.menu = false; render(); return focusInput(); } return setOpen(false, { keyboard: true }); }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'h' && hide) { e.preventDefault(); setOpen(false); return hide.run(); }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'o') { e.preventDefault(); return openApp(); }
       if (e.key === 'Backspace' && e.target.tagName === 'INPUT' && e.target.value === '') { e.preventDefault(); state.menu = !state.menu; render(); focusInput(); }
@@ -176,9 +205,11 @@
       }
     });
 
-    function setOpen(v) {
+    // keyboard: opened or closed from a key (⌥Space, Enter, Escape) appears at once; a click animates.
+    function setOpen(v, { keyboard = false } = {}) {
       if (v === isOpen) return;
       isOpen = v;
+      win.classList.toggle('no-anim', keyboard);
       if (isOpen) { state.menu = false; render(); place(win); }
       win.classList.toggle('is-open', isOpen);
       trigger.classList.toggle('is-open', isOpen);
@@ -192,8 +223,8 @@
       if (ignore.some((el) => el.contains(e.target))) return;
       setOpen(false);
     });
-    document.addEventListener('keydown', (e) => { if (e.altKey && e.code === 'Space') { e.preventDefault(); setOpen(!isOpen); } });
-    trigger.addEventListener('keydown', (e) => { if (!e.altKey && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); setOpen(!isOpen); } });
+    document.addEventListener('keydown', (e) => { if (e.altKey && e.code === 'Space') { e.preventDefault(); setOpen(!isOpen, { keyboard: true }); } });
+    trigger.addEventListener('keydown', (e) => { if (!e.altKey && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); setOpen(!isOpen, { keyboard: true }); } });
 
     render();
     return { open: () => setOpen(true), close: () => setOpen(false), toggle: () => setOpen(!isOpen), isOpen: () => isOpen, render, win, current };

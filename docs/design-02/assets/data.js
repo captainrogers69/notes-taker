@@ -16,7 +16,7 @@
   const T = (t) => ({ id: id(), type: 'text', t, indent: 0 });
 
   const lists = [
-    { id: 1, name: 'Today', color: 0, pinned: true, onScreen: true, edited: '2 min ago on Pixel 8', items: [
+    { id: 1, name: 'Errands', color: 0, pinned: true, onScreen: true, edited: '2 min ago on Pixel 8', items: [
       T('Errands before 18:00, calls after.'),
       C('Pay electricity bill', { due: { d: 0, t: '09:00' }, remind: 'At due time' }),
       C('Reply to design review', { due: { d: 0, t: '17:00' }, remind: '15 min before' }),
@@ -131,6 +131,8 @@
     if (d == null && t == null) return { text: raw.trim(), due: null };
     return { text, due: { d, t }, timer };
   }
+  // An overdue time carries an icon and hidden words, so red is never the only signal.
+  const lateWhen = (label, icon) => `<span class="sr">Overdue, </span>${icon || ''}${label}`;
   function fmtClock(m) { return /* taste-skill-ignore: a clock */ `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`; }
   function parsePreview(p) {
     if (!p.due) return '';
@@ -142,14 +144,15 @@
   const sum = (a) => a.reduce((x, y) => x + y, 0);
   console.assert(sum(lists.map((l) => open(l).length + done(l).length)) === sum(lists.map((l) => checks(l).length)), 'open + done = all checks');
   console.assert(today().filter((x) => isOverdue(x.it)).length === 1, 'exactly one overdue item today (the finding)');
-  console.assert(nextUp(lists[0]).t === 'Reply to design review', 'next up on Today is the 17:00 reply');
+  console.assert(nextUp(lists[0]).t === 'Reply to design review', 'next up on Errands is the 17:00 reply');
   console.assert(remindAt(lists[0].items[2]) === 16 * 60 + 45, 'reply reminder rings 16:45');
   console.assert(parseQuick('call mom tomorrow 6pm').due.t === '18:00', 'quick capture parses 6pm');
   console.assert(parseQuick('dentist fri 10am').due.d === 3 && parseQuick('dentist fri 10am').text === 'dentist', 'quick capture parses a weekday');
 
   window.WeaveData = {
     NOW, lists, devices, esc, toMin, checks, open, done, isOverdue, leftLabel, dueLabel, nextUp, today, laterThisWeek,
-    parseQuick, parsePreview, fmtClock, id, remindAt,
+    parseQuick, parsePreview, fmtClock, id, remindAt, lateWhen,
+    COLOR_NAMES: ['Yellow', 'Blue', 'Green', 'Pink', 'Purple', 'Orange'],
     color: (l) => `var(--n${l.color % 6})`,
     ink: (l) => `var(--n${l.color % 6}-ink)`,
   };

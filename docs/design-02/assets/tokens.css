@@ -31,6 +31,12 @@
   --ease: cubic-bezier(.2, .8, .2, 1);
 }
 
+/* Note paper: a list's own colour as a real surface, so a list reads as a note stuck on screen.
+   Use on a container that sets --c (the list fill). Text on it keeps --text / --muted. */
+.paper { background: color-mix(in srgb, var(--c, var(--accent)) var(--paper-mix), var(--surface)); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.ic-late { display: inline-block; vertical-align: -1px; margin-right: 4px; }
+
 /* ---------- Light ---------- */
 :root, .t-light {
   --ground: #f5f5f3;   /* one level off white, low chroma: plain paper, not cream */
@@ -50,6 +56,7 @@
   --pill-neutral-bg: #eeeeee; --pill-neutral-ink: #3d3d3d;
   --pill-negative-bg: #ffedea; --pill-negative-ink: #831c1e;
   --float-shadow: 0 12px 32px rgba(0, 0, 0, .14), 0 0 0 1px rgba(0, 0, 0, .06); /* only on what floats */
+  --paper-mix: 22%;
   --n0-ink: #876508; --n1-ink: #0B65E0; --n2-ink: #2C784D; --n3-ink: #CD1B5D; --n4-ink: #794CE0; --n5-ink: #AC4F0E;
   color-scheme: light;
 }
@@ -73,6 +80,7 @@
   --pill-neutral-bg: #262626; --pill-neutral-ink: #d4d4d4;
   --pill-negative-bg: #2c1a1a; --pill-negative-ink: #ef8a8a;
   --float-shadow: 0 16px 40px rgba(0, 0, 0, .6), 0 0 0 1px #2e2e2e;
+  --paper-mix: 16%;
   --n0-ink: #F5C84C; --n1-ink: #6AA6F8; --n2-ink: #5DC48A; --n3-ink: #EE7FA8; --n4-ink: #A88BEB; --n5-ink: #F29A5B;
   color-scheme: dark;
 }

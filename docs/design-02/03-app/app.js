@@ -54,7 +54,9 @@
   }
   const HINT = `<span>Times and days are understood: 6pm, 18:30, tomorrow, tonight, in 2 h.</span>`;
 
-  const itemWhen = (it) => (it.due ? `<span class="when ${D.isOverdue(it) ? 'late' : ''}">${D.dueLabel(it.due)}</span>` : '');
+  const itemWhen = (it) => (!it.due ? '' : D.isOverdue(it)
+    ? `<span class="when late">${D.lateWhen(D.dueLabel(it.due), I.alert)}</span>`
+    : `<span class="when">${D.dueLabel(it.due)}</span>`);
 
   function agendaRow(x, { showList = true } = {}) {
     const { it, list } = x;
@@ -81,18 +83,22 @@
     return parts.join(' · ');
   }
 
-  function todayCard() {
+  function todayCard({ withCapture = false } = {}) {
     const t = D.today();
     const late = t.filter((x) => D.isOverdue(x.it));
     const upcoming = t.filter((x) => !x.it.d && !D.isOverdue(x.it));
     const done = t.filter((x) => x.it.d);
+    // The list chip only earns its place when today mixes lists.
+    const showList = new Set(t.map((x) => x.list.id)).size > 1;
+    const row = (x) => agendaRow(x, { showList });
     return `
       <section class="card" aria-labelledby="h-today">
         <header><h2 id="h-today">Today</h2><span class="meta num">${upcoming.length + late.length} open · ${done.length} done</span></header>
-        ${late.length ? `<div class="subhead late">Overdue</div><ul class="rows">${late.map((x) => agendaRow(x)).join('')}</ul>` : ''}
-        ${upcoming.length ? `<div class="subhead">Still to do</div><ul class="rows">${upcoming.map((x) => agendaRow(x)).join('')}</ul>` : ''}
+        ${withCapture ? `<div class="capturebox">${capture(null)}</div>` : ''}
+        ${late.length ? `<div class="subhead late">Overdue</div><ul class="rows">${late.map(row).join('')}</ul>` : ''}
+        ${upcoming.length ? `<div class="subhead">Still to do</div><ul class="rows">${upcoming.map(row).join('')}</ul>` : ''}
         ${!upcoming.length && !late.length ? '<p class="empty">Nothing left for today.</p>' : ''}
-        ${done.length ? `<div class="subhead">Done today</div><ul class="rows">${done.map((x) => agendaRow(x)).join('')}</ul>` : ''}
+        ${done.length ? `<div class="subhead">Done today</div><ul class="rows">${done.map(row).join('')}</ul>` : ''}
       </section>`;
   }
 
@@ -109,15 +115,25 @@
     return `
       <section class="card" aria-labelledby="h-lists">
         <header><h2 id="h-lists">Lists</h2><span class="meta num">${D.lists.length}</span><button class="link" data-act="newlist">New list</button></header>
-        <ul class="rows">${D.lists.map((l) => `
-          <li class="row" style="${cvars(l)}">
-            <button class="rowbtn" data-act="open" data-list="${l.id}">
-              ${dot(l)}<span class="t">${esc(l.name)}</span>
-              ${l.onScreen ? `<span class="src" title="In the mini bar">${I.screen}</span>` : ''}
-            </button>
-            <span class="when num">${D.open(l).length ? `${D.open(l).length} left` : 'All done'}</span>
-          </li>`).join('')}</ul>
+        <ul class="notes">${D.lists.map((l) => {
+          const n = D.nextUp(l), late = D.open(l).filter(D.isOverdue).length;
+          const line = late ? `<span class="late">${I.alert}${late} overdue</span>` : n ? `next ${D.dueLabel(n.due)}` : D.open(l).length ? 'no times set' : 'nothing left';
+          return `
+          <li><button class="note paper" style="${cvars(l)}" data-act="open" data-list="${l.id}">
+            <span class="nn"><span class="name">${esc(l.name)}</span>${l.onScreen ? `<span class="onscreen" title="In the mini bar">${I.screen}<span class="sr">In the mini bar</span></span>` : ''}</span>
+            <span class="nl num"><b>${D.open(l).length ? `${D.open(l).length} left` : 'All done'}</b> · ${line}</span>
+          </button></li>`;
+        }).join('')}</ul>
       </section>`;
+  }
+
+  // The bar's own words, as the mini bar shows them (same rule as assets/weave.js barMeta).
+  function WeaveBarMeta(l) {
+    const late = D.open(l).filter(D.isOverdue).length, n = D.nextUp(l), left = D.open(l).length;
+    const head = left ? `<span class="num" style="color:var(--text)">${left}</span> left` : 'All done';
+    if (late) return `${head} · <span class="late">${late} overdue</span>`;
+    if (n && n.due.d === 0) return `${head} · next <span class="num" style="color:var(--text)">${n.due.t}</span>`;
+    return head;
   }
 
   // The next reminder that will ring today, across lists: "16:45 · Reply to design review".
@@ -138,17 +154,19 @@
           <dt>Hotkey</dt><dd><span class="kbd">⌥ Space</span></dd>
           <dt>Sync</dt><dd>${SYNC[state.sync]}</dd>
         </dl>
+        <div class="preview onscreen-prev" role="img" aria-label="The mini bar as it looks now: ${esc(l.name)}, ${esc(D.leftLabel(l))}">
+          <div class="pbar paper" style="${cvars(l)}" aria-hidden="true">${dot(l)}<b style="font-weight:500">${esc(l.name)}</b><span class="m">${WeaveBarMeta(l)}</span></div></div>
       </section>`;
   }
 
   function threadCard() {
     return `
       <section class="card thread" aria-labelledby="h-thread">
-        <header><h2 id="h-thread">Today's thread</h2><span class="meta">What's due, hour by hour</span>
+        <header><h2 id="h-thread">Today's thread</h2><span class="meta">${D.NOW.day}, 07:00 to 23:00</span>
           <span class="legend">
             <span><svg width="10" height="10"><circle cx="5" cy="5" r="4" fill="var(--surface)" stroke="var(--muted)" stroke-width="1.5"/></svg>Done</span>
             <span><svg width="10" height="10"><circle cx="5" cy="5" r="4.5" fill="var(--n0)" stroke="var(--n0-ink)"/></svg>Due</span>
-            <span><svg width="10" height="10"><circle cx="5" cy="5" r="4" fill="var(--surface)" stroke="var(--negative)" stroke-width="2"/></svg>Overdue</span>
+            <span><svg width="10" height="10"><circle cx="5" cy="5" r="4" fill="var(--surface)" stroke="var(--negative)" stroke-width="2"/></svg>! Overdue</span>
           </span>
         </header>
         <div data-thread></div>
@@ -160,10 +178,10 @@
     const W = host.clientWidth;
     if (!W) return;
     const compact = W < 520;
-    const START = 7 * 60, END = 23 * 60, ROW = 16;
+    const START = 7 * 60, END = 23 * 60, ROW = compact ? 20 : 24;
     const x = (m) => Math.round(((m - START) / (END - START)) * (W - 12)) + 6;
     const ctx = drawThread.ctx || (drawThread.ctx = document.createElement('canvas').getContext('2d'));
-    ctx.font = '12px Geist, Inter, system-ui, sans-serif';
+    ctx.font = '14px Geist, Inter, system-ui, sans-serif';
     const short = (s, n) => (s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s);
     const dots = D.today().map(({ it, list }) => ({ it, list, m: D.toMin(it.due.t), cx: x(D.toMin(it.due.t)) })).sort((a, b) => a.m - b.m);
     // Marks closer than 14px share one label ("Pick up parcel… +1"), so every label keeps a clear leader.
@@ -171,8 +189,8 @@
     dots.forEach((d) => { const last = marks[marks.length - 1]; if (last && d.cx - last.cx < 14) last.more.push(d); else marks.push({ ...d, more: [] }); });
     marks.forEach((mk) => {
       const extra = mk.more.length ? ` +${mk.more.length}` : '';
-      mk.label = (compact ? short(mk.it.t, 14) : `${mk.it.due.t} ${short(mk.it.t, 24)}`) + extra;
-      mk.w = ctx.measureText(mk.label).width;
+      mk.label = (compact ? short(mk.it.t, 16) : `${mk.it.due.t} ${short(mk.it.t, 28)}`) + extra;
+      mk.w = ctx.measureText((D.isOverdue(mk.it) ? '! ' : '') + mk.label).width;
     });
     // Label rows above the axis: lowest free row whose span is clear and whose lower rows don't cover this leader.
     // Placed right to left: a label runs right from its mark, so lower rows only ever hold marks to the right,
@@ -191,18 +209,20 @@
       (rows[r] || (rows[r] = [])).push({ s, e }); mk.row = r; mk.s = s;
     });
     const nRows = rows.length;
-    const axisY = 8 + nRows * ROW + 14;
-    const H = axisY + 30;
+    const axisY = 8 + nRows * ROW + 16;
+    const H = axisY + 34;
     const nowX = x(D.NOW.min);
     const step = compact ? 240 : 120;
     const hours = [];
     for (let m = START; m <= END; m += step) hours.push(m);
     const nowLbl = `Now ${D.NOW.clock}`;
+    ctx.font = '13px Geist, Inter, system-ui, sans-serif';
     const nowW = ctx.measureText(nowLbl).width + 8;
     const nowS = Math.max(0, Math.min(W - nowW, nowX - nowW / 2));
     let svg = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Today from 07:00 to 23:00: ${dots.map((m) => `${m.it.due.t} ${esc(m.it.t)}${m.it.d ? ' (done)' : D.isOverdue(m.it) ? ' (overdue)' : ''}`).join(', ')}. Now ${D.NOW.clock}.">`;
-    svg += `<line x1="6" x2="${W - 6}" y1="${axisY}" y2="${axisY}" stroke="var(--border)" stroke-width="2" stroke-linecap="round"/>`;
-    svg += `<line x1="6" x2="${nowX}" y1="${axisY}" y2="${axisY}" stroke="var(--text)" stroke-width="2" stroke-linecap="round"/>`;
+    svg += `<rect x="${nowX}" y="0" width="${W - nowX}" height="${axisY + 8}" fill="var(--hover)" rx="4"/>`; // the rest of today
+    svg += `<line x1="6" x2="${W - 6}" y1="${axisY}" y2="${axisY}" stroke="var(--control)" stroke-width="3" stroke-linecap="round"/>`;
+    svg += `<line x1="6" x2="${nowX}" y1="${axisY}" y2="${axisY}" stroke="var(--text)" stroke-width="3" stroke-linecap="round"/>`;
     hours.forEach((m) => {
       const hx = x(m);
       const lbl = D.fmtClock(m);
@@ -211,19 +231,19 @@
       const ls = anchor === 'start' ? hx : anchor === 'end' ? hx - lw : hx - lw / 2;
       if (ls + lw > nowS - 6 && ls < nowS + nowW + 6) return; // the Now label wins the lane
       svg += `<line x1="${hx}" x2="${hx}" y1="${axisY + 4}" y2="${axisY + 7}" stroke="var(--control)"/>`;
-      svg += `<text x="${anchor === 'start' ? hx - 6 : anchor === 'end' ? hx + 6 : hx}" y="${axisY + 22}" text-anchor="${anchor}" class="num">${lbl}</text>`;
+      svg += `<text x="${anchor === 'start' ? hx - 6 : anchor === 'end' ? hx + 6 : hx}" y="${axisY + 26}" text-anchor="${anchor}" class="num">${lbl}</text>`;
     });
-    svg += `<line x1="${nowX}" x2="${nowX}" y1="${axisY - 10}" y2="${axisY + 8}" stroke="var(--text)"/>`;
-    svg += `<text x="${nowS + nowW / 2}" y="${axisY + 22}" text-anchor="middle" class="now num">${nowLbl}</text>`;
+    svg += `<line x1="${nowX}" x2="${nowX}" y1="0" y2="${axisY + 10}" stroke="var(--text)" stroke-width="1.5"/>`;
+    svg += `<text x="${nowS + nowW / 2}" y="${axisY + 26}" text-anchor="middle" class="now num">${nowLbl}</text>`;
     marks.forEach((mk) => {
-      const ly = 8 + (nRows - 1 - mk.row) * ROW + 11; // row 0 sits nearest the axis
+      const ly = 8 + (nRows - 1 - mk.row) * ROW + 14; // row 0 sits nearest the axis
       const late = D.isOverdue(mk.it);
-      svg += `<line x1="${mk.cx}" x2="${mk.cx}" y1="${ly + 4}" y2="${axisY - 6}" stroke="var(--control)"/>`;
-      svg += `<text x="${mk.s}" y="${ly}" class="lbl ${mk.it.d ? 'done' : late ? 'late' : ''}">${esc(mk.label)}</text>`;
+      svg += `<line x1="${mk.cx}" x2="${mk.cx}" y1="${ly + 5}" y2="${axisY - 8}" stroke="var(--control)"/>`;
+      svg += `<text x="${mk.s}" y="${ly}" class="lbl ${mk.it.d ? 'done' : late ? 'late' : ''}">${late ? '! ' : ''}${esc(mk.label)}</text>`;
       [...mk.more].reverse().concat([mk]).forEach((d) => {
-        if (d.it.d) svg += `<circle cx="${d.cx}" cy="${axisY}" r="4" fill="var(--surface)" stroke="var(--muted)" stroke-width="1.5"/>`;
-        else if (D.isOverdue(d.it)) svg += `<circle cx="${d.cx}" cy="${axisY}" r="4.5" fill="var(--surface)" stroke="var(--negative)" stroke-width="2"/>`;
-        else svg += `<circle cx="${d.cx}" cy="${axisY}" r="5.5" fill="${D.color(d.list)}" stroke="${D.ink(d.list)}"/>`;
+        if (d.it.d) svg += `<circle cx="${d.cx}" cy="${axisY}" r="5" fill="var(--surface)" stroke="var(--muted)" stroke-width="1.5"/>`;
+        else if (D.isOverdue(d.it)) svg += `<circle cx="${d.cx}" cy="${axisY}" r="6" fill="var(--surface)" stroke="var(--negative)" stroke-width="2.5"/>`;
+        else svg += `<circle cx="${d.cx}" cy="${axisY}" r="7.5" fill="${D.color(d.list)}" stroke="${D.ink(d.list)}"/>`;
       });
     });
     host.innerHTML = svg + '</svg>';
@@ -235,10 +255,9 @@
       ${threadCard()}${todayCard()}${laterCard()}${listsCard()}`;
     return `
       <div class="titlerow"><div class="tt"><h1>Up next</h1><p class="subline">${upNextFinding()}</p></div></div>
-      <div class="grid">
-        <section class="card span-12" aria-label="Quick capture">${capture(null)}</section>
+      <div class="grid eq">
         <div class="span-12">${threadCard()}</div>
-        <div class="span-8 stack">${todayCard()}${laterCard()}</div>
+        <div class="span-8 stack">${todayCard({ withCapture: true })}${laterCard()}</div>
         <div class="span-4 stack">${listsCard()}${floatCard()}</div>
       </div>`;
   }
@@ -259,16 +278,16 @@
     const chips = [
       it.remind ? `<span title="Reminder: ${esc(it.remind)}">${I.bell}</span>` : '',
       it.repeat ? `<span title="Repeats ${esc(it.repeat)}">${I.repeat}</span>` : '',
-      it.due && !it.d ? `<span class="when ${D.isOverdue(it) ? 'late' : ''}">${D.dueLabel(it.due)}</span>` : '',
+      it.due && !it.d ? itemWhen(it) : '',
     ].join('');
     return `
       <li class="row ${it.d ? 'is-done' : ''} ${it.indent ? 'indent' : ''} ${state.sel === it.id ? 'sel' : ''} ${state.newItem === it.id ? 'is-new' : ''}">
-        ${phone() ? '' : `<span class="grip" title="Drag to reorder">${I.grip}</span>`}
+        ${phone() ? '' : `<span class="grip" title="Drag to reorder, or Alt+↑ / Alt+↓" aria-hidden="true">${I.grip}</span>`}
         <button class="check" data-act="tick" data-id="${it.id}" aria-label="${it.d ? 'Uncheck' : 'Check'} ${esc(it.t)}">${I.tick}</button>
         ${phone() ? `<button class="ed rowbtn" style="min-height:0" data-act="select" data-id="${it.id}">${esc(it.t)}</button>`
-                  : `<input class="ed" data-edit="${it.id}" value="${esc(it.t)}" aria-label="Task" data-act-focus="select" data-id="${it.id}">`}
+                  : `<input class="ed" data-edit="${it.id}" value="${esc(it.t)}" aria-label="Task. Alt+Up or Alt+Down moves it." data-act-focus="select" data-id="${it.id}">`}
         ${chips ? `<span class="chips">${chips}</span>` : ''}
-        ${phone() ? '' : `<button class="ibtn" style="width:28px;height:20px" data-act="select" data-id="${it.id}" aria-label="Details for ${esc(it.t)}">${I.chevRight}</button>`}
+        ${phone() ? '' : `<button class="ibtn chev" data-act="select" data-id="${it.id}" aria-label="Details for ${esc(it.t)}">${I.chevRight}</button>`}
       </li>`;
   }
 
@@ -293,7 +312,7 @@
         <header><h2 id="h-info">This list</h2></header>
         <span class="field-label">Colour</span>
         <div class="swatches" role="radiogroup" aria-label="List colour">${[0, 1, 2, 3, 4, 5].map((c) => `
-          <button class="swatch ${l.color === c ? 'on' : ''}" role="radio" aria-checked="${l.color === c}" aria-label="Colour ${c + 1}" data-act="color" data-c="${c}" style="--c:var(--n${c});--ci:var(--n${c}-ink)">${l.color === c ? I.tick : ''}</button>`).join('')}</div>
+          <button class="swatch ${l.color === c ? 'on' : ''}" role="radio" aria-checked="${l.color === c}" aria-label="${D.COLOR_NAMES[c]}" data-act="color" data-c="${c}" style="--c:var(--n${c});--ci:var(--n${c}-ink)">${l.color === c ? I.tick : ''}</button>`).join('')}</div>
         <span class="field-label">Reminders <span class="muted num" style="font-weight:400">${reminders.length}</span></span>
         ${reminders.length ? `<dl class="kv">${reminders.map((i) => `<dt>${esc(i.t)}</dt><dd class="num muted">${esc(i.remind)}</dd>`).join('')}</dl>` : '<p class="empty">No reminders on this list.</p>'}
         <span class="field-label">Order</span>
@@ -319,6 +338,8 @@
         ${d != null ? '<p class="muted" style="margin:8px 0 0;font-size:12px">"Before" reminders move with the due time.</p>' : ''}
         <span class="field-label">Repeat</span>
         <div class="opts">${['Daily', 'Weekdays', 'Weekly', 'Monthly'].map((v) => opt('repeat', v, v, it.repeat === v)).join('')}${opt('repeat', '', 'Never', !it.repeat)}</div>
+        <span class="field-label">Order</span>
+        <div class="opts"><button class="opt" data-act="move" data-dir="-1" data-id="${it.id}">Move up</button><button class="opt" data-act="move" data-dir="1" data-id="${it.id}">Move down</button></div>
         <div style="margin-top:20px;display:flex"><button class="btn danger" data-act="delete" data-id="${it.id}">${I.trash} Delete task</button></div>
       </section>`;
   }
@@ -327,7 +348,7 @@
     const l = cur();
     const sel = state.sel && findItem(state.sel);
     const title = `<h1><button class="dotbtn" data-act="colormenu" aria-label="Change colour">${dot(l)}</button><span data-rename contenteditable="plaintext-only" spellcheck="false" aria-label="List name, editable">${esc(l.name)}</span></h1>`;
-    if (phone()) return `${title}<p class="subline">${listSubline(l)}</p><section class="card">${itemsBlock(l)}</section>`;
+    if (phone()) return `${title}<p class="subline">${listSubline(l)}</p><section class="card paper notecard" style="${cvars(l)}">${itemsBlock(l)}</section>`;
     return `
       <div class="titlerow">
         <div class="tt">${title}<p class="subline">${listSubline(l)}</p></div>
@@ -338,7 +359,7 @@
         </div>
       </div>
       <div class="grid">
-        <section class="card span-8" aria-label="Tasks">${capture(l)}<div style="height:8px"></div>${itemsBlock(l)}</section>
+        <section class="card span-8 paper notecard" style="${cvars(l)}" aria-label="Tasks">${capture(l)}<div style="height:8px"></div>${itemsBlock(l)}</section>
         <div class="span-4">${sel ? details(sel) : listInfo(l)}</div>
       </div>`;
   }
@@ -370,7 +391,7 @@
         <div class="switchrow"><span class="lbl"><b>Show the mini bar</b><small>${state.os === 'android' ? 'Needs "Display over other apps". Without it, Weave uses a notification and the home widget.' : 'A small bar above every app. Click it to open the sheet.'}</small></span>${tg('bar', P.bar, 'Show the mini bar')}</div>
         <div class="switchrow" style="display:block"><span class="lbl"><b>Opacity when idle</b><small>Full strength on hover, while dragging, and while open.</small></span>
           <div class="range" style="margin-top:12px"><input type="range" min="20" max="100" step="5" value="${state.floatOpacity}" data-range="opacity" aria-label="Opacity when idle"><span class="num" style="width:40px;text-align:right">${state.floatOpacity}%</span></div>
-          <div class="preview" aria-hidden="true"><div class="pbar" style="opacity:${state.floatOpacity / 100}"><span class="dot"></span><b style="font-weight:500">Today</b><span class="m"><span class="num" style="color:var(--text)">4</span> left</span></div></div></div>
+          <div class="preview" aria-hidden="true"><div class="pbar" style="opacity:${state.floatOpacity / 100}"><span class="dot"></span><b style="font-weight:500">Errands</b><span class="m"><span class="num" style="color:var(--text)">4</span> left</span></div></div></div>
         ${isPhoneOS() ? '' : `<div class="switchrow"><span class="lbl"><b>Quick-capture hotkey</b><small>Opens the sheet from anywhere, ready to type.</small></span><span class="kbd" style="padding-top:2px">⌥ Space</span></div>
         <div class="switchrow"><span class="lbl"><b>Hide in full-screen apps</b><small>Films and presentations stay clean.</small></span>${tg('fullscreen', P.fullscreen, 'Hide in full-screen apps')}</div>`}`;
     return `
@@ -456,9 +477,9 @@
     const sheet = state.psheet === 'item' && sel ? details(sel).replace('class="card"', 'class=""')
       : state.psheet === 'share' ? `<h2>Share ${esc(l.name)}</h2><div class="sharerow"><button class="btn" data-act="share" data-as="Text">Text</button><button class="btn" data-act="share" data-as="Markdown">Markdown</button><button class="btn" data-act="share" data-as="Image">Image</button></div>`
       : state.psheet === 'more' ? `<h2>${esc(l.name)}</h2>
-          <div class="switchrow"><span class="lbl"><b>${state.os === 'ios' ? 'Show in widget' : 'Show in the bar'}</b></span><button class="tg" role="switch" aria-checked="${!!l.onScreen}" data-act="onscreen"></button></div>
-          <div class="switchrow"><span class="lbl"><b>Pin to top</b></span><button class="tg" role="switch" aria-checked="${!!l.pinned}" data-act="pinned"></button></div>
-          <span class="field-label">Colour</span><div class="swatches">${[0, 1, 2, 3, 4, 5].map((c) => `<button class="swatch ${l.color === c ? 'on' : ''}" aria-label="Colour ${c + 1}" data-act="color" data-c="${c}" style="--c:var(--n${c});--ci:var(--n${c}-ink)">${l.color === c ? I.tick : ''}</button>`).join('')}</div>
+          <div class="switchrow"><span class="lbl"><b>${state.os === 'ios' ? 'Show in widget' : 'Show in the bar'}</b></span><button class="tg" role="switch" aria-checked="${!!l.onScreen}" data-act="onscreen" aria-label="${state.os === 'ios' ? 'Show in widget' : 'Show in the bar'}"></button></div>
+          <div class="switchrow"><span class="lbl"><b>Pin to top</b></span><button class="tg" role="switch" aria-checked="${!!l.pinned}" data-act="pinned" aria-label="Pin to top"></button></div>
+          <span class="field-label">Colour</span><div class="swatches">${[0, 1, 2, 3, 4, 5].map((c) => `<button class="swatch ${l.color === c ? 'on' : ''}" aria-label="${D.COLOR_NAMES[c]}" aria-pressed="${l.color === c}" data-act="color" data-c="${c}" style="--c:var(--n${c});--ci:var(--n${c}-ink)">${l.color === c ? I.tick : ''}</button>`).join('')}</div>
           <div style="display:flex;gap:8px;margin-top:20px"><button class="btn" data-act="uncheckall">Uncheck all</button><button class="btn" data-act="archive">Archive</button><button class="btn danger" data-act="dellist">Delete</button></div>` : '';
     return `
       <div class="phonestage"><div class="device"><div class="pscreen">
@@ -503,7 +524,7 @@
     const items = {
       share: `<button data-act="share" data-as="Text">${I.text} Copy as text</button><button data-act="share" data-as="Markdown">${I.list} Copy as Markdown</button><button data-act="share" data-as="Image">${I.share} Share as image…</button>`,
       more: `<button data-act="pinned">${I.pin} ${l.pinned ? 'Unpin from top' : 'Pin to top'}</button><button data-act="uncheckall">${I.repeat} Uncheck all</button><hr><button data-act="archive">${I.archive} Archive</button><button class="danger" data-act="dellist">${I.trash} Delete list…</button>`,
-      color: [0, 1, 2, 3, 4, 5].map((c) => `<button data-act="color" data-c="${c}"><span class="dot" style="--c:var(--n${c});--ci:var(--n${c}-ink)"></span>Colour ${c + 1}${l.color === c ? ' (current)' : ''}</button>`).join(''),
+      color: [0, 1, 2, 3, 4, 5].map((c) => `<button data-act="color" data-c="${c}"><span class="dot" style="--c:var(--n${c});--ci:var(--n${c}-ink)"></span>${D.COLOR_NAMES[c]}${l.color === c ? ' (current)' : ''}</button>`).join(''),
     }[state.pop.kind];
     popEl.innerHTML = items;
     popEl.hidden = false;
@@ -531,6 +552,17 @@
     toastT = setTimeout(() => toastEl.classList.remove('on'), 4000);
   }
 
+  // Move a task one place among its list's tasks (text lines stay where they are).
+  function moveItem(it, dir) {
+    const owner = listOf(it);
+    const peers = owner.items.filter((i) => i.type === 'check' && i.d === it.d);
+    const j = peers.indexOf(it) + dir;
+    if (j < 0 || j >= peers.length) return false;
+    const a = owner.items.indexOf(it), b = owner.items.indexOf(peers[j]);
+    [owner.items[a], owner.items[b]] = [owner.items[b], owner.items[a]];
+    return true;
+  }
+
   // ---------- Actions ----------
   function act(a, b, e) {
     const l = cur();
@@ -545,6 +577,7 @@
         if (!it.d && row) { row.classList.add('is-ticking'); setTimeout(() => { it.d = true; render(); toast(`Checked "${it.t}"`, () => { it.d = false; }); }, 280); return; }
         it.d = !it.d; break;
       }
+      case 'move': { moveItem(findItem(+b.dataset.id), +b.dataset.dir); break; }
       case 'select': state.sel = +b.dataset.id; if (phone()) state.psheet = 'item'; break;
       case 'deselect': state.sel = null; break;
       case 'done': state.showDone = !state.showDone; break;
@@ -574,7 +607,7 @@
         return;
       }
       case 'restore': { const arr = b.dataset.kind === 'trash' ? trashed : archived; const i = arr.findIndex((r) => r.id === +b.dataset.id); const [r] = arr.splice(i, 1); render(); toast(`Restored ${r.name}`); return; }
-      case 'purge': { const i = trashed.findIndex((r) => r.id === +b.dataset.id); const [r] = trashed.splice(i, 1); render(); toast(`Deleted ${r.name} for good`); return; }
+      case 'purge': { const i = trashed.findIndex((r) => r.id === +b.dataset.id); const [r] = trashed.splice(i, 1); render(); toast(`Deleted ${r.name}`, () => trashed.splice(i, 0, r)); return; }
       case 'newlist': {
         const nl = { id: D.id(), name: 'Untitled list', color: D.lists.length % 6, pinned: false, onScreen: false, edited: 'just now', items: [] };
         D.lists.push(nl); state.view = 'list'; state.cur = nl.id; state.pmenu = false; render();
@@ -636,6 +669,11 @@
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'n') { e.preventDefault(); act('newlist'); return; }
     if (!t.matches('.items [data-edit]')) return;
     const it = findItem(+t.dataset.edit), owner = listOf(it), idx = owner.items.indexOf(it);
+    if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown') && it.type === 'check') {
+      e.preventDefault();
+      if (moveItem(it, e.key === 'ArrowUp' ? -1 : 1)) { render(); app.querySelector(`[data-edit="${it.id}"]`).focus(); }
+      return;
+    }
     if (e.key === 'Enter') {
       e.preventDefault();
       const n = { id: D.id(), type: 'check', t: '', d: false, indent: it.indent, due: null, remind: null, repeat: null };

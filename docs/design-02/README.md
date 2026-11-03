@@ -20,13 +20,15 @@ Dealt by the `design-taste-frontend` skill (app run, `draw.mjs --app --kind work
 - **Type:** Geist 400/500, sizes 13 / 14 / 16 / 24, tabular figures on every time and count. Monospace dropped.
 - **Shape:** card radius 8, control radius 6, 1px borders. Shadows only on what floats: bar, sheet, menus, toast.
 
+**Round 1 review fixes** (see [review.md](review.md)): list colour is now a note-paper surface on the bar, the sheet's header, the list's task card and the list tiles on Up next. The day thread leads Up next and appears as one line in the sheet. The sample list "Today" is now "Errands".
+
 ## Each screen's question
 
 | Screen | Question it answers first | Main action, one click away |
 |---|---|---|
 | Mini bar | How much is left, and is anything late or next? | Click → type → Enter |
 | Sheet | What's on this list, in time order? | The add field, focused on open |
-| Up next | What is due today across every list? | Quick capture with list picker |
+| Up next | What is due today across every list? | Add field at the top of the Today card, with list picker |
 | List | What's left on this list? | Add field at the top; tick |
 | Task details | When is it due and when will it remind me? | Due, Remind me, Repeat options |
 | Settings | Is Weave set up the way I want? | Each control saves itself |
