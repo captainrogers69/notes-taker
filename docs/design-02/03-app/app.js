@@ -5,6 +5,9 @@
   'use strict';
   const D = window.WeaveData, I = window.WeaveIcons, { esc } = D;
   const hash = new URLSearchParams(location.hash.slice(1));
+  // Declutter study (review.md D1–D13): #lean shows the proposed version, #rail=none drops the list rail,
+  // #marks pins numbered badges on what each item changes, #embed hides the prototype toolbar.
+  const LEAN = hash.has('lean'), RAIL_NONE = hash.get('rail') === 'none', MARKS = hash.has('marks'), EMBED = hash.has('embed');
 
   const archived = [
     { id: 91, name: 'Diwali shopping', color: 3, n: 7, when: 'Archived 28 Oct' },
@@ -44,6 +47,7 @@
 
   // ---------- Shared fragments ----------
   function capture(target, { phoneBar = false } = {}) {
+    if (LEAN) return leanCapture(target, { phoneBar });
     const select = target ? '' : `
       <select name="list" aria-label="Add to list">${D.lists.map((l) => `<option value="${l.id}" ${l.id === 1 ? 'selected' : ''}>${esc(l.name)}</option>`).join('')}</select>`;
     return `
@@ -55,6 +59,15 @@
       <div class="parse" aria-live="polite">${phoneBar ? '' : HINT}</div>`;
   }
   const HINT = `<span>Times and days are understood: 6pm, 18:30, tomorrow, tonight, in 2 h.</span>`;
+  // D7: one field. Enter adds; the list is a small chip inside the field; the hint shows only while it has focus.
+  function leanCapture(target, { phoneBar = false, inline = false } = {}) {
+    const chip = target ? '' : `<select class="lchip" name="list" aria-label="Add to list">${D.lists.map((l) => `<option value="${l.id}" ${l.id === 1 ? 'selected' : ''}>${esc(l.name)}</option>`).join('')}</select>`;
+    return `
+      <form class="capture lean ${inline ? 'inline' : ''}" data-form="capture" ${target ? `data-list="${target.id}"` : ''}>
+        <div class="field">${I.plus}<input name="t" autocomplete="off" placeholder="${target ? 'Add a task…' : 'Add a task… try “dentist fri 10am”'}" aria-label="Add a task${target ? ' to ' + esc(target.name) : ''}">${chip}</div>
+      </form>
+      <div class="parse onfocus" aria-live="polite">${phoneBar ? '' : HINT}</div>`;
+  }
 
   const rowMotion = (it) => `${state.ticking.has(it.id) ? 'is-ticking' : ''} ${state.leaving.has(it.id) ? 'is-leaving' : ''}`;
   const itemWhen = (it) => (!it.due ? '' : D.isOverdue(it)
@@ -86,7 +99,39 @@
     return parts.join(' · ');
   }
 
+  // D1: one fact under the title; the date moves above it.
+  function leanFinding() {
+    const open = D.today().filter((x) => !x.it.d);
+    const next = open.find((x) => !D.isOverdue(x.it));
+    if (!open.length) return 'Nothing left for today';
+    return `<b class="num">${open.length}</b> left today${next ? ` · next ${esc(next.it.t)} at <span class="num">${next.it.due.t}</span>` : ''}`;
+  }
+  const leanTitle = (h) => `<p class="eyebrow">${D.NOW.day}</p><h1>${h}</h1><p class="subline">${leanFinding()}</p>`;
+
+  // D3: today across every list as one line (the mini-bar sheet's strip), for the phone's Today card.
+  function dayStrip() {
+    const due = D.today();
+    if (!due.length) return '';
+    const W = 300, S = 7 * 60, E = 23 * 60;
+    const x = (m) => 6 + Math.round(((Math.min(E, Math.max(S, m)) - S) / (E - S)) * (W - 12));
+    const nx = x(D.NOW.min);
+    const marks = due.map(({ it, list }) => {
+      const cx = x(D.toMin(it.due.t));
+      if (it.d) return `<circle cx="${cx}" cy="9" r="4" fill="var(--surface)" stroke="var(--muted)" stroke-width="1.5"/>`;
+      if (D.isOverdue(it)) return `<circle cx="${cx}" cy="9" r="4.5" fill="var(--surface)" stroke="var(--negative)" stroke-width="2"/>`;
+      return `<circle cx="${cx}" cy="9" r="5.5" fill="${D.color(list)}" stroke="${D.ink(list)}"/>`;
+    }).join('');
+    const said = due.map(({ it }) => `${it.due.t} ${esc(it.t)}${it.d ? ' (done)' : D.isOverdue(it) ? ' (overdue)' : ''}`).join(', ');
+    return /* taste-skill-ignore: hour labels, not numbering */ `<div class="lstrip daystrip"><span aria-hidden="true">07</span>
+      <svg viewBox="0 0 ${W} 18" height="18" role="img" aria-label="Today: ${said}. Now ${D.NOW.clock}.">
+        <line x1="6" x2="${W - 6}" y1="9" y2="9" stroke="var(--control)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="6" x2="${nx}" y1="9" y2="9" stroke="var(--text)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="${nx}" x2="${nx}" y1="1" y2="17" stroke="var(--text)" stroke-width="1.5"/>${marks}</svg>
+      <span aria-hidden="true">23</span></div>`;
+  }
+
   function todayCard({ withCapture = false } = {}) {
+    if (LEAN) return leanTodayCard({ withCapture });
     const t = D.today();
     const late = t.filter((x) => D.isOverdue(x.it));
     const upcoming = t.filter((x) => !x.it.d && !D.isOverdue(x.it));
@@ -105,12 +150,29 @@
       </section>`;
   }
 
+  // D4: one list, no group labels: overdue first (red time), then the rest, done rows last and struck through.
+  function leanTodayCard({ withCapture = false } = {}) {
+    const t = D.today();
+    const late = t.filter((x) => !x.it.d && D.isOverdue(x.it));
+    const upcoming = t.filter((x) => !x.it.d && !D.isOverdue(x.it));
+    const done = t.filter((x) => x.it.d);
+    const showList = new Set(t.map((x) => x.list.id)).size > 1;
+    const rows = [...late, ...upcoming, ...done];
+    return `
+      <section class="card" aria-labelledby="h-today">
+        <header><h2 id="h-today">Today</h2><span class="meta num">${late.length + upcoming.length} open · ${done.length} done</span></header>
+        ${phone() ? dayStrip() : ''}
+        ${withCapture ? `<div class="capturebox">${capture(null)}</div>` : ''}
+        ${rows.length ? `<ul class="rows">${rows.map((x) => agendaRow(x, { showList })).join('')}</ul>` : '<p class="empty">Nothing left for today.</p>'}
+      </section>`;
+  }
+
   function laterCard() {
     const later = D.laterThisWeek();
     return `
       <section class="card" aria-labelledby="h-later">
         <header><h2 id="h-later">Later this week</h2><span class="meta num">${later.length}</span></header>
-        ${later.length ? `<ul class="rows">${later.map((x) => agendaRow(x)).join('')}</ul>` : '<p class="empty">Nothing scheduled after today.</p>'}
+        ${later.length ? `<ul class="rows">${later.map((x) => agendaRow(x, { showList: !(LEAN && !phone()) })).join('')}</ul>` : '<p class="empty">Nothing scheduled after today.</p>'}
       </section>`;
   }
 
@@ -165,12 +227,12 @@
   function threadCard() {
     return `
       <section class="card thread" aria-labelledby="h-thread">
-        <header><h2 id="h-thread">Today's thread</h2><span class="meta">${D.NOW.day}, 07:00 to 23:00</span>
-          <span class="legend">
+        <header><h2 id="h-thread">Today's thread</h2><span class="meta">${LEAN ? '07:00 to 23:00' : `${D.NOW.day}, 07:00 to 23:00`}</span>
+          ${LEAN ? '' : `<span class="legend">
             <span><svg width="10" height="10"><circle cx="5" cy="5" r="4" fill="var(--surface)" stroke="var(--muted)" stroke-width="1.5"/></svg>Done</span>
             <span><svg width="10" height="10"><circle cx="5" cy="5" r="4.5" fill="var(--n0)" stroke="var(--n0-ink)"/></svg>Due</span>
             <span><svg width="10" height="10"><circle cx="5" cy="5" r="4" fill="var(--surface)" stroke="var(--negative)" stroke-width="2"/></svg>! Overdue</span>
-          </span>
+          </span>`}
         </header>
         <div data-thread></div>
       </section>`;
@@ -267,6 +329,14 @@
   }
 
   function nextScreen() {
+    if (LEAN && phone()) return `${leanTitle('Up next')}${todayCard()}${laterCard()}`;
+    if (LEAN) return `
+      <div class="titlerow"><div class="tt">${leanTitle('Up next')}</div></div>
+      <div class="grid eq">
+        <div class="span-12">${threadCard()}</div>
+        <div class="span-8">${todayCard({ withCapture: true })}</div>
+        <div class="span-4">${laterCard()}</div>
+      </div>`;
     if (phone()) return `
       <h1>Up next</h1><p class="subline">${upNextFinding()}</p>
       ${threadCard()}${todayCard()}${laterCard()}`;
@@ -285,7 +355,7 @@
     const parts = [o ? `<b class="num">${o}</b> left of ${all}` : 'All done'];
     const late = D.open(l).filter(D.isOverdue);
     if (late.length) parts.push(`<span class="late">${late.length} overdue</span>`);
-    if (l.onScreen) parts.push(state.os === 'ios' ? 'in the widget' : 'in the mini bar');
+    if (l.onScreen && !LEAN) parts.push(state.os === 'ios' ? 'in the widget' : 'in the mini bar');
     parts.push(`edited ${l.edited || 'just now'}`);
     return parts.join(' · ');
   }
@@ -313,7 +383,8 @@
     const done = D.done(l);
     return `
       <ul class="rows items">${open.map(itemRow).join('')}</ul>
-      ${phone() ? '' : `<button class="ruled" data-act="focusadd"><i>Add a task…</i>${'<i aria-hidden="true"></i>'.repeat(8)}</button>`}
+      ${phone() ? '' : LEAN ? `<div class="ruled lean">${leanCapture(l, { inline: true })}${'<i aria-hidden="true"></i>'.repeat(8)}</div>`
+        : `<button class="ruled" data-act="focusadd"><i>Add a task…</i>${'<i aria-hidden="true"></i>'.repeat(8)}</button>`}
       ${!D.checks(l).length ? '<p class="empty">Nothing here yet. Type above and press Enter.</p>' : ''}
       ${done.length ? `<div class="donefoot">
         <div class="donebar">
@@ -346,6 +417,15 @@
   }
 
   function listInfo(l) {
+    if (LEAN) return `
+      <section class="card railcard slim" aria-labelledby="h-info">
+        <header><h2 id="h-info">This list</h2></header>
+        <span class="field-label">Colour</span>
+        <div class="swatches" role="radiogroup" aria-label="List colour">${[0, 1, 2, 3, 4, 5].map((c) => `
+          <button class="swatch ${l.color === c ? 'on' : ''}" role="radio" aria-checked="${l.color === c}" aria-label="${D.COLOR_NAMES[c]}" data-act="color" data-c="${c}" style="--c:var(--n${c});--ci:var(--n${c}-ink)">${l.color === c ? I.tick : ''}</button>`).join('')}</div>
+        <div class="switchrow" style="margin-top:20px"><span class="lbl"><b>Pin to top</b><small>Keeps it first in your lists.</small></span>
+          <button class="tg" role="switch" aria-checked="${!!l.pinned}" data-act="pinned" aria-label="Pin to top"></button></div>
+      </section>`;
     const reminders = D.open(l).filter((i) => i.remind);
     return `
       <section class="card railcard" aria-labelledby="h-info">
@@ -401,8 +481,8 @@
         </div>
       </div>
       <div class="grid listgrid">
-        <section class="card span-8 paper notecard" style="${cvars(l)}" aria-label="Tasks">${capture(l)}<div style="height:8px"></div>${itemsBlock(l)}</section>
-        <div class="span-4">${sel ? details(sel) : listInfo(l)}</div>
+        <section class="card ${LEAN && RAIL_NONE && !sel ? 'span-12' : 'span-8'} paper notecard" style="${cvars(l)}" aria-label="Tasks">${LEAN ? '' : `${capture(l)}<div style="height:8px"></div>`}${itemsBlock(l)}</section>
+        ${LEAN && RAIL_NONE && !sel ? '' : `<div class="span-4">${sel ? details(sel) : listInfo(l)}</div>`}
       </div>`;
   }
 
@@ -479,7 +559,7 @@
     const lrow = (l) => {
       const all = D.checks(l).length, done = D.done(l).length;
       const pct = all ? Math.round((done / all) * 100) : 0;
-      return `<button class="navrow ${state.view === 'list' && state.cur === l.id && !state.query ? 'on' : ''} ${l.onScreen ? 'inbar' : ''}" style="${cvars(l)}" data-act="open" data-list="${l.id}"><span class="ndot">${dot(l)}</span><span class="label">${esc(l.name)}</span>${l.onScreen ? `<span class="onscreen" title="In the mini bar">${I.screen}<span class="sr">In the mini bar</span></span>` : ''}<span class="prog" style="--p:${pct}%" title="${done} of ${all} done" aria-hidden="true"></span><span class="n">${D.open(l).length || ''}</span></button>`;
+      return `<button class="navrow ${state.view === 'list' && state.cur === l.id && !state.query ? 'on' : ''} ${l.onScreen ? 'inbar' : ''}" style="${cvars(l)}" data-act="open" data-list="${l.id}"><span class="ndot">${dot(l)}</span><span class="label">${esc(l.name)}</span>${l.onScreen ? `<span class="onscreen" title="In the mini bar">${I.screen}<span class="sr">In the mini bar</span></span>` : ''}${LEAN ? '' : `<span class="prog" style="--p:${pct}%" title="${done} of ${all} done" aria-hidden="true"></span>`}<span class="n">${D.open(l).length || ''}</span></button>`;
     };
     const dueToday = D.today().filter((x) => !x.it.d).length;
     return `
@@ -563,7 +643,7 @@
       : `<button class="backlink" data-act="nav" data-view="lists">${I.back}Lists</button>`;
     const top = sub
       ? `${back}<span class="ttl"></span>${inList ? `<button class="ibtn" data-act="psheet" data-sheet="share" aria-label="Share">${I.share}</button><button class="ibtn" data-act="psheet" data-sheet="more" aria-label="More">${I.more}</button>` : ''}`
-      : `<span class="ttl"><span style="display:inline-flex;align-items:center;gap:8px">${I.mark}Weave</span></span>`;
+      : LEAN ? '' : `<span class="ttl"><span style="display:inline-flex;align-items:center;gap:8px">${I.mark}Weave</span></span>`;
     const tab = sub ? 'lists' : state.view;
     const tabs = [['next', I.sun, 'Up next'], ['lists', I.list, 'Lists'], ['search', I.search, 'Search'], ['settings', I.gear, 'Settings']];
     const dueToday = D.today().filter((x) => !x.it.d).length;
@@ -580,7 +660,7 @@
     return `
       <div class="phonestage"><div class="device"><div class="pscreen">
         <div class="pstatus"><span>16:20</span><span>${state.os === 'ios' ? '' : '5G 82%'}</span></div>
-        <div class="ptop">${top}</div>
+        <div class="ptop ${top ? '' : 'empty'}">${top}</div>
         <main class="pbody">${{ next: nextScreen, lists: phoneLists, search: phoneSearch, list: listScreen, settings: settingsScreen, archive: archiveScreen }[state.view]()}</main>
         ${showAdd ? `<div class="paddbar">${capture(inList ? l : null, { phoneBar: true })}</div>` : ''}
         ${tabbar}
@@ -593,7 +673,7 @@
   const app = document.getElementById('app');
   function render() {
     const ph = phone();
-    document.body.className = `os-${state.os} ${ph ? 'lay-phone' : 'lay-desk'} ${bare() ? 'bare' : ''}`;
+    document.body.className = `os-${state.os} ${ph ? 'lay-phone' : 'lay-desk'} ${bare() ? 'bare' : ''} ${LEAN ? 'lean' : ''} ${EMBED ? 'embed' : ''}`;
     const l = cur();
     document.documentElement.style.setProperty('--accent', state.view === 'list' ? D.color(l) : 'var(--n0)');
     document.documentElement.style.setProperty('--accent-ink', state.view === 'list' ? D.ink(l) : 'var(--n0-ink)');
@@ -603,9 +683,36 @@
     state.newItem = null;
     if (ph) settleSheet(); else lastSheet = { open: false, html: '' };
     document.querySelectorAll('[data-os]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.os === state.os)));
-    document.fonts.ready.then(() => app.querySelectorAll('[data-thread]').forEach(drawThread));
+    document.fonts.ready.then(() => { app.querySelectorAll('[data-thread]').forEach(drawThread); placeMarks(); });
     renderPop();
   }
+
+  // #marks: numbered badges (review.md D1–D13) on whatever each item changes, in either version.
+  const MARK_AT = [
+    ['D1', 'next', '.subline'], ['D2', 'next', '.ptop .ttl'], ['D3', 'next', '.lay-phone .thread, .daystrip'],
+    ['D4', 'next', '.subhead:not(.late), .lean .card:has(#h-today) .rows'], ['D5', 'next', '.card:has(#h-lists), .card:has(#h-float), .lean.lay-desk .card:has(#h-later)'],
+    ['D6', 'next', '.thread .legend'], ['D7', 'next', '.capturebox'],
+    ['D9', 'list', '.notecard > .capture, .ruled'], ['D10', 'list', '.items .row:first-child .chev'], ['D11', 'list', '.subline'],
+    ['D12', 'list', '.railcard'], ['D13', '*', '.side .navrow .prog, .lean .side .navrow.inbar .n', true],
+  ];
+  const markLayer = document.createElement('div');
+  markLayer.className = 'marks';
+  function placeMarks() {
+    if (!MARKS) return;
+    if (!markLayer.isConnected) document.body.appendChild(markLayer);
+    const html = [];
+    MARK_AT.forEach(([id, view, sel, firstOnly]) => {
+      if (view !== '*' && view !== state.view) return;
+      (firstOnly ? [app.querySelector(sel)].filter(Boolean) : app.querySelectorAll(sel)).forEach((el) => {
+        const r = el.getBoundingClientRect();
+        if (!r.width) return;
+        html.push(`<span class="mk" style="left:${Math.max(2, r.left - 12)}px;top:${Math.max(2, r.top - 10)}px">${id}</span>`);
+        html.push(`<span class="mkbox" style="left:${r.left - 3}px;top:${r.top - 3}px;width:${r.width + 6}px;height:${r.height + 6}px"></span>`);
+      });
+    });
+    markLayer.innerHTML = html.join('');
+  }
+  if (MARKS) { addEventListener('resize', placeMarks); addEventListener('scroll', placeMarks, true); }
 
   // Re-render, then slide rows that moved from where they were (FLIP), so nothing jumps.
   function flipRender(skipId) {

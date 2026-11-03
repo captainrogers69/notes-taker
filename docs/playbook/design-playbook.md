@@ -21,6 +21,33 @@ Weave is **always within reach and never in the way**. It's a quick launcher for
 | **One family** | The bar is the sheet's collapsed form: same surface, line, shadow, type and accent. |
 | **Same everywhere** | Same sheet, words and colors on every platform. Only how the bar floats adapts to the OS. |
 
+### Clutter rules (critical: apply to every screen)
+
+Weave is glanced at dozens of times a day, so every extra word, label and control costs time on every glance. These rules came from the declutter study (2026-11-03, [`docs/design-02/declutter.html`](../design-02/declutter.html), review items D1–D13). Check every new or changed screen against them before review.
+
+| # | Rule | Means | Example (study item) |
+|---|---|---|---|
+| C1 | **Say each fact once per screen** | Before adding a count, status or list, check whether the screen already shows it. If it does, keep the place where it is acted on and delete the other. | Overdue was in the header and leads the list (D1). The Lists card repeated the sidebar (D5). "In the mini bar" was in the subline and on the button (D11). The rail's Today strip and Reminders repeated the rows (D12). |
+| C2 | **Header = date, title, one fact** | Date small above the title. Under it, one line with the single most useful fact: what's left and what's next. No sentence that strings every status together. | "4 left today · next Reply to design review at 17:00" (D1). |
+| C3 | **Nothing between the title and the first task except one field** | One input. Enter adds, so there is no Add button. Choices with a sensible default (which list) sit inside the field as a small chip. Hints appear on focus, not permanently. | Field + dropdown + Add + helper line became one field with a list chip (D7). |
+| C4 | **One place per action** | If two controls do the same thing on one screen, keep one. The add row lives at the end of the list. | The top add box and the ruled "Add a task…" area (D9). |
+| C5 | **Order and style group rows; labels are the last resort** | Overdue rows come first with a red time and alert icon; done rows come last, struck through. Add a group heading only when order and style can't carry the grouping (large or mixed sets). | "Overdue / Still to do / Done today" for five rows (D4). |
+| C6 | **No legend for labelled marks** | A key is only for marks that carry no label of their own. The screen-reader text keeps the full meaning. | The thread's Done / Due / Overdue legend (D6). |
+| C7 | **One signal per number** | Show a number once, in one form: a count *or* a bar *or* a ring, never two side by side. | Sidebar count + progress bar (D13). |
+| C8 | **A row is a title plus at most one meta line** | Secondary controls (chevron, grip, more) appear on hover, keyboard focus and selection. On touch, where there is no hover, the whole row is the target and those controls don't render. | The chevron on every row (D10). |
+| C9 | **Truncated text means the wrong form** | If labels cut off at a width, don't shrink further. Switch to the compact form made for that width (the one-line strip, the label-free version), or let the text wrap. | The phone thread with "Reply to design…" labels became the one-line strip (D3). |
+| C10 | **Columns fit their content at each width** | A column sized for the longest desktop value ("Tomorrow 10:00") must not hold that width where values are short. Size to content on the phone. | A 116 px time column cut "Pick up parcel from the locker" for "18:00" (D8). |
+| C11 | **Chrome earns its row** | A bar or header that only repeats where you are goes. The tab bar already names the screen; the brand belongs on the sidebar and splash, not on top of every phone screen. | The phone's "Weave" logo row (D2). |
+| C12 | **Every card does a job on this screen** | A card that only reads back settings or mirrors navigation belongs in Settings or nowhere. Fill the space it leaves with the screen's main job, not with a new card. | The "On screen" settings readout on Up next (D5). |
+
+**Clutter check, before any review:**
+1. Count the facts that appear twice on the screen (C1). The answer should be zero.
+2. Count the controls above the first task (C3). The answer should be one.
+3. Look for truncated text at phone, tablet and desktop widths (C9, C10).
+4. For every heading, legend and label, ask whether order, colour or position already says it (C5, C6).
+5. For every card, name its job in one verb (C12).
+6. Judge the change **visually, side by side**: build the proposal behind a URL flag (as `#lean` was), with numbered markers on each change, and compare it with the current screen at desktop and phone width. Don't decide clutter from a written list.
+
 ---
 
 ## 1. Vocabulary
@@ -183,16 +210,47 @@ User setting "floating opacity" (S4) scales the idle value.
 
 ### Motion
 
+Weighting: restraint first (a productivity tool used dozens of times a day), production polish second, play only for rare moments. Source: the motion audit of 2026-11-03 (`motion-audits/notes-taker-2026-11-03.html`, M1–M12), as built in `docs/design-02`.
+
+**Tokens** (`tokens.css`); every transition uses these, never the browser's default `ease`:
+
+| Token | Value | Use |
+|---|---|---|
+| `--dur-fast` | 120 ms | Exits, tick fill and fade |
+| `--dur` | 180 ms | Enters, menus, row slides, expanding sections |
+| `--ease-out` | `cubic-bezier(.23, 1, .32, 1)` | Everything on screen, entering and leaving |
+| `--ease-sheet` | `cubic-bezier(.32, .72, 0, 1)` | Phone bottom sheets only (iOS sheet curve) |
+
+Named exceptions, longer because they travel further: the bar's flight to the tray (260 ms) and the phone sheet (280 ms).
+
 | Event | Motion |
 |---|---|
-| Sheet open | fade + scale 0.94 → 1 + 8 px slide from the bar, 160–220 ms, `cubic-bezier(.2,.8,.2,1)` |
-| Note ↔ lists | horizontal slide, 260 ms same curve |
-| Bar hover | opacity 200 ms |
-| Bar drag | scale 1.03 while held |
-| Tick | instant fill + strike, item moves to "Done" after ~280 ms |
-| New item | 1 s accent highlight fading out |
+| Sheet open (click) | Fade in over 180 ms; scale .96 → 1 with a 6 px slide from the bar's side over 200 ms; transform-origin at the bar |
+| Sheet open (⌥ Space / Enter) | Instant: keyboard-triggered UI never animates |
+| Sheet close | 120 ms fade at scale .99, no slide back |
+| List switcher, Share, More, Colour menus | Grow from their trigger: opacity + scale .97 with a 4 px drop, 180 ms; close with a 100 ms fade. Instant when opened or closed from the keyboard |
+| Bar hover / focus | Opacity 50 % → 100 % over 180 ms |
+| Bar drag | Scale 1.03 while held |
+| Tick | Circle fills and text strikes through (120 ms), the row fades (120 ms), then the rows below slide up (180 ms, FLIP). Quick successive ticks never cancel each other |
+| New item | Accent highlight fading out over 600 ms |
+| Typing in the sheet | The parse line under the field keeps its height whether shown or not, so the list never nudges |
+| "Done · n" section | Opens and closes with its chevron: rows grow from 0 to full height over 180 ms (`grid-template-rows`) |
+| Toast | Rises 16 px and fades in (200 ms); leaves with a 150 ms fade, no drop |
+| Phone bottom sheet | Slides up over 280 ms on `--ease-sheet`; slides down over 200 ms with its content still showing. Edits inside an open sheet don't replay the motion. The scrim fades with it |
+| Hide to tray | The bar flies into the tray icon with transform + opacity only (translate + scale .4, 260 ms); its position is never animated. Showing it reverses the flight |
+| Tray icon | One pop to 1.12 over 240 ms when the bar arrives; never repeats |
+| Day's last tick | Ink runs along the rest of today's thread (600 ms) and fades by 1 s. Once a day, only when the thread is on screen |
+| First run | The bar unrolls rightward from its colour dot (420 ms), then the name and count fade in. Once ever |
 
-Respect reduce-motion: all durations → 0.
+Rules:
+- **Exits are faster and simpler than enters.** A fade, no reverse slide.
+- **Keyboard-triggered UI is instant.** That covers the hotkey, Enter, Space, Escape and Backspace.
+- **Animate transform and opacity only.** Never `left`, `top`, `width` or `height` (the Done section's grid-row growth is the one exception).
+- **Re-renders must not snap or replay motion.** Start from the state last drawn, then change after a reflow.
+- **Never depend on `transitionend` alone.** Always pair it with a fallback timer.
+- **Delight is rare.** Only the day's last tick and the first run get expressive motion, and each plays at most once a day or once ever.
+
+Respect reduce-motion: all durations → 0. The day's-last-tick stroke and the first-run unroll are skipped entirely.
 
 ---
 
@@ -208,7 +266,7 @@ Respect reduce-motion: all durations → 0.
 | **Web** | In-page bar, top-center by default | In-page sheet | — |
 
 Desktop bar windows must be click-through outside the bar's shape.
-The hide animation flies the bar into its tray spot (≈400 ms) and the tray icon gives one small pop — no repeated attention-grabbing.
+The hide animation flies the bar into its tray spot (260 ms, transform + opacity only) and the tray icon gives one small pop (1.12, 240 ms) — no repeated attention-grabbing.
 
 ---
 
@@ -371,3 +429,5 @@ Open design work is tracked in [`docs/design/design-checklist.md`](../design/des
 | 2026-10-30 | One token file (`tokens.css`) for all prototypes; three directions (Glass, Paper, Woven) built in 007 for comparison | User asked to improve the theme |
 | 2026-10-30 | **Woven chosen**: Woven colors, Inter, plain strip, solid strike, solid surfaces (no blur), radius sheet 12 / bar 10. Light and dark | User choice after comparing Glass, Paper, Woven |
 | 2026-10-30 | Glass and Paper themes and the 007 comparison page removed; one theme only | User direction |
+| 2026-11-03 | **Motion table rewritten** to the audited values: `--dur-fast` 120 / `--dur` 180 / `--ease-out` tokens, instant keyboard UI, fade-only exits, FLIP tick, 260 ms tray flight, two once-only delights | Motion audit M1–M12 (2026-11-03) fixed and verified in design-02; the old table (280 ms tick, 1 s highlight, `cubic-bezier(.2,.8,.2,1)`) no longer matched
+| 2026-11-03 | **Clutter rules C1–C12** added to §0 and made mandatory for every screen, with a clutter check before review | Declutter study against a before/after reference (design-02 `declutter.html`, D1–D13). User: "these are very critical" |

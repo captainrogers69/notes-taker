@@ -175,6 +175,31 @@ Checks:
 - Lint gives 0 FAIL.
 - The inspector gives 0 FAIL / 0 WARN on every screen, with the standing allowances for 01 and 02 (the bar's shadow and the desktop around it).
 
+### D · Declutter pass (2026-11-03, proposals, nothing changed yet)
+
+The lens is a before/after of a to-do app: one summary line instead of a banner, rows of title plus one meta line, one segmented control instead of coloured chips, the add row at the end of the list, and fewer tabs. Weave already avoids the "before" faults: no tags, avatars, descriptions, coloured chips or floating button. Its clutter is a different kind: **the same fact shown twice** and **controls stacked before the first task**.
+
+**Up next (desktop and phone)**
+- [ ] D1 · Header line repeats the list below it ("Tue 3 Nov · 4 due today · 1 overdue since 09:00 · Pay electricity bill" takes two lines on the phone). Put the date small above the title and keep one fact under it: "4 left today · next Reply to design review at 17:00". The overdue item already leads the list in red.
+- [ ] D2 · Phone: the "Weave" logo row above the title costs a line on every screen while the tab bar already says where you are. Remove it on the phone.
+- [ ] D3 · Phone: the thread's labels are cut off ("Reply to design…", "Pick up parcel… +1") and repeat the Today list directly below. Show the phone thread as the one-line strip the mini-bar sheet uses (marks and Now, no labels) at the top of the Today card. The labelled thread stays on desktop.
+- [ ] D4 · Today card: three group labels (Overdue / Still to do / Done today) for five rows. Drop "Still to do" and "Done today": overdue rows come first with their red time, done rows sit at the end struck through.
+- [ ] D5 · Desktop: the "Lists" card repeats the sidebar (the same six lists and counts), and "On screen" is a settings readout. Remove both from Up next. The thread and Today then get the full width.
+- [ ] D6 · Desktop: the thread's legend (Done / Due / Overdue) explains marks that are already labelled. Remove it (the screen-reader label stays).
+- [ ] D7 · Capture box: field + list dropdown + Add button + an always-on helper line, before any task. Keep the field only: Enter adds, the list becomes a small chip inside the field, and the helper line appears on focus.
+- [ ] D8 · Phone bug: "Pick up parcel from the l…" is cut off on Up next although the row has room (the list page shows it whole). Check the `.rowbtn` width.
+
+**List page**
+- [ ] D9 · Two add fields: the box at the top (with Add and the helper line) and the ruled "Add a task…" area under the rows. Keep one: the row at the end of the list, as in the "after" picture. The ruled lines below it stay as the page's paper.
+- [ ] D10 · Each row ends in bell + time + chevron. The whole row opens the details, so the chevron only appears on hover and focus.
+- [ ] D11 · Header says "in the mini bar" and the button beside it says "In mini bar". Drop it from the subline.
+- [ ] D12 · Right rail: the Today strip repeats Up next and Reminders repeats the bells in the rows. Keep Colour and Pin only, or move both into ••• and give the list the full width (decide by the screenshot).
+
+**Sidebar**
+- [ ] D13 · Each list row carries a mini-bar icon, a progress bar and a count. Keep the count; the progress bar (added for A6) is a third signal for one number. Reverses part of A6, so a decision is needed.
+
+**Mini-bar sheet:** already at the "after" level (one header, a strip, the field, the rows). No change.
+
 ---
 
 ## Next

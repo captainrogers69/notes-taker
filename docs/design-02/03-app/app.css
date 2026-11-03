@@ -359,6 +359,7 @@ h1 [data-rename]:focus { box-shadow: 0 2px 0 var(--text); }
 .lay-phone .srow .desc { max-width: none; }
 .lay-phone .danger-zone .panel { flex-direction: column; align-items: flex-start; }
 .lay-phone .row .src { display: none; }
+.lay-phone .row .when { width: auto; min-width: 48px; } /* D8: short times don't hold a 116px column on the phone */
 .lay-phone .thread .legend { display: none; }
 
 .psheet-scrim:not(.on), .psheet:not(.on) { visibility: hidden; pointer-events: none; transition: transform 200ms var(--ease-out), opacity 200ms var(--ease-out), visibility 0s 200ms; }
@@ -374,3 +375,22 @@ h1 [data-rename]:focus { box-shadow: 0 2px 0 var(--text); }
   .lay-desk .srow { grid-template-columns: 1fr; gap: 12px; }
   .lay-desk .titlerow { flex-wrap: wrap; }
 }
+
+/* ---------- Declutter study (#lean, #marks, #embed; review.md D1–D13) ---------- */
+.embed .proto { display: none; }
+.lean .eyebrow { margin: 0 0 2px; color: var(--muted); font-size: var(--fs-small); }
+.lean .ptop.empty { display: none; }
+.lean .daystrip { margin: 0 0 12px; }
+.capture.lean .field { position: relative; }
+.capture.lean .lchip { all: unset; flex: none; cursor: pointer; height: 26px; line-height: 26px; padding: 0 10px; border-radius: 13px; background: var(--hover); color: var(--muted); font-size: var(--fs-small); }
+.capture.lean .lchip:focus-visible { outline: 2px solid var(--text); }
+.lean .capturebox:not(:focus-within) .parse.onfocus { display: none; }
+.lean .capturebox .parse.onfocus { min-height: 0; }
+.ruled.lean { cursor: default; }
+.ruled.lean .capture.inline .field { height: 44px; border: 0; border-radius: 0; background: none; padding: 0 0 0 4px; border-top: 1px solid color-mix(in srgb, var(--ci) 14%, var(--surface)); }
+.ruled.lean .capture.inline + .parse { display: none; }
+.lean .items .row .chev { opacity: 0; transition: opacity var(--dur-fast) var(--ease-out); }
+.lean .items .row:hover .chev, .lean .items .row:focus-within .chev, .lean .items .row.sel .chev { opacity: 1; }
+.marks { position: fixed; inset: 0; pointer-events: none; z-index: 90; }
+.marks .mk { position: absolute; z-index: 2; height: 20px; padding: 0 6px; border-radius: 10px; background: #e5484d; color: #fff; font: 600 12px/20px var(--font); }
+.marks .mkbox { position: absolute; border: 2px solid #e5484d; border-radius: 8px; }

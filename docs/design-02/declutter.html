@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weave · Declutter study (D1–D13)</title>
+<link rel="stylesheet" href="assets/tokens.css">
+<style>
+  body { margin: 0; background: var(--ground); color: var(--text); font: 15px/1.5 var(--font); }
+  .wrap { max-width: 1480px; margin: 0 auto; padding: 40px 32px 80px; }
+  h1 { font-size: 28px; font-weight: 500; margin: 0 0 6px; }
+  .lede { color: var(--muted); margin: 0 0 20px; max-width: 760px; }
+  .bar { display: flex; gap: 16px; align-items: center; margin: 0 0 32px; flex-wrap: wrap; }
+  .bar label { display: inline-flex; gap: 8px; align-items: center; cursor: pointer; }
+  .bar a { color: var(--text); }
+  section { margin: 0 0 56px; }
+  h2 { font-size: 20px; font-weight: 500; margin: 0 0 14px; }
+  .pair { display: grid; gap: 20px; grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr)); }
+  figure { margin: 0; }
+  figcaption { display: flex; justify-content: space-between; gap: 12px; margin: 0 0 8px; font-weight: 500; }
+  figcaption a { font-weight: 400; color: var(--muted); font-size: 13px; }
+  .frame { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); aspect-ratio: var(--w) / var(--h); }
+  .frame iframe { position: absolute; left: 0; top: 0; border: 0; width: calc(var(--w) * 1px); height: calc(var(--h) * 1px); transform-origin: 0 0; transform: scale(var(--s, .5)); }
+  .phones { --n: 2; max-width: 980px; }
+  ol.items { margin: 16px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+  ol.items li { display: flex; gap: 10px; align-items: baseline; padding: 10px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+  .tag { flex: none; height: 20px; padding: 0 6px; border-radius: 10px; background: var(--negative); color: #fff; font: 600 12px/20px var(--font); }
+  .ask { border-left: 3px solid var(--text); padding: 2px 0 2px 12px; margin: 16px 0 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Declutter study</h1>
+  <p class="lede">Left: the app as it is now. Right: the same screen with the D1–D13 proposals from <code>review.md</code> applied. Red boxes mark what each item changes. Both sides are the live prototype: click, tick and type in either.</p>
+  <div class="bar">
+    <label><input type="checkbox" id="marks" checked> Show markers</label>
+    <label><input type="checkbox" id="dark"> Dark</label>
+    <a href="03-app/index.html#lean">Open the lean version full size</a>
+  </div>
+
+  <section>
+    <h2>Up next · desktop</h2>
+    <div class="pair">
+      <figure><figcaption>Now</figcaption><div class="frame" style="--w:1440;--h:900"><iframe data-src="03-app/index.html#os=macos" title="Up next now"></iframe></div></figure>
+      <figure><figcaption>Lean</figcaption><div class="frame" style="--w:1440;--h:900"><iframe data-src="03-app/index.html#os=macos&lean" title="Up next lean"></iframe></div></figure>
+    </div>
+    <ol class="items">
+      <li><span class="tag">D1</span><span>Date moves above the title; one fact under it: what's left and what's next.</span></li>
+      <li><span class="tag">D4</span><span>No "Still to do" or "Done today" labels: overdue first, done last.</span></li>
+      <li><span class="tag">D5</span><span>Lists card (repeats the sidebar) and On screen card removed; Later this week moves up.</span></li>
+      <li><span class="tag">D6</span><span>Thread legend removed; the marks are labelled.</span></li>
+      <li><span class="tag">D7</span><span>One field: no dropdown, no Add button; the list is a chip inside; the hint shows on focus.</span></li>
+      <li><span class="tag">D13</span><span>Sidebar keeps the count only, no progress bar.</span></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>A list · desktop</h2>
+    <div class="pair" style="--n:3">
+      <figure><figcaption>Now</figcaption><div class="frame" style="--w:1440;--h:900"><iframe data-src="03-app/index.html#os=macos&list=1" title="List now"></iframe></div></figure>
+      <figure><figcaption>Lean, slim rail</figcaption><div class="frame" style="--w:1440;--h:900"><iframe data-src="03-app/index.html#os=macos&list=1&lean" title="List lean with slim rail"></iframe></div></figure>
+      <figure><figcaption>Lean, no rail</figcaption><div class="frame" style="--w:1440;--h:900"><iframe data-src="03-app/index.html#os=macos&list=1&lean&rail=none" title="List lean without rail"></iframe></div></figure>
+    </div>
+    <ol class="items">
+      <li><span class="tag">D9</span><span>One place to add: a row at the end of the list. The box at the top goes.</span></li>
+      <li><span class="tag">D10</span><span>Row chevron only on hover or focus (hover a row on the right to see it).</span></li>
+      <li><span class="tag">D11</span><span>"in the mini bar" dropped from the line under the title; the button already says it.</span></li>
+      <li><span class="tag">D12</span><span>Rail keeps Colour and Pin only, or goes (colour is on the title dot, Pin is in ••• ).</span></li>
+    </ol>
+    <p class="ask">Your call on D12: middle (slim rail) or right (no rail)?</p>
+  </section>
+
+  <section>
+    <h2>Up next and a list · iPhone</h2>
+    <div class="pair phones" style="--n:4;max-width:none">
+      <figure><figcaption>Up next, now</figcaption><div class="frame" style="--w:440;--h:900"><iframe data-src="03-app/index.html#os=ios" title="Phone Up next now"></iframe></div></figure>
+      <figure><figcaption>Up next, lean</figcaption><div class="frame" style="--w:440;--h:900"><iframe data-src="03-app/index.html#os=ios&lean" title="Phone Up next lean"></iframe></div></figure>
+      <figure><figcaption>List, now</figcaption><div class="frame" style="--w:440;--h:900"><iframe data-src="03-app/index.html#os=ios&list=1" title="Phone list now"></iframe></div></figure>
+      <figure><figcaption>List, lean</figcaption><div class="frame" style="--w:440;--h:900"><iframe data-src="03-app/index.html#os=ios&list=1&lean" title="Phone list lean"></iframe></div></figure>
+    </div>
+    <ol class="items">
+      <li><span class="tag">D1</span><span>Same header as desktop: date above, one fact below. No two-line sentence.</span></li>
+      <li><span class="tag">D2</span><span>The "Weave" logo row goes; the tab bar says where you are.</span></li>
+      <li><span class="tag">D3</span><span>The labelled thread (cut-off labels) becomes the one-line strip in the Today card.</span></li>
+      <li><span class="tag">D8</span><span>Bug, fixed in both: "Pick up parcel from the locker" no longer cuts off.</span></li>
+    </ol>
+  </section>
+</div>
+<script>
+  // Each frame is the live prototype at its real size, scaled to the column. Markers and theme reload the frames.
+  const frames = [...document.querySelectorAll('iframe')];
+  let n = 0;
+  function load() {
+    const marks = document.getElementById('marks').checked, dark = document.getElementById('dark').checked;
+    n++;
+    frames.forEach((f) => {
+      const [path, h] = f.dataset.src.split('#');
+      f.src = `${path}?v=${n}#${h}&embed${marks ? '&marks' : ''}${dark ? '&mode=dark' : '&mode=light'}`;
+    });
+  }
+  function fit() {
+    document.querySelectorAll('.frame').forEach((el) => {
+      const w = +getComputedStyle(el).getPropertyValue('--w');
+      el.style.setProperty('--s', el.clientWidth / w);
+    });
+  }
+  document.getElementById('marks').addEventListener('change', load);
+  document.getElementById('dark').addEventListener('change', load);
+  addEventListener('resize', fit);
+  fit(); load();
+</script>
+</body>
+</html>
