@@ -7,7 +7,8 @@
   const MOD = /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl+';
   const TAP_SLOP = 5;
 
-  const state = { cur: 1, showDone: false, newItem: null, menu: false };
+  const state = { cur: 1, showDone: false, newItem: null, menu: false, ticking: new Set(), leaving: new Set() };
+  const TICK_FILL = 120, TICK_FADE = 120; // ms: the circle fills, then the row fades, then rows below close up
   const current = () => D.lists.find((l) => l.id === state.cur);
 
   // Overdue first, then by time, then untimed (newest first) — so the sheet reads as "what's next".
@@ -29,7 +30,7 @@
   }
 
   const itemRow = (it) => `
-    <li class="item ${it.d ? 'is-done' : ''} ${it.indent ? 'indent' : ''} ${it.id === state.newItem ? 'is-new' : ''}">
+    <li class="item ${it.d ? 'is-done' : ''} ${it.indent ? 'indent' : ''} ${it.id === state.newItem ? 'is-new' : ''} ${state.ticking.has(it.id) ? 'is-ticking' : ''} ${state.leaving.has(it.id) ? 'is-leaving' : ''}" data-id="${it.id}">
       <button class="check" data-act="tick" data-id="${it.id}" aria-label="${it.d ? 'Uncheck' : 'Check'} ${esc(it.t)}">${I.tick}</button>
       <span class="text">${esc(it.t)}</span>
       ${it.due && !it.d ? (D.isOverdue(it) ? `<span class="when late">${D.lateWhen(D.dueLabel(it.due), I.alert)}</span>` : `<span class="when">${D.dueLabel(it.due)}</span>`) : ''}
@@ -128,6 +129,34 @@
       if (onRender) onRender(l);
     }
 
+    // The list menu opens and closes in place (no re-render), so it can animate in and fade out.
+    function setMenu(v, { keyboard = false } = {}) {
+      state.menu = v;
+      const m = win.querySelector('.menu');
+      m.classList.toggle('kbd', keyboard);
+      m.classList.toggle('on', v);
+      win.querySelector('.switch').setAttribute('aria-expanded', String(v));
+      focusInput();
+    }
+
+    // Re-render, then slide rows that moved from where they were (FLIP), so nothing jumps.
+    function flipRender(skipId) {
+      const before = new Map();
+      win.querySelectorAll('.item[data-id]').forEach((el) => before.set(el.dataset.id, el.getBoundingClientRect().top));
+      render();
+      win.querySelectorAll('.item[data-id]').forEach((el) => {
+        const top = before.get(el.dataset.id);
+        if (top == null || +el.dataset.id === skipId) return;
+        const dy = top - el.getBoundingClientRect().top;
+        if (!dy) return;
+        el.style.transition = 'none';
+        el.style.transform = `translateY(${dy}px)`;
+        void el.offsetHeight;
+        el.style.transition = 'transform var(--dur) var(--ease-out)';
+        el.style.transform = '';
+      });
+    }
+
     function updateParse() {
       const input = win.querySelector('.add input');
       const box = win.querySelector('.parse');
@@ -147,19 +176,23 @@
 
     win.addEventListener('click', (e) => {
       const b = e.target.closest('[data-act]');
-      if (!b) { if (state.menu && !e.target.closest('.menu')) { state.menu = false; render(); } return; }
+      if (!b) { if (state.menu && !e.target.closest('.menu')) setMenu(false); return; }
       const act = b.dataset.act;
       if (act === 'app') return openApp();
       if (act === 'hide') { setOpen(false); return hide.run(); }
       if (act === 'move') { move.run(); place(win); return; }
-      if (act === 'menu') { state.menu = !state.menu; render(); return focusInput(); }
+      if (act === 'menu') return setMenu(!state.menu, { keyboard: e.detail === 0 }); // detail 0 = Enter/Space
       if (act === 'open') { state.cur = +b.dataset.id; state.menu = false; state.showDone = false; win.querySelector('.add input').value = ''; render(); return focusInput(); }
       if (act === 'done') { state.showDone = !state.showDone; render(); return; }
       if (act === 'tick') {
         const it = current().items.find((i) => i.id === +b.dataset.id);
         if (it.d) { it.d = false; render(); return; }
-        b.closest('.item').classList.add('is-ticking'); // show the tick for a beat, then move it into Done
-        setTimeout(() => { it.d = true; render(); }, 280);
+        // Fill (120ms), fade the row (120ms), then the rows below close up (FLIP). The sets keep each row's
+        // state through any re-render, so ticking several rows quickly never cancels one.
+        state.ticking.add(it.id);
+        b.closest('.item').classList.add('is-ticking');
+        setTimeout(() => { state.leaving.add(it.id); win.querySelector(`.item[data-id="${it.id}"]`)?.classList.add('is-leaving'); }, TICK_FILL);
+        setTimeout(() => { it.d = true; state.ticking.delete(it.id); state.leaving.delete(it.id); flipRender(it.id); }, TICK_FILL + TICK_FADE);
         return;
       }
       if (onAction) onAction(act, b);
@@ -193,10 +226,10 @@
     }
 
     win.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') { if (state.menu) { state.menu = false; render(); return focusInput(); } return setOpen(false, { keyboard: true }); }
+      if (e.key === 'Escape') { if (state.menu) return setMenu(false, { keyboard: true }); return setOpen(false, { keyboard: true }); }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'h' && hide) { e.preventDefault(); setOpen(false); return hide.run(); }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'o') { e.preventDefault(); return openApp(); }
-      if (e.key === 'Backspace' && e.target.tagName === 'INPUT' && e.target.value === '') { e.preventDefault(); state.menu = !state.menu; render(); focusInput(); }
+      if (e.key === 'Backspace' && e.target.tagName === 'INPUT' && e.target.value === '') { e.preventDefault(); setMenu(!state.menu, { keyboard: true }); }
       if (state.menu && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
         const rows = [...win.querySelectorAll('.menu .mrow, .menu input')];
         const i = rows.indexOf(document.activeElement);
@@ -210,7 +243,10 @@
       if (v === isOpen) return;
       isOpen = v;
       win.classList.toggle('no-anim', keyboard);
-      if (isOpen) { state.menu = false; render(); place(win); }
+      if (isOpen) {
+        state.menu = false; render(); place(win);
+        win.classList.add('pre'); void win.offsetHeight; win.classList.remove('pre'); // start the enter from scale .96 + slide
+      }
       win.classList.toggle('is-open', isOpen);
       trigger.classList.toggle('is-open', isOpen);
       trigger.setAttribute('aria-expanded', String(isOpen));

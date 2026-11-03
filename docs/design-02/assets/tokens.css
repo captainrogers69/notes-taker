@@ -28,7 +28,12 @@
   --fs-body: 14px;
   --fs-small: 13px;
 
-  --ease: cubic-bezier(.2, .8, .2, 1);
+  /* Motion: two durations and one strong ease-out for every state change; large sheets get their own curve. */
+  --dur-fast: 120ms;   /* fills, fades, small exits */
+  --dur: 180ms;        /* enters, toggles, menus, close-ups */
+  --ease-out: cubic-bezier(.23, 1, .32, 1);
+  --ease-sheet: cubic-bezier(.32, .72, 0, 1);   /* phone bottom sheets (iOS sheet curve) */
+  --ease: var(--ease-out);
 }
 
 /* Note paper: a list's own colour as a real surface, so a list reads as a note stuck on screen.

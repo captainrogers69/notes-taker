@@ -33,7 +33,7 @@ svg { display: block; }
   cursor: grab;
   touch-action: none;
   user-select: none;
-  transition: opacity .2s, transform .15s var(--ease);
+  transition: opacity var(--dur) var(--ease-out), transform var(--dur-fast) var(--ease-out);
 }
 .minibar:hover, .minibar.is-open, .minibar:focus-visible { opacity: 1; outline: none; }
 .minibar:focus-visible { box-shadow: var(--float-shadow), 0 0 0 2px var(--text); }
@@ -59,13 +59,14 @@ svg { display: block; }
   background: var(--surface);
   box-shadow: var(--float-shadow);
   opacity: 0;
-  transform: scale(.96) translateY(var(--slide-y, -6px));
+  transform: scale(.99);
   transform-origin: var(--origin, left top);
   pointer-events: none;
-  transition: opacity .16s ease, transform .2s var(--ease);
+  transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out); /* exit: a quick fade */
 }
-.sheet.is-open { opacity: 1; transform: none; pointer-events: auto; }
-.sheet.no-anim { transition: none; } /* opened or closed from the keyboard: no motion */
+.sheet.pre { transform: scale(.96) translateY(var(--slide-y, -6px)); transition: none; } /* where an enter starts */
+.sheet.is-open { opacity: 1; transform: none; pointer-events: auto; transition: opacity var(--dur) var(--ease-out), transform 200ms var(--ease-out); }
+.sheet.no-anim, .sheet.no-anim.is-open { transition: none; } /* opened or closed from the keyboard: no motion */
 .sheet :focus-visible { outline: 2px solid var(--text); outline-offset: 1px; border-radius: var(--radius-control); }
 
 .sheet .top { border-radius: var(--radius-card) var(--radius-card) 0 0; padding-bottom: 12px; }
@@ -121,6 +122,7 @@ svg { display: block; }
 .item .when.late { color: var(--negative); font-weight: 500; }
 .item.is-done .text, .item.is-ticking .text { text-decoration: line-through; color: var(--muted); }
 .item.indent { padding-left: 42px; }
+.item.is-leaving { opacity: 0; transition: opacity var(--dur-fast) var(--ease-out); }
 
 /* The tick: an 18px circle drawn inside a 24px target (WCAG 2.5.8). */
 .check {
@@ -131,7 +133,7 @@ svg { display: block; }
 .check::before {
   content: ''; position: absolute; inset: 3px; border-radius: 50%;
   border: 1.5px solid var(--control); background: var(--surface);
-  transition: background .15s, border-color .15s;
+  transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
 }
 .check:hover::before { border-color: var(--accent-ink); }
 .check svg { position: relative; opacity: 0; color: #111; }
@@ -140,7 +142,7 @@ svg { display: block; }
 
 .done-row { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 6px; margin: 4px 12px 0; padding: 6px 0; color: var(--muted); font-size: var(--fs-small); }
 .done-row:hover { color: var(--text); }
-.done-row svg { transition: transform .15s; }
+.done-row svg { transition: transform var(--dur) var(--ease-out); }
 .done-row[aria-expanded="true"] svg { transform: rotate(90deg); }
 .sheet .empty { margin: 16px 12px; padding: 12px; border: 1px dashed var(--control); border-radius: var(--radius-control); color: var(--muted); font-size: 13px; }
 
@@ -156,9 +158,12 @@ svg { display: block; }
   position: absolute; z-index: 3; left: 8px; top: 46px; width: 260px;
   padding: 6px; border-radius: var(--radius-card);
   background: var(--surface); box-shadow: var(--float-shadow);
-  display: none;
+  visibility: hidden; opacity: 0; pointer-events: none; transform-origin: 16px top;
+  transition: opacity 100ms var(--ease-out), visibility 0s 100ms; /* exit: a quick fade */
 }
-.menu.on { display: block; }
+.menu.on { visibility: visible; opacity: 1; pointer-events: auto; transition: none; animation: wv-menu-in var(--dur) var(--ease-out); }
+@keyframes wv-menu-in { from { opacity: 0; transform: translateY(-4px) scale(.97); } }
+.menu.kbd, .menu.kbd.on { transition: none; animation: none; } /* opened or closed from the keyboard: instant */
 .menu .mrow { all: unset; box-sizing: border-box; cursor: pointer; width: 100%; display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px; border-radius: var(--radius-control); }
 .menu .mrow:hover, .menu .mrow:focus-visible { background: var(--hover); outline: none; }
 .menu .mrow .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

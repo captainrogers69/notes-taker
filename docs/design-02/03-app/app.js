@@ -25,7 +25,9 @@
     query: '',
     psheet: null,       // phone bottom sheet: 'item' | 'share' | 'more'
     pmenu: false,
-    pop: null,          // desktop floating menu: { kind, x, y }
+    pop: null,          // desktop floating menu: { kind, x, y, kbd }
+    ticking: new Set(), // rows whose tick is filling (kept through re-renders)
+    leaving: new Set(), // rows fading out after a tick
     floatOpacity: 50,
     theme: 'system',
   };
@@ -54,6 +56,7 @@
   }
   const HINT = `<span>Times and days are understood: 6pm, 18:30, tomorrow, tonight, in 2 h.</span>`;
 
+  const rowMotion = (it) => `${state.ticking.has(it.id) ? 'is-ticking' : ''} ${state.leaving.has(it.id) ? 'is-leaving' : ''}`;
   const itemWhen = (it) => (!it.due ? '' : D.isOverdue(it)
     ? `<span class="when late">${D.lateWhen(D.dueLabel(it.due), I.alert)}</span>`
     : `<span class="when">${D.dueLabel(it.due)}</span>`);
@@ -61,7 +64,7 @@
   function agendaRow(x, { showList = true } = {}) {
     const { it, list } = x;
     return `
-      <li class="row ${it.d ? 'is-done' : ''}" style="${cvars(list)}">
+      <li class="row ${it.d ? 'is-done' : ''} ${rowMotion(it)}" data-id="${it.id}" style="${cvars(list)}">
         <button class="check" data-act="tick" data-id="${it.id}" aria-label="${it.d ? 'Uncheck' : 'Check'} ${esc(it.t)}">${I.tick}</button>
         <button class="rowbtn" data-act="goto" data-list="${list.id}" data-id="${it.id}">
           <span class="t">${esc(it.t)}</span>
@@ -282,7 +285,7 @@
       it.due && !it.d ? itemWhen(it) : '',
     ].join('');
     return `
-      <li class="row ${it.d ? 'is-done' : ''} ${it.indent ? 'indent' : ''} ${state.sel === it.id ? 'sel' : ''} ${state.newItem === it.id ? 'is-new' : ''}">
+      <li class="row ${it.d ? 'is-done' : ''} ${it.indent ? 'indent' : ''} ${state.sel === it.id ? 'sel' : ''} ${state.newItem === it.id ? 'is-new' : ''} ${rowMotion(it)}" data-id="${it.id}">
         ${phone() ? '' : `<span class="grip" title="Drag to reorder, or Alt+↑ / Alt+↓" aria-hidden="true">${I.grip}</span>`}
         <button class="check" data-act="tick" data-id="${it.id}" aria-label="${it.d ? 'Uncheck' : 'Check'} ${esc(it.t)}">${I.tick}</button>
         ${phone() ? `<button class="ed rowbtn" style="min-height:0" data-act="select" data-id="${it.id}">${esc(it.t)}</button>`
@@ -591,13 +594,30 @@
     renderPop();
   }
 
-  // ---------- Floating menus (desktop) ----------
+  // Re-render, then slide rows that moved from where they were (FLIP), so nothing jumps.
+  function flipRender(skipId) {
+    const before = new Map();
+    app.querySelectorAll('.row[data-id]').forEach((el) => before.set(el.dataset.id, el.getBoundingClientRect().top));
+    render();
+    app.querySelectorAll('.row[data-id]').forEach((el) => {
+      const top = before.get(el.dataset.id);
+      if (top == null || +el.dataset.id === skipId) return;
+      const dy = top - el.getBoundingClientRect().top;
+      if (!dy) return;
+      el.style.transition = 'none';
+      el.style.transform = `translateY(${dy}px)`;
+      void el.offsetHeight;
+      el.style.transition = 'transform var(--dur) var(--ease-out)';
+      el.style.transform = '';
+    });
+  }
+
+  // ---------- Floating menus (desktop): grow from their trigger, fade out; instant from the keyboard ----------
   const popEl = document.createElement('div');
   popEl.className = 'pop';
-  popEl.hidden = true;
   document.body.appendChild(popEl);
   function renderPop() {
-    if (!state.pop) { popEl.hidden = true; return; }
+    if (!state.pop) { popEl.classList.remove('on'); return; }
     const l = cur();
     const items = {
       share: `<button data-act="share" data-as="Text">${I.text} Copy as text</button><button data-act="share" data-as="Markdown">${I.list} Copy as Markdown</button><button data-act="share" data-as="Image">${I.share} Share as image…</button>`,
@@ -605,14 +625,16 @@
       color: [0, 1, 2, 3, 4, 5].map((c) => `<button data-act="color" data-c="${c}"><span class="dot" style="--c:var(--n${c});--ci:var(--n${c}-ink)"></span>${D.COLOR_NAMES[c]}${l.color === c ? ' (current)' : ''}</button>`).join(''),
     }[state.pop.kind];
     popEl.innerHTML = items;
-    popEl.hidden = false;
+    popEl.style.transformOrigin = state.pop.kind === 'color' ? 'left top' : 'right top';
+    popEl.classList.toggle('kbd', !!state.pop.kbd);
+    popEl.classList.add('on');
     popEl.style.left = Math.min(state.pop.x, innerWidth - 240) + 'px';
     popEl.style.top = state.pop.y + 'px';
     popEl.querySelector('button').focus();
   }
-  function openPop(kind, el) {
+  function openPop(kind, el, e) {
     const r = el.getBoundingClientRect();
-    state.pop = { kind, x: kind === 'color' ? r.left : r.right - 220, y: r.bottom + 6 };
+    state.pop = { kind, x: kind === 'color' ? r.left : r.right - 220, y: r.bottom + 6, kbd: !!e && e.detail === 0 };
     renderPop();
   }
 
@@ -624,6 +646,7 @@
   let toastT;
   function toast(msg, undo) {
     toastEl.innerHTML = `<span>${esc(msg)}</span>${undo ? '<button>Undo</button>' : ''}`;
+    if (!toastEl.classList.contains('on')) { toastEl.classList.add('pre'); void toastEl.offsetHeight; toastEl.classList.remove('pre'); }
     toastEl.classList.add('on');
     if (undo) toastEl.querySelector('button').onclick = () => { undo(); toastEl.classList.remove('on'); render(); };
     clearTimeout(toastT);
@@ -652,7 +675,13 @@
       case 'tick': {
         const it = findItem(+b.dataset.id);
         const row = b.closest('.row');
-        if (!it.d && row) { row.classList.add('is-ticking'); setTimeout(() => { it.d = true; render(); toast(`Checked "${it.t}"`, () => { it.d = false; }); }, 280); return; }
+        if (!it.d && row) {
+          // Fill (120ms), fade the row (120ms), then the rows below close up (FLIP). Ticking several rows quickly never cancels one.
+          state.ticking.add(it.id); row.classList.add('is-ticking');
+          setTimeout(() => { state.leaving.add(it.id); app.querySelectorAll(`.row[data-id="${it.id}"]`).forEach((r) => r.classList.add('is-leaving')); }, 120);
+          setTimeout(() => { it.d = true; state.ticking.delete(it.id); state.leaving.delete(it.id); flipRender(it.id); toast(`Checked "${it.t}"`, () => { it.d = false; }); }, 240);
+          return;
+        }
         it.d = !it.d; break;
       }
       case 'focusadd': { const i = app.querySelector('.notecard .capture input'); if (i) i.focus(); return; }
@@ -674,9 +703,9 @@
       case 'onscreen': D.lists.forEach((x) => { if (x !== l) x.onScreen = false; }); l.onScreen = !l.onScreen; break;
       case 'pinned': l.pinned = !l.pinned; state.pop = null; break;
       case 'share': state.pop = null; state.psheet = null; render(); toast(b.dataset.as === 'Image' ? `Sharing ${l.name} as an image…` : `Copied ${l.name} as ${b.dataset.as}`); return;
-      case 'sharemenu': openPop('share', b); return;
-      case 'more': openPop('more', b); return;
-      case 'colormenu': if (phone()) { state.psheet = 'more'; break; } openPop('color', b); return;
+      case 'sharemenu': openPop('share', b, e); return;
+      case 'more': openPop('more', b, e); return;
+      case 'colormenu': if (phone()) { state.psheet = 'more'; break; } openPop('color', b, e); return;
       case 'archive': case 'dellist': {
         const idx = D.lists.indexOf(l); D.lists.splice(idx, 1);
         if (a === 'archive') archived.unshift({ id: l.id, name: l.name, color: l.color, n: D.checks(l).length, when: 'Archived just now' });
@@ -743,7 +772,7 @@
   // Inline editing on desktop: Enter adds below, Backspace on empty removes, Tab indents.
   document.addEventListener('keydown', (e) => {
     const t = e.target;
-    if (e.key === 'Escape') { if (state.pop) { state.pop = null; renderPop(); return; } if (state.psheet || state.sel) { state.psheet = null; state.sel = null; render(); } return; }
+    if (e.key === 'Escape') { if (state.pop) { popEl.classList.add('kbd'); state.pop = null; renderPop(); return; } if (state.psheet || state.sel) { state.psheet = null; state.sel = null; render(); } return; }
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); const s = app.querySelector('[data-search]'); if (s) s.focus(); return; }
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'n') { e.preventDefault(); act('newlist'); return; }
     if (!t.matches('.items [data-edit]')) return;

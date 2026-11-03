@@ -43,7 +43,7 @@
     },
     place(win) {
       const h = Math.min(win.scrollHeight, 460), w = win.offsetWidth;
-      if (st.from === 'tray') {
+      if (st.from === 'tray' && trays[st.os]) {
         const r = trays[st.os].getBoundingClientRect();
         if (st.os === 'macos') { // drops down under the menu bar item
           win.style.left = clamp(r.right - w, EDGE, innerWidth - w - EDGE) + 'px';
@@ -178,8 +178,10 @@
     if (a === 'reply') { st.replying = true; renderShade(l); document.querySelector('.reply input').focus(); }
     if (a === 'tick') {
       const it = l.items.find((i) => i.id === +b.dataset.id);
-      b.closest('li').classList.add('is-done');
-      setTimeout(() => { it.d = true; sheet.render(); }, 280);
+      const li = b.closest('li');
+      li.classList.add('is-done');                                   // fill (120ms)
+      setTimeout(() => li.classList.add('is-leaving'), 120);         // fade the row (120ms)
+      setTimeout(() => { it.d = true; sheet.render(); }, 240);
     }
   });
   document.getElementById('shade').addEventListener('submit', (e) => {

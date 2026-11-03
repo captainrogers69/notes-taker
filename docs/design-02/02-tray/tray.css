@@ -45,6 +45,7 @@
 .notif .sub .late { color: var(--negative); }
 .notif ul { list-style: none; margin: 8px 0 4px; padding: 0; }
 .notif li { display: flex; align-items: center; gap: 12px; height: 36px; font-size: 14px; }
+.notif li.is-leaving { opacity: 0; transition: opacity var(--dur-fast) var(--ease-out); }
 .notif li .t { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .notif li .when { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
 .notif li .when.late { color: var(--negative); font-weight: 500; }
@@ -65,6 +66,6 @@
 
 /* The bar flying into the tray / back: transform + opacity only (its left/top never animate), 260ms ease-out-quint.
    The translate and scale are set inline from the tray icon's position. */
-.minibar.flying { transition: transform .26s cubic-bezier(.22, 1, .36, 1), opacity .26s cubic-bezier(.22, 1, .36, 1); transform-origin: left top; pointer-events: none; }
+.minibar.flying { transition: transform 260ms var(--ease-out), opacity 260ms var(--ease-out); transform-origin: left top; pointer-events: none; }
 .minibar.flying-start { transition: none; transform-origin: left top; pointer-events: none; }
 .minibar.gone { display: none; }

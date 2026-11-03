@@ -109,7 +109,29 @@ Checks: `inspect.mjs` 0 FAIL / 0 WARN on Up next, settings and all six lists. Th
 
 **Still open:**
 - B6: **decided, keep 50%** (2026-11-03). The bar is meant to recede; it reaches full strength on hover, while open, and while dragging. Not fixing.
-- C: motion audit, critical items fixed (below). The 4 important items and 6 opportunities are not started.
+- C: motion audit, critical and important items fixed (below). The 6 opportunities are not started.
+
+### Motion audit checklist
+
+From [`motion-audits/notes-taker-2026-11-03.html`](../../motion-audits/notes-taker-2026-11-03.html). Tick an item when it is fixed and re-checked in the browser.
+
+**Critical**
+- [x] M1 · Phone bottom sheets and menu snap in and out → slide in 280ms on the iOS sheet curve, out in 200ms (`app.js`, `app.css`)
+- [x] M2 · Bar flies into the tray by animating `left`/`top` → transform + opacity only, 260ms, ends on `transitionend` (`tray.js`, `tray.css`)
+
+**Important**
+- [x] M3 · Tick holds 280ms, then the row vanishes and the list jolts → 120ms fill, 120ms fade, rows below close up with a 180ms FLIP; rapid ticks don't cancel each other (`weave.js`, `app.js`, `tray.js`)
+- [x] M4 · Menus have no enter or exit (list switcher; Share, More, Colour) → 180ms opacity + scale .97 from the trigger, 100ms fade out, instant when opened from the keyboard (`weave.css`/`weave.js`, `app.js`/`app.css`)
+- [x] M5 · Exits as heavy as enters (sheet, toast) → exit is a 120–150ms fade with no slide (`weave.css`, `app.css`)
+- [x] M6 · Default `ease` and scattered durations → `--dur-fast`, `--dur` and `--ease-out` tokens on every transition (`tokens.css` and all stylesheets)
+
+**Opportunities**
+- [ ] M7 · New-task highlight 1.2s → 600ms (`weave.css:117`, `app.css`)
+- [ ] M8 · Reserve the height of the parse line under the sheet's field, so the list stops nudging while you type (`weave.css:108`)
+- [ ] M9 · "Done · n" section expands with its chevron (180ms `grid-template-rows`) (`weave.js:49`, `app.js`)
+- [ ] M10 · Tray icon pop 1.35 → 1.12, 240ms (`tray.css:24`)
+- [ ] M11 · Day's-last-tick ink stroke along the thread, once a day, skipped under reduced motion (`app.js` `drawThread`)
+- [ ] M12 · First-run bar unroll from the mark, once only (`01-mini-bar`)
 
 ### Motion audit fixes: critical (2026-11-03)
 
@@ -120,8 +142,19 @@ Checks: `inspect.mjs` 0 FAIL / 0 WARN on Up next, settings and all six lists. Th
 
 Verified mid-flight in a headless browser: the sheet is part-way at 70ms on open and 60ms on close; the bar's `left` stays fixed while its transform scales to ~.49 at 90ms (macOS and Windows). All click-through tests pass with a clean console; inspect 0 FAIL / 0 WARN; lint 0 FAIL.
 
+### Motion audit fixes: important (2026-11-03)
+
+| Finding | Fix |
+|---|---|
+| M3 · Tick holds, then the row vanishes and the list jolts | The circle fills and the text strikes through over 120ms, then the row fades over 120ms. The rows below slide up over 180ms (FLIP: the old position is recorded, the list re-renders, and each row animates from its old offset). The ticking and leaving rows are tracked in sets, so a re-render or a second tick mid-animation doesn't reset the first. Mini-bar sheet, app list, Up next and the Android notification. `assets/weave.js` `flipRender`, `03-app/app.js` `flipRender` / `rowMotion`, `02-tray/tray.js`. |
+| M4 · Menus snap open and shut | The list switcher and the Share, More and Colour pops grow from their trigger (opacity plus scale .97, 180ms, transform-origin at the trigger) and fade out over 100ms. A menu opened from the keyboard (Enter or Space, or the Escape and Backspace shortcuts) appears and disappears instantly. `assets/weave.css` `.menu`, `03-app/app.css` `.pop`, `kbd` class in both scripts. |
+| M5 · Exits as heavy as enters | The sheet enters from scale .96 (180ms opacity, 200ms transform) and leaves as a 120ms fade at scale .99. Opening it with ⌥Space is instant. The toast rises 16px on enter and leaves as a 150ms fade with no drop. `assets/weave.css` `.sheet.pre`, `03-app/app.css` `.toast.pre`. |
+| M6 · Default `ease` and scattered durations | `--dur-fast` (120ms), `--dur` (180ms), `--ease-out` and `--ease-sheet` in `tokens.css`. Every transition in the three stylesheets uses them. The two longer flights (the 260ms tray flight and the 280ms phone sheet) are named exceptions. |
+
+Verified mid-animation in a headless browser: the sheet at 50ms is part-way in (scale .991, opacity .82) and part-way out (opacity .07); a clicked menu is at opacity .82 after 40ms while a keyboard-opened one is instant; two quick ticks both fade and the rows below slide; the toast fades out without moving. The click-through tests pass with a clean console on 01, 02 (macOS, Windows, Android) and 03. Lint 0 FAIL. The inspector gives 0 FAIL / 0 WARN on every screen except one WARN on the phone list page: the space between a short list and the add field pinned above the tab bar. That space is intended.
+
 ---
 
 ## Next
 
-Decide on the motion audit's important items, run round 2 of the AI passes on the new screenshots, then go to designer review (plan step 2).
+Decide on the motion audit's opportunities (M7–M12), run round 2 of the AI passes on the new screenshots, then go to designer review (plan step 2).
