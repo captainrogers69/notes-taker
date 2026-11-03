@@ -20,6 +20,7 @@
   figcaption { display: flex; justify-content: space-between; gap: 12px; margin: 0 0 8px; font-weight: 500; }
   figcaption a { font-weight: 400; color: var(--muted); font-size: 13px; }
   .frame { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); aspect-ratio: var(--w) / var(--h); }
+  .frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top left; }
   .frame iframe { position: absolute; left: 0; top: 0; border: 0; width: calc(var(--w) * 1px); height: calc(var(--h) * 1px); transform-origin: 0 0; transform: scale(var(--s, .5)); }
   .phones { --n: 2; max-width: 980px; }
   ol.items { margin: 16px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
@@ -31,18 +32,18 @@
 <body>
 <div class="wrap">
   <h1>Declutter study</h1>
-  <p class="lede">Left: the app as it is now. Right: the same screen with the D1–D13 proposals from <code>review.md</code> applied. Red boxes mark what each item changes. Both sides are the live prototype: click, tick and type in either.</p>
+  <p class="lede">Left: the app before the clutter rules (screenshots, 3 Nov). Right: the live app now, after the rules (design playbook C1–C12) were applied to every screen. Red boxes mark what each item changed. The right side is the real prototype: click, tick and type in it.</p>
   <div class="bar">
     <label><input type="checkbox" id="marks" checked> Show markers</label>
     <label><input type="checkbox" id="dark"> Dark</label>
-    <a href="03-app/index.html#lean">Open the lean version full size</a>
+    <a href="03-app/index.html">Open the app full size</a>
   </div>
 
   <section>
     <h2>Up next · desktop</h2>
     <div class="pair">
-      <figure><figcaption>Now</figcaption><div class="frame" style="--w:1440;--h:900"><iframe data-src="03-app/index.html#os=macos" title="Up next now"></iframe></div></figure>
-      <figure><figcaption>Lean</figcaption><div class="frame" style="--w:1440;--h:900"><iframe data-src="03-app/index.html#os=macos&lean" title="Up next lean"></iframe></div></figure>
+      <figure><figcaption>Before</figcaption><div class="frame" style="--w:1440;--h:900"><img src="assets/declutter/before-next.jpg" alt="Up next before the clutter rules, with markers"></div></figure>
+      <figure><figcaption>After (live)</figcaption><div class="frame" style="--w:1440;--h:900"><iframe data-src="03-app/index.html#os=macos" title="Up next now"></iframe></div></figure>
     </div>
     <ol class="items">
       <li><span class="tag">D1</span><span>Date moves above the title; one fact under it: what's left and what's next.</span></li>
@@ -56,33 +57,41 @@
 
   <section>
     <h2>A list · desktop</h2>
-    <div class="pair" style="--n:3">
-      <figure><figcaption>Now</figcaption><div class="frame" style="--w:1440;--h:900"><iframe data-src="03-app/index.html#os=macos&list=1" title="List now"></iframe></div></figure>
-      <figure><figcaption>Lean, slim rail</figcaption><div class="frame" style="--w:1440;--h:900"><iframe data-src="03-app/index.html#os=macos&list=1&lean" title="List lean with slim rail"></iframe></div></figure>
-      <figure><figcaption>Lean, no rail</figcaption><div class="frame" style="--w:1440;--h:900"><iframe data-src="03-app/index.html#os=macos&list=1&lean&rail=none" title="List lean without rail"></iframe></div></figure>
+    <div class="pair">
+      <figure><figcaption>Before</figcaption><div class="frame" style="--w:1440;--h:900"><img src="assets/declutter/before-list.jpg" alt="A list before the clutter rules, with markers"></div></figure>
+      <figure><figcaption>After (live)</figcaption><div class="frame" style="--w:1440;--h:900"><iframe data-src="03-app/index.html#os=macos&list=1" title="List now"></iframe></div></figure>
     </div>
     <ol class="items">
       <li><span class="tag">D9</span><span>One place to add: a row at the end of the list. The box at the top goes.</span></li>
       <li><span class="tag">D10</span><span>Row chevron only on hover or focus (hover a row on the right to see it).</span></li>
-      <li><span class="tag">D11</span><span>"in the mini bar" dropped from the line under the title; the button already says it.</span></li>
-      <li><span class="tag">D12</span><span>Rail keeps Colour and Pin only, or goes (colour is on the title dot, Pin is in ••• ).</span></li>
+      <li><span class="tag">D11</span><span>The line under the title is one fact: what's left and what's next. "In the mini bar", the overdue count and "edited…" are said elsewhere (button, red row, ••• menu).</span></li>
+      <li><span class="tag">D12</span><span>No side panel: colour is on the title dot, Pin is in •••. The list keeps a reading width (760 px) so times stay near their tasks.</span></li>
     </ol>
-    <p class="ask">Your call on D12: middle (slim rail) or right (no rail)?</p>
   </section>
 
   <section>
     <h2>Up next and a list · iPhone</h2>
     <div class="pair phones" style="--n:4;max-width:none">
-      <figure><figcaption>Up next, now</figcaption><div class="frame" style="--w:440;--h:900"><iframe data-src="03-app/index.html#os=ios" title="Phone Up next now"></iframe></div></figure>
-      <figure><figcaption>Up next, lean</figcaption><div class="frame" style="--w:440;--h:900"><iframe data-src="03-app/index.html#os=ios&lean" title="Phone Up next lean"></iframe></div></figure>
-      <figure><figcaption>List, now</figcaption><div class="frame" style="--w:440;--h:900"><iframe data-src="03-app/index.html#os=ios&list=1" title="Phone list now"></iframe></div></figure>
-      <figure><figcaption>List, lean</figcaption><div class="frame" style="--w:440;--h:900"><iframe data-src="03-app/index.html#os=ios&list=1&lean" title="Phone list lean"></iframe></div></figure>
+      <figure><figcaption>Up next, before</figcaption><div class="frame" style="--w:440;--h:900"><img src="assets/declutter/before-phone-next.jpg" alt="Phone Up next before, with markers"></div></figure>
+      <figure><figcaption>Up next, after</figcaption><div class="frame" style="--w:440;--h:900"><iframe data-src="03-app/index.html#os=ios" title="Phone Up next now"></iframe></div></figure>
+      <figure><figcaption>List, before</figcaption><div class="frame" style="--w:440;--h:900"><img src="assets/declutter/before-phone-list.jpg" alt="Phone list before, with markers"></div></figure>
+      <figure><figcaption>List, after</figcaption><div class="frame" style="--w:440;--h:900"><iframe data-src="03-app/index.html#os=ios&list=1" title="Phone list now"></iframe></div></figure>
     </div>
     <ol class="items">
       <li><span class="tag">D1</span><span>Same header as desktop: date above, one fact below. No two-line sentence.</span></li>
       <li><span class="tag">D2</span><span>The "Weave" logo row goes; the tab bar says where you are.</span></li>
       <li><span class="tag">D3</span><span>The labelled thread (cut-off labels) becomes the one-line strip in the Today card.</span></li>
-      <li><span class="tag">D8</span><span>Bug, fixed in both: "Pick up parcel from the locker" no longer cuts off.</span></li>
+      <li><span class="tag">D8</span><span>"Pick up parcel from the locker" no longer cuts off: the time column fits its content.</span></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Also applied (clutter check on the other screens)</h2>
+    <ol class="items">
+      <li><span class="tag">E3</span><span>"Uncheck all" lives only beside Done, no longer also in •••.</span></li>
+      <li><span class="tag">E4</span><span>Today card drops "4 open · 1 done": the header already says 4 left.</span></li>
+      <li><span class="tag">E5</span><span>Settings: the Mini bar intro no longer reads back the controls beside it.</span></li>
+      <li><span class="tag">E6</span><span>Mini bar: while the sheet is open the bar's count fades, since the sheet header says it.</span></li>
     </ol>
   </section>
 </div>

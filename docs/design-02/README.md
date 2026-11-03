@@ -8,7 +8,7 @@ A redesign of the prototypes in [`docs/design/`](../design/index.html): mini bar
 |---|---|---|
 | [01](01-mini-bar/index.html) | Mini bar and sheet | The bar shows the one thing to know: "1 overdue", otherwise "next 17:00". No hotkey chip or colour strip. The sheet orders tasks by time, with times right-aligned. The field reads times as you type ("tomorrow 6pm" → "Due Tomorrow 18:00"). Lists open in a menu instead of a sideways slide. The footer shows sync status. |
 | [02](02-tray/index.html) | Hide to tray | The same flow on macOS, Windows and Android. The Android notification lists the next two tasks with times, tick buttons, and a reply field. Linux is left out: it is the same as macOS. |
-| [03](03-app/index.html) | Weave app | The app opens on **Up next**: today's tasks from every list, with a **day thread** on top. A list screen puts tasks on the left; the right panel shows list details, or task details once a task is selected. Archive and trash share one screen. Settings use one row per section, with a live preview of the mini bar's opacity. On phones (iOS and Android), a bottom tab bar (Up next · Lists · Search · Settings) replaces the menu, styled to each platform, and the add field sits just above it, near the thumb, instead of a floating button. Linux chrome is dropped. |
+| [03](03-app/index.html) | Weave app | The app opens on **Up next**: today's tasks from every list, with a **day thread** on top. A list screen is one task card at a reading width; task details open beside it once a task is selected (colour is on the title dot, Pin and Archive in •••). Archive and trash share one screen. Settings use one row per section, with a live preview of the mini bar's opacity. On phones (iOS and Android), a bottom tab bar (Up next · Lists · Search · Settings) replaces the menu, styled to each platform, and the add field sits just above it, near the thumb, instead of a floating button. Linux chrome is dropped. |
 
 ## Direction
 
@@ -22,13 +22,15 @@ Dealt by the `design-taste-frontend` skill (app run, `draw.mjs --app --kind work
 
 **Round 1 review fixes** (see [review.md](review.md)): list colour is now a note-paper surface on the bar, the sheet's header, the list's task card and the list tiles on Up next. The day thread leads Up next and appears as one line in the sheet. The sample list "Today" is now "Errands".
 
+**Clutter rules** (design playbook C1–C12, see [declutter.html](declutter.html)): each fact once per screen, a header of date + title + one fact, one field before the first task, one place per action, no group labels or legends the order and marks already carry, counts without progress bars, and a list at a reading width.
+
 ## Each screen's question
 
 | Screen | Question it answers first | Main action, one click away |
 |---|---|---|
 | Mini bar | How much is left, and is anything late or next? | Click → type → Enter |
 | Sheet | What's on this list, in time order? | The add field, focused on open |
-| Up next | What is due today across every list? | Add field at the top of the Today card, with list picker |
+| Up next | What is due today across every list? | One add field at the top of the Today card, with the list as a chip inside |
 | List | What's left on this list? | Add field at the top; tick |
 | Task details | When is it due and when will it remind me? | Due, Remind me, Repeat options |
 | Settings | Is Weave set up the way I want? | Each control saves itself |

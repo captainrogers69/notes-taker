@@ -50,8 +50,6 @@ svg { display: block; flex: none; }
 .navrow .onscreen { color: var(--muted); }
 .navrow .ndot { width: 16px; display: grid; place-items: center; }
 /* Each list's progress in its own colour: a short bar, the count beside it */
-.navrow .prog { flex: none; width: 24px; height: 4px; border-radius: 2px; overflow: hidden; background: color-mix(in srgb, var(--ci) 20%, var(--surface)); }
-.navrow .prog::before { content: ''; display: block; height: 100%; width: var(--p); background: var(--c); }
 .navrow .n { min-width: 12px; text-align: right; }
 .navrow.inbar:not(.on) { background: color-mix(in srgb, var(--c) var(--paper-mix), transparent); }
 .group { margin: 22px 8px 6px; color: var(--muted); font-size: var(--fs-small); display: flex; align-items: center; }
@@ -111,8 +109,6 @@ h1 [data-rename]:focus { box-shadow: 0 2px 0 var(--text); }
 .capture .field:focus-within { border-color: var(--text); }
 .capture input { all: unset; flex: 1; min-width: 0; }
 .capture input::placeholder { color: var(--faint); }
-.capture select { height: 40px; padding: 0 10px; border: 1px solid var(--control); border-radius: var(--radius-control); background: var(--surface); }
-.capture .btn { height: 40px; }
 .capturebox { margin: 0 0 16px; }
 .parse { min-height: 20px; margin-top: 10px; color: var(--muted); font-size: var(--fs-small); display: flex; align-items: center; gap: 6px; }
 .parse svg { color: var(--muted); }
@@ -129,8 +125,6 @@ h1 [data-rename]:focus { box-shadow: 0 2px 0 var(--text); }
 .thread svg .now { fill: var(--text); font-weight: 500; }
 .thread svg .finale { opacity: 0; stroke-dasharray: 1; stroke-dashoffset: 1; animation: finale 1s var(--ease-out); }
 @keyframes finale { 0% { opacity: 1; stroke-dashoffset: 1; } 60% { opacity: 1; stroke-dashoffset: 0; } 100% { opacity: 0; stroke-dashoffset: 0; } }
-.thread .legend { display: flex; gap: 16px; color: var(--muted); font-size: var(--fs-small); margin-left: auto; }
-.thread .legend span { display: inline-flex; align-items: center; gap: 6px; }
 
 /* Rows */
 .rows { list-style: none; margin: 0; padding: 0; }
@@ -146,8 +140,6 @@ h1 [data-rename]:focus { box-shadow: 0 2px 0 var(--text); }
 .row.is-leaving { opacity: 0; transition: opacity var(--dur-fast) var(--ease-out); }
 .row.sel { background: var(--raised); }
 .rowbtn { all: unset; box-sizing: border-box; cursor: pointer; flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; min-height: var(--row-height); }
-.subhead { margin: 16px 0 4px; color: var(--muted); font-size: var(--fs-small); }
-.subhead:first-child { margin-top: 0; }
 
 /* The tick: an 18px circle inside a 24px target on desktop, 44px on phones. */
 .check { all: unset; flex: none; cursor: pointer; position: relative; width: 24px; height: 24px; margin: -3px; display: grid; place-items: center; border-radius: 50%; }
@@ -178,13 +170,10 @@ h1 [data-rename]:focus { box-shadow: 0 2px 0 var(--text); }
 /* List page: the note and the rail share one height. Slack in the note becomes ruled lines that add a task. */
 .lay-desk .listgrid { align-items: stretch; }
 .lay-desk .listgrid > .notecard { display: flex; flex-direction: column; }
-.ruled { all: unset; box-sizing: border-box; cursor: text; flex: 1 1 0; min-height: 44px; contain: size; display: flex; flex-direction: column; overflow: hidden; color: var(--faint); }
+.ruled { box-sizing: border-box; flex: 1 1 0; min-height: 44px; contain: size; display: flex; flex-direction: column; overflow: hidden; color: var(--faint); }
 .ruled i { flex: none; height: 44px; border-top: 1px solid color-mix(in srgb, var(--ci) 14%, var(--surface)); display: flex; align-items: center; padding-left: 34px; font-style: normal; }
-.ruled:hover i:first-child, .ruled:focus-visible i:first-child { color: var(--text); }
 .lay-desk .listgrid > .span-4 { display: flex; flex-direction: column; }
 .lay-desk .listgrid > .span-4 > .card { flex: 1; }
-.railcard { display: flex; flex-direction: column; }
-.railcard .railfoot { margin-top: auto; padding-top: 16px; }
 .lstrip { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
 .lstrip svg { flex: 1; min-width: 0; }
 
@@ -255,8 +244,6 @@ h1 [data-rename]:focus { box-shadow: 0 2px 0 var(--text); }
 .preview { position: relative; height: 96px; margin-top: 12px; border-radius: var(--radius-control); overflow: hidden; background: #1e1e1e url('../assets/desktop.png') center / cover; }
 .preview .pbar { position: absolute; left: 20px; top: 28px; height: 40px; display: flex; align-items: center; gap: 10px; padding: 0 14px 0 12px; border-radius: var(--radius-card); background: var(--surface); color: var(--text); box-shadow: var(--float-shadow); }
 .preview .pbar .dot { --c: var(--n0); --ci: var(--n0-ink); }
-.onscreen-prev { margin-top: 16px; height: 104px; }
-.onscreen-prev .pbar { top: 32px; }
 .preview .pbar .m { color: var(--muted); }
 .devtable { width: 100%; border-collapse: collapse; }
 .devtable th { text-align: left; font-weight: 400; color: var(--muted); font-size: var(--fs-small); padding: 0 0 8px; }
@@ -284,6 +271,7 @@ h1 [data-rename]:focus { box-shadow: 0 2px 0 var(--text); }
 .pop { position: fixed; z-index: 40; min-width: 200px; padding: 6px; border-radius: var(--radius-card); background: var(--surface); box-shadow: var(--float-shadow); }
 .pop button { all: unset; box-sizing: border-box; cursor: pointer; width: 100%; display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px; border-radius: var(--radius-control); }
 .pop button:hover, .pop button:focus-visible { background: var(--hover); outline: none; }
+.pop .popnote { margin: 4px 0 0; padding: 8px 10px 4px; border-top: 1px solid var(--rule); color: var(--muted); font-size: var(--fs-small); }
 .pop button svg { color: var(--muted); }
 .pop .danger { color: var(--negative); }
 .pop hr { border: 0; border-top: 1px solid var(--rule); margin: 6px 0; }
@@ -360,7 +348,6 @@ h1 [data-rename]:focus { box-shadow: 0 2px 0 var(--text); }
 .lay-phone .danger-zone .panel { flex-direction: column; align-items: flex-start; }
 .lay-phone .row .src { display: none; }
 .lay-phone .row .when { width: auto; min-width: 48px; } /* D8: short times don't hold a 116px column on the phone */
-.lay-phone .thread .legend { display: none; }
 
 .psheet-scrim:not(.on), .psheet:not(.on) { visibility: hidden; pointer-events: none; transition: transform 200ms var(--ease-out), opacity 200ms var(--ease-out), visibility 0s 200ms; }
 .lay-phone .paddbar select { max-width: 112px; }
@@ -376,21 +363,23 @@ h1 [data-rename]:focus { box-shadow: 0 2px 0 var(--text); }
   .lay-desk .titlerow { flex-wrap: wrap; }
 }
 
-/* ---------- Declutter study (#lean, #marks, #embed; review.md D1–D13) ---------- */
+/* E1: a list reads at a row width, not the canvas width (time stays near its task). */
+.lay-desk .listgrid > .notecard.span-12 { max-width: 760px; }
+.lay-desk .canvas:has(.listgrid > .notecard.span-12) .titlerow { max-width: 760px; } /* actions sit over the list's right edge */
+
+/* ---------- Clutter rules (playbook C1–C12; #marks and #embed are for docs/design-02/declutter.html) ---------- */
 .embed .proto { display: none; }
-.lean .eyebrow { margin: 0 0 2px; color: var(--muted); font-size: var(--fs-small); }
-.lean .ptop.empty { display: none; }
-.lean .daystrip { margin: 0 0 12px; }
-.capture.lean .field { position: relative; }
-.capture.lean .lchip { all: unset; flex: none; cursor: pointer; height: 26px; line-height: 26px; padding: 0 10px; border-radius: 13px; background: var(--hover); color: var(--muted); font-size: var(--fs-small); }
-.capture.lean .lchip:focus-visible { outline: 2px solid var(--text); }
-.lean .capturebox:not(:focus-within) .parse.onfocus { display: none; }
-.lean .capturebox .parse.onfocus { min-height: 0; }
-.ruled.lean { cursor: default; }
-.ruled.lean .capture.inline .field { height: 44px; border: 0; border-radius: 0; background: none; padding: 0 0 0 4px; border-top: 1px solid color-mix(in srgb, var(--ci) 14%, var(--surface)); }
-.ruled.lean .capture.inline + .parse { display: none; }
-.lean .items .row .chev { opacity: 0; transition: opacity var(--dur-fast) var(--ease-out); }
-.lean .items .row:hover .chev, .lean .items .row:focus-within .chev, .lean .items .row.sel .chev { opacity: 1; }
+.eyebrow { margin: 0 0 2px; color: var(--muted); font-size: var(--fs-small); }
+.ptop.empty { display: none; }
+.daystrip { margin: 0 0 12px; }
+.capture .lchip { all: unset; flex: none; cursor: pointer; height: 26px; line-height: 26px; padding: 0 10px; border-radius: 13px; background: var(--hover); color: var(--muted); font-size: var(--fs-small); }
+.capture .lchip:focus-visible { outline: 2px solid var(--text); }
+.capturebox:not(:focus-within) .parse.onfocus { display: none; }
+.capturebox .parse.onfocus { min-height: 0; }
+.ruled .capture.inline .field { height: 44px; border: 0; border-radius: 0; background: none; padding: 0 0 0 4px; border-top: 1px solid color-mix(in srgb, var(--ci) 14%, var(--surface)); }
+.ruled .capture.inline + .parse { display: none; }
+.lay-desk .items .row .chev { opacity: 0; transition: opacity var(--dur-fast) var(--ease-out); }
+.lay-desk .items .row:hover .chev, .lay-desk .items .row:focus-within .chev, .lay-desk .items .row.sel .chev { opacity: 1; }
 .marks { position: fixed; inset: 0; pointer-events: none; z-index: 90; }
 .marks .mk { position: absolute; z-index: 2; height: 20px; padding: 0 6px; border-radius: 10px; background: #e5484d; color: #fff; font: 600 12px/20px var(--font); }
 .marks .mkbox { position: absolute; border: 2px solid #e5484d; border-radius: 8px; }

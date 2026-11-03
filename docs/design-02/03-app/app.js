@@ -5,9 +5,8 @@
   'use strict';
   const D = window.WeaveData, I = window.WeaveIcons, { esc } = D;
   const hash = new URLSearchParams(location.hash.slice(1));
-  // Declutter study (review.md D1–D13): #lean shows the proposed version, #rail=none drops the list rail,
-  // #marks pins numbered badges on what each item changes, #embed hides the prototype toolbar.
-  const LEAN = hash.has('lean'), RAIL_NONE = hash.get('rail') === 'none', MARKS = hash.has('marks'), EMBED = hash.has('embed');
+  // #marks pins the declutter study's numbered badges (review.md D1–D13); #embed hides the prototype toolbar.
+  const MARKS = hash.has('marks'), EMBED = hash.has('embed');
 
   const archived = [
     { id: 91, name: 'Diwali shopping', color: 3, n: 7, when: 'Archived 28 Oct' },
@@ -46,24 +45,12 @@
   const dot = (l) => `<span class="dot" style="${cvars(l)}"></span>`;
 
   // ---------- Shared fragments ----------
-  function capture(target, { phoneBar = false } = {}) {
-    if (LEAN) return leanCapture(target, { phoneBar });
-    const select = target ? '' : `
-      <select name="list" aria-label="Add to list">${D.lists.map((l) => `<option value="${l.id}" ${l.id === 1 ? 'selected' : ''}>${esc(l.name)}</option>`).join('')}</select>`;
-    return `
-      <form class="capture" data-form="capture" ${target ? `data-list="${target.id}"` : ''}>
-        <label class="field">${I.plus}<input name="t" autocomplete="off" placeholder="${target ? 'Add a task…' : 'Add a task… try “dentist fri 10am”'}" aria-label="Add a task${target ? ' to ' + esc(target.name) : ''}"></label>
-        ${select}
-        ${phoneBar ? '' : `<button class="btn primary">Add</button>`}
-      </form>
-      <div class="parse" aria-live="polite">${phoneBar ? '' : HINT}</div>`;
-  }
   const HINT = `<span>Times and days are understood: 6pm, 18:30, tomorrow, tonight, in 2 h.</span>`;
-  // D7: one field. Enter adds; the list is a small chip inside the field; the hint shows only while it has focus.
-  function leanCapture(target, { phoneBar = false, inline = false } = {}) {
+  // One field (playbook C3): Enter adds; the list is a small chip inside the field; the hint shows only on focus.
+  function capture(target, { phoneBar = false, inline = false } = {}) {
     const chip = target ? '' : `<select class="lchip" name="list" aria-label="Add to list">${D.lists.map((l) => `<option value="${l.id}" ${l.id === 1 ? 'selected' : ''}>${esc(l.name)}</option>`).join('')}</select>`;
     return `
-      <form class="capture lean ${inline ? 'inline' : ''}" data-form="capture" ${target ? `data-list="${target.id}"` : ''}>
+      <form class="capture ${inline ? 'inline' : ''}" data-form="capture" ${target ? `data-list="${target.id}"` : ''}>
         <div class="field">${I.plus}<input name="t" autocomplete="off" placeholder="${target ? 'Add a task…' : 'Add a task… try “dentist fri 10am”'}" aria-label="Add a task${target ? ' to ' + esc(target.name) : ''}">${chip}</div>
       </form>
       <div class="parse onfocus" aria-live="polite">${phoneBar ? '' : HINT}</div>`;
@@ -88,27 +75,17 @@
   }
 
   // ---------- Up next ----------
-  function upNextFinding() {
-    const today = D.today();
-    const open = today.filter((x) => !x.it.d);
-    const late = open.filter((x) => D.isOverdue(x.it));
-    const parts = [`${D.NOW.day}`, `<b class="num">${open.length}</b> due today`];
-    if (late.length) parts.push(`<span class="late">${late.length} overdue since ${late[0].it.due.t}</span> · ${esc(late[0].it.t)}`);
-    else if (open.length) parts.push(`next ${open[0].it.due.t} · ${esc(open[0].it.t)}`);
-    else parts.push('nothing left for today');
-    return parts.join(' · ');
-  }
 
-  // D1: one fact under the title; the date moves above it.
-  function leanFinding() {
+  // Header (C2): the date above the title, one fact under it.
+  function upNextFinding() {
     const open = D.today().filter((x) => !x.it.d);
     const next = open.find((x) => !D.isOverdue(x.it));
     if (!open.length) return 'Nothing left for today';
     return `<b class="num">${open.length}</b> left today${next ? ` · next ${esc(next.it.t)} at <span class="num">${next.it.due.t}</span>` : ''}`;
   }
-  const leanTitle = (h) => `<p class="eyebrow">${D.NOW.day}</p><h1>${h}</h1><p class="subline">${leanFinding()}</p>`;
+  const pageTitle = (h) => `<p class="eyebrow">${D.NOW.day}</p><h1>${h}</h1><p class="subline">${upNextFinding()}</p>`;
 
-  // D3: today across every list as one line (the mini-bar sheet's strip), for the phone's Today card.
+  // Today across every list as one line (the mini-bar sheet's strip), for the phone's Today card.
   function dayStrip() {
     const due = D.today();
     if (!due.length) return '';
@@ -130,28 +107,9 @@
       <span aria-hidden="true">23</span></div>`;
   }
 
-  function todayCard({ withCapture = false } = {}) {
-    if (LEAN) return leanTodayCard({ withCapture });
-    const t = D.today();
-    const late = t.filter((x) => D.isOverdue(x.it));
-    const upcoming = t.filter((x) => !x.it.d && !D.isOverdue(x.it));
-    const done = t.filter((x) => x.it.d);
-    // The list chip only earns its place when today mixes lists.
-    const showList = new Set(t.map((x) => x.list.id)).size > 1;
-    const row = (x) => agendaRow(x, { showList });
-    return `
-      <section class="card" aria-labelledby="h-today">
-        <header><h2 id="h-today">Today</h2><span class="meta num">${upcoming.length + late.length} open · ${done.length} done</span></header>
-        ${withCapture ? `<div class="capturebox">${capture(null)}</div>` : ''}
-        ${late.length ? `<div class="subhead late">Overdue</div><ul class="rows">${late.map(row).join('')}</ul>` : ''}
-        ${upcoming.length ? `<div class="subhead">Still to do</div><ul class="rows">${upcoming.map(row).join('')}</ul>` : ''}
-        ${!upcoming.length && !late.length ? '<p class="empty">Nothing left for today.</p>' : ''}
-        ${done.length ? `<div class="subhead">Done today</div><ul class="rows">${done.map(row).join('')}</ul>` : ''}
-      </section>`;
-  }
 
-  // D4: one list, no group labels: overdue first (red time), then the rest, done rows last and struck through.
-  function leanTodayCard({ withCapture = false } = {}) {
+  // One list, no group labels (C5): overdue first with its red time, then the rest, done rows last and struck through.
+  function todayCard({ withCapture = false } = {}) {
     const t = D.today();
     const late = t.filter((x) => !x.it.d && D.isOverdue(x.it));
     const upcoming = t.filter((x) => !x.it.d && !D.isOverdue(x.it));
@@ -160,7 +118,7 @@
     const rows = [...late, ...upcoming, ...done];
     return `
       <section class="card" aria-labelledby="h-today">
-        <header><h2 id="h-today">Today</h2><span class="meta num">${late.length + upcoming.length} open · ${done.length} done</span></header>
+        <header><h2 id="h-today">Today</h2></header>
         ${phone() ? dayStrip() : ''}
         ${withCapture ? `<div class="capturebox">${capture(null)}</div>` : ''}
         ${rows.length ? `<ul class="rows">${rows.map((x) => agendaRow(x, { showList })).join('')}</ul>` : '<p class="empty">Nothing left for today.</p>'}
@@ -172,7 +130,7 @@
     return `
       <section class="card" aria-labelledby="h-later">
         <header><h2 id="h-later">Later this week</h2><span class="meta num">${later.length}</span></header>
-        ${later.length ? `<ul class="rows">${later.map((x) => agendaRow(x, { showList: !(LEAN && !phone()) })).join('')}</ul>` : '<p class="empty">Nothing scheduled after today.</p>'}
+        ${later.length ? `<ul class="rows">${later.map((x) => agendaRow(x, { showList: false })).join('')}</ul>` : '<p class="empty">Nothing scheduled after today.</p>'}
       </section>`;
   }
 
@@ -192,47 +150,13 @@
       </section>`;
   }
 
-  // The bar's own words, as the mini bar shows them (same rule as assets/weave.js barMeta).
-  function WeaveBarMeta(l) {
-    const late = D.open(l).filter(D.isOverdue).length, n = D.nextUp(l), left = D.open(l).length;
-    const head = left ? `<span class="num" style="color:var(--text)">${left}</span> left` : 'All done';
-    if (late) return `${head} · <span class="late">${late} overdue</span>`;
-    if (n && n.due.d === 0) return `${head} · next <span class="num" style="color:var(--text)">${n.due.t}</span>`;
-    return head;
-  }
 
-  // The next reminder that will ring today, across lists: "16:45 · Reply to design review".
-  function nextReminder() {
-    const r = D.lists.flatMap((l) => D.open(l)).map((it) => ({ it, at: D.remindAt(it) }))
-      .filter((x) => x.at != null && x.at > D.NOW.min).sort((a, b) => a.at - b.at)[0];
-    return r ? `${D.fmtClock(r.at)} · ${esc(r.it.t)}` : '—';
-  }
 
-  function floatCard() {
-    const l = D.lists.find((x) => x.onScreen) || D.lists[0];
-    return `
-      <section class="card" aria-labelledby="h-float">
-        <header><h2 id="h-float">On screen</h2><button class="link" data-act="nav" data-view="settings">Mini bar settings</button></header>
-        <dl class="kv">
-          <dt>Mini bar shows</dt><dd><span style="display:inline-flex;gap:8px;align-items:center">${dot(l)}${esc(l.name)}</span></dd>
-          <dt>Next reminder</dt><dd class="num">${nextReminder()}</dd>
-          <dt>Hotkey</dt><dd><span class="kbd">⌥ Space</span></dd>
-          <dt>Sync</dt><dd>${SYNC[state.sync]}</dd>
-        </dl>
-        <div class="preview onscreen-prev" role="img" aria-label="The mini bar as it looks now: ${esc(l.name)}, ${esc(D.leftLabel(l))}">
-          <div class="pbar paper" style="${cvars(l)}" aria-hidden="true">${dot(l)}<b style="font-weight:500">${esc(l.name)}</b><span class="m">${WeaveBarMeta(l)}</span></div></div>
-      </section>`;
-  }
 
   function threadCard() {
     return `
       <section class="card thread" aria-labelledby="h-thread">
-        <header><h2 id="h-thread">Today's thread</h2><span class="meta">${LEAN ? '07:00 to 23:00' : `${D.NOW.day}, 07:00 to 23:00`}</span>
-          ${LEAN ? '' : `<span class="legend">
-            <span><svg width="10" height="10"><circle cx="5" cy="5" r="4" fill="var(--surface)" stroke="var(--muted)" stroke-width="1.5"/></svg>Done</span>
-            <span><svg width="10" height="10"><circle cx="5" cy="5" r="4.5" fill="var(--n0)" stroke="var(--n0-ink)"/></svg>Due</span>
-            <span><svg width="10" height="10"><circle cx="5" cy="5" r="4" fill="var(--surface)" stroke="var(--negative)" stroke-width="2"/></svg>! Overdue</span>
-          </span>`}
+        <header><h2 id="h-thread">Today's thread</h2><span class="meta">07:00 to 23:00</span>
         </header>
         <div data-thread></div>
       </section>`;
@@ -329,35 +253,23 @@
   }
 
   function nextScreen() {
-    if (LEAN && phone()) return `${leanTitle('Up next')}${todayCard()}${laterCard()}`;
-    if (LEAN) return `
-      <div class="titlerow"><div class="tt">${leanTitle('Up next')}</div></div>
+    if (phone()) return `${pageTitle('Up next')}${todayCard()}${laterCard()}`;
+    return `
+      <div class="titlerow"><div class="tt">${pageTitle('Up next')}</div></div>
       <div class="grid eq">
         <div class="span-12">${threadCard()}</div>
         <div class="span-8">${todayCard({ withCapture: true })}</div>
-        <div class="span-4">${laterCard()}</div>
-      </div>`;
-    if (phone()) return `
-      <h1>Up next</h1><p class="subline">${upNextFinding()}</p>
-      ${threadCard()}${todayCard()}${laterCard()}`;
-    return `
-      <div class="titlerow"><div class="tt"><h1>Up next</h1><p class="subline">${upNextFinding()}</p></div></div>
-      <div class="grid eq">
-        <div class="span-12">${threadCard()}</div>
-        <div class="span-8 stack">${todayCard({ withCapture: true })}${laterCard()}</div>
-        <div class="span-4 stack">${listsCard()}${floatCard()}</div>
+        <div class="span-4">${laterCard()}</div> <!-- ragged bottoms on purpose: C12, no padding a card to match its neighbour -->
       </div>`;
   }
 
   // ---------- A list ----------
+  // One fact (C2), and not the overdue count: the overdue row already leads the list in red (C1).
   function listSubline(l) {
-    const o = D.open(l).length, all = D.checks(l).length;
-    const parts = [o ? `<b class="num">${o}</b> left of ${all}` : 'All done'];
-    const late = D.open(l).filter(D.isOverdue);
-    if (late.length) parts.push(`<span class="late">${late.length} overdue</span>`);
-    if (l.onScreen && !LEAN) parts.push(state.os === 'ios' ? 'in the widget' : 'in the mini bar');
-    parts.push(`edited ${l.edited || 'just now'}`);
-    return parts.join(' · ');
+    const o = D.open(l).length, n = D.nextUp(l);
+    if (!o) return 'All done';
+    const when = n ? (n.due.d === 0 ? `at <span class="num">${n.due.t}</span>` : `· <span class="num">${D.dueLabel(n.due)}</span>`) : '';
+    return `<b class="num">${o}</b> left${n ? ` · next ${esc(n.t)} ${when}` : ''}`;
   }
 
   function itemRow(it) {
@@ -383,9 +295,8 @@
     const done = D.done(l);
     return `
       <ul class="rows items">${open.map(itemRow).join('')}</ul>
-      ${phone() ? '' : LEAN ? `<div class="ruled lean">${leanCapture(l, { inline: true })}${'<i aria-hidden="true"></i>'.repeat(8)}</div>`
-        : `<button class="ruled" data-act="focusadd"><i>Add a task…</i>${'<i aria-hidden="true"></i>'.repeat(8)}</button>`}
-      ${!D.checks(l).length ? '<p class="empty">Nothing here yet. Type above and press Enter.</p>' : ''}
+      ${phone() ? '' : `<div class="ruled">${capture(l, { inline: true })}${'<i aria-hidden="true"></i>'.repeat(8)}</div>`}
+      ${!D.checks(l).length ? '<p class="empty">Nothing here yet. Type below and press Enter.</p>' : ''}
       ${done.length ? `<div class="donefoot">
         <div class="donebar">
           <button class="toggle" data-act="done" aria-expanded="${state.showDone}">${I.chevRight} Done · ${done.length}</button>
@@ -395,53 +306,7 @@
   }
 
   // Today on one list, as one line (07:00–23:00): the lived part in ink, its tasks as marks.
-  function listStrip(l) {
-    const due = D.checks(l).filter((i) => i.due && i.due.d === 0 && i.due.t);
-    if (!due.length) return '<p class="muted" style="margin:0">Nothing timed today.</p>';
-    const W = 300, S = 7 * 60, E = 23 * 60;
-    const x = (m) => 6 + Math.round(((Math.min(E, Math.max(S, m)) - S) / (E - S)) * (W - 12));
-    const nx = x(D.NOW.min);
-    const marks = due.map((i) => {
-      const cx = x(D.toMin(i.due.t));
-      if (i.d) return `<circle cx="${cx}" cy="9" r="4" fill="var(--surface)" stroke="var(--muted)" stroke-width="1.5"/>`;
-      if (D.isOverdue(i)) return `<circle cx="${cx}" cy="9" r="4.5" fill="var(--surface)" stroke="var(--negative)" stroke-width="2"/>`;
-      return `<circle cx="${cx}" cy="9" r="5.5" fill="${D.color(l)}" stroke="${D.ink(l)}"/>`;
-    }).join('');
-    const said = due.map((i) => `${i.due.t} ${esc(i.t)}${i.d ? ' (done)' : D.isOverdue(i) ? ' (overdue)' : ''}`).join(', ');
-    return /* taste-skill-ignore: hour labels, not numbering */ `<div class="lstrip"><span aria-hidden="true">07</span>
-      <svg viewBox="0 0 ${W} 18" height="18" role="img" aria-label="Today on ${esc(l.name)}: ${said}. Now ${D.NOW.clock}.">
-        <line x1="6" x2="${W - 6}" y1="9" y2="9" stroke="var(--control)" stroke-width="2" stroke-linecap="round"/>
-        <line x1="6" x2="${nx}" y1="9" y2="9" stroke="var(--text)" stroke-width="2" stroke-linecap="round"/>
-        <line x1="${nx}" x2="${nx}" y1="1" y2="17" stroke="var(--text)" stroke-width="1.5"/>${marks}</svg>
-      <span aria-hidden="true">23</span></div>`;
-  }
 
-  function listInfo(l) {
-    if (LEAN) return `
-      <section class="card railcard slim" aria-labelledby="h-info">
-        <header><h2 id="h-info">This list</h2></header>
-        <span class="field-label">Colour</span>
-        <div class="swatches" role="radiogroup" aria-label="List colour">${[0, 1, 2, 3, 4, 5].map((c) => `
-          <button class="swatch ${l.color === c ? 'on' : ''}" role="radio" aria-checked="${l.color === c}" aria-label="${D.COLOR_NAMES[c]}" data-act="color" data-c="${c}" style="--c:var(--n${c});--ci:var(--n${c}-ink)">${l.color === c ? I.tick : ''}</button>`).join('')}</div>
-        <div class="switchrow" style="margin-top:20px"><span class="lbl"><b>Pin to top</b><small>Keeps it first in your lists.</small></span>
-          <button class="tg" role="switch" aria-checked="${!!l.pinned}" data-act="pinned" aria-label="Pin to top"></button></div>
-      </section>`;
-    const reminders = D.open(l).filter((i) => i.remind);
-    return `
-      <section class="card railcard" aria-labelledby="h-info">
-        <header><h2 id="h-info">This list</h2></header>
-        <span class="field-label">Colour</span>
-        <div class="swatches" role="radiogroup" aria-label="List colour">${[0, 1, 2, 3, 4, 5].map((c) => `
-          <button class="swatch ${l.color === c ? 'on' : ''}" role="radio" aria-checked="${l.color === c}" aria-label="${D.COLOR_NAMES[c]}" data-act="color" data-c="${c}" style="--c:var(--n${c});--ci:var(--n${c}-ink)">${l.color === c ? I.tick : ''}</button>`).join('')}</div>
-        <span class="field-label">Today</span>
-        ${listStrip(l)}
-        <span class="field-label">Reminders <span class="muted num" style="font-weight:400">${reminders.length}</span></span>
-        ${reminders.length ? `<dl class="kv">${reminders.map((i) => `<dt>${esc(i.t)}</dt><dd class="num muted">${esc(i.remind)}</dd>`).join('')}</dl>` : '<p class="empty">No reminders on this list.</p>'}
-        <div class="railfoot"><span class="field-label">Order</span>
-        <div class="switchrow"><span class="lbl"><b>Pin to top</b><small>Keeps it first in your lists.</small></span>
-          <button class="tg" role="switch" aria-checked="${!!l.pinned}" data-act="pinned" aria-label="Pin to top"></button></div></div>
-      </section>`;
-  }
 
   function details(it) {
     const opt = (field, val, label = val, on) => `<button class="opt ${on ? 'on' : ''}" data-act="set" data-field="${field}" data-val="${esc(val)}">${label}</button>`;
@@ -481,8 +346,8 @@
         </div>
       </div>
       <div class="grid listgrid">
-        <section class="card ${LEAN && RAIL_NONE && !sel ? 'span-12' : 'span-8'} paper notecard" style="${cvars(l)}" aria-label="Tasks">${LEAN ? '' : `${capture(l)}<div style="height:8px"></div>`}${itemsBlock(l)}</section>
-        ${LEAN && RAIL_NONE && !sel ? '' : `<div class="span-4">${sel ? details(sel) : listInfo(l)}</div>`}
+        <section class="card ${sel ? 'span-8' : 'span-12'} paper notecard" style="${cvars(l)}" aria-label="Tasks">${itemsBlock(l)}</section>
+        ${sel ? `<div class="span-4">${details(sel)}</div>` : ''}
       </div>`;
   }
 
@@ -521,7 +386,7 @@
       <div class="settings">
         <section class="srow"><div><h2>Appearance</h2><p class="desc">Follows your system unless you pick one.</p></div>
           <div class="panel">${seg('theme', state.theme, [['system', 'System'], ['light', 'Light'], ['dark', 'Dark']])}</div></section>
-        <section class="srow"><div><h2>${state.os === 'ios' ? 'Widgets' : 'Mini bar'}</h2><p class="desc">How Weave stays within reach without getting in the way.</p>${state.os === 'ios' ? '' : `<p class="desc">Now: ${settingsScreen.p && !settingsScreen.p.bar ? 'hidden' : 'shown'}, <span class="num">${state.floatOpacity}%</span> when idle${isPhoneOS() ? '' : ', ⌥ Space to open'}.</p>`}</div>
+        <section class="srow"><div><h2>${state.os === 'ios' ? 'Widgets' : 'Mini bar'}</h2><p class="desc">How Weave stays within reach without getting in the way.</p></div>
           <div class="panel">${floatPanel}</div></section>
         <section class="srow"><div><h2>Notifications</h2><p class="desc">Reminders ring on every signed-in device. Done or snoozed on one clears the rest.</p></div>
           <div class="panel">
@@ -557,9 +422,7 @@
   function sidebar() {
     const nav = (v, icon, label, n) => `<button class="navrow ${state.view === v && !state.query ? 'on' : ''}" data-act="nav" data-view="${v}">${icon}<span class="label">${label}</span>${n != null ? `<span class="n">${n}</span>` : ''}</button>`;
     const lrow = (l) => {
-      const all = D.checks(l).length, done = D.done(l).length;
-      const pct = all ? Math.round((done / all) * 100) : 0;
-      return `<button class="navrow ${state.view === 'list' && state.cur === l.id && !state.query ? 'on' : ''} ${l.onScreen ? 'inbar' : ''}" style="${cvars(l)}" data-act="open" data-list="${l.id}"><span class="ndot">${dot(l)}</span><span class="label">${esc(l.name)}</span>${l.onScreen ? `<span class="onscreen" title="In the mini bar">${I.screen}<span class="sr">In the mini bar</span></span>` : ''}${LEAN ? '' : `<span class="prog" style="--p:${pct}%" title="${done} of ${all} done" aria-hidden="true"></span>`}<span class="n">${D.open(l).length || ''}</span></button>`;
+      return `<button class="navrow ${state.view === 'list' && state.cur === l.id && !state.query ? 'on' : ''} ${l.onScreen ? 'inbar' : ''}" style="${cvars(l)}" data-act="open" data-list="${l.id}"><span class="ndot">${dot(l)}</span><span class="label">${esc(l.name)}</span>${l.onScreen ? `<span class="onscreen" title="In the mini bar">${I.screen}<span class="sr">In the mini bar</span></span>` : ''}<span class="n">${D.open(l).length || ''}</span></button>`;
     };
     const dueToday = D.today().filter((x) => !x.it.d).length;
     return `
@@ -643,7 +506,7 @@
       : `<button class="backlink" data-act="nav" data-view="lists">${I.back}Lists</button>`;
     const top = sub
       ? `${back}<span class="ttl"></span>${inList ? `<button class="ibtn" data-act="psheet" data-sheet="share" aria-label="Share">${I.share}</button><button class="ibtn" data-act="psheet" data-sheet="more" aria-label="More">${I.more}</button>` : ''}`
-      : LEAN ? '' : `<span class="ttl"><span style="display:inline-flex;align-items:center;gap:8px">${I.mark}Weave</span></span>`;
+      : '';
     const tab = sub ? 'lists' : state.view;
     const tabs = [['next', I.sun, 'Up next'], ['lists', I.list, 'Lists'], ['search', I.search, 'Search'], ['settings', I.gear, 'Settings']];
     const dueToday = D.today().filter((x) => !x.it.d).length;
@@ -656,7 +519,7 @@
           <div class="switchrow"><span class="lbl"><b>${state.os === 'ios' ? 'Show in widget' : 'Show in the bar'}</b></span><button class="tg" role="switch" aria-checked="${!!l.onScreen}" data-act="onscreen" aria-label="${state.os === 'ios' ? 'Show in widget' : 'Show in the bar'}"></button></div>
           <div class="switchrow"><span class="lbl"><b>Pin to top</b></span><button class="tg" role="switch" aria-checked="${!!l.pinned}" data-act="pinned" aria-label="Pin to top"></button></div>
           <span class="field-label">Colour</span><div class="swatches">${[0, 1, 2, 3, 4, 5].map((c) => `<button class="swatch ${l.color === c ? 'on' : ''}" aria-label="${D.COLOR_NAMES[c]}" aria-pressed="${l.color === c}" data-act="color" data-c="${c}" style="--c:var(--n${c});--ci:var(--n${c}-ink)">${l.color === c ? I.tick : ''}</button>`).join('')}</div>
-          <div style="display:flex;gap:8px;margin-top:20px"><button class="btn" data-act="uncheckall">Uncheck all</button><button class="btn" data-act="archive">Archive</button><button class="btn danger" data-act="dellist">Delete</button></div>` : '';
+          <div style="display:flex;gap:8px;margin-top:20px"><button class="btn" data-act="archive">Archive</button><button class="btn danger" data-act="dellist">Delete</button></div><p class="muted" style="margin:16px 0 0;font-size:var(--fs-small)">Edited ${esc(l.edited || 'just now')}</p>` : '';
     return `
       <div class="phonestage"><div class="device"><div class="pscreen">
         <div class="pstatus"><span>16:20</span><span>${state.os === 'ios' ? '' : '5G 82%'}</span></div>
@@ -673,7 +536,7 @@
   const app = document.getElementById('app');
   function render() {
     const ph = phone();
-    document.body.className = `os-${state.os} ${ph ? 'lay-phone' : 'lay-desk'} ${bare() ? 'bare' : ''} ${LEAN ? 'lean' : ''} ${EMBED ? 'embed' : ''}`;
+    document.body.className = `os-${state.os} ${ph ? 'lay-phone' : 'lay-desk'} ${bare() ? 'bare' : ''} ${EMBED ? 'embed' : ''}`;
     const l = cur();
     document.documentElement.style.setProperty('--accent', state.view === 'list' ? D.color(l) : 'var(--n0)');
     document.documentElement.style.setProperty('--accent-ink', state.view === 'list' ? D.ink(l) : 'var(--n0-ink)');
@@ -689,11 +552,9 @@
 
   // #marks: numbered badges (review.md D1–D13) on whatever each item changes, in either version.
   const MARK_AT = [
-    ['D1', 'next', '.subline'], ['D2', 'next', '.ptop .ttl'], ['D3', 'next', '.lay-phone .thread, .daystrip'],
-    ['D4', 'next', '.subhead:not(.late), .lean .card:has(#h-today) .rows'], ['D5', 'next', '.card:has(#h-lists), .card:has(#h-float), .lean.lay-desk .card:has(#h-later)'],
-    ['D6', 'next', '.thread .legend'], ['D7', 'next', '.capturebox'],
-    ['D9', 'list', '.notecard > .capture, .ruled'], ['D10', 'list', '.items .row:first-child .chev'], ['D11', 'list', '.subline'],
-    ['D12', 'list', '.railcard'], ['D13', '*', '.side .navrow .prog, .lean .side .navrow.inbar .n', true],
+    ['D1', 'next', '.subline'], ['D3', 'next', '.daystrip'], ['D4', 'next', '.card:has(#h-today) .rows'],
+    ['D5', 'next', '.lay-desk .card:has(#h-later)'], ['D7', 'next', '.capturebox'],
+    ['D9', 'list', '.ruled .capture'], ['D11', 'list', '.subline'], ['D13', '*', '.side .navrow.inbar .n', true],
   ];
   const markLayer = document.createElement('div');
   markLayer.className = 'marks';
@@ -741,7 +602,7 @@
     const l = cur();
     const items = {
       share: `<button data-act="share" data-as="Text">${I.text} Copy as text</button><button data-act="share" data-as="Markdown">${I.list} Copy as Markdown</button><button data-act="share" data-as="Image">${I.share} Share as image…</button>`,
-      more: `<button data-act="pinned">${I.pin} ${l.pinned ? 'Unpin from top' : 'Pin to top'}</button><button data-act="uncheckall">${I.repeat} Uncheck all</button><hr><button data-act="archive">${I.archive} Archive</button><button class="danger" data-act="dellist">${I.trash} Delete list…</button>`,
+      more: `<button data-act="pinned">${I.pin} ${l.pinned ? 'Unpin from top' : 'Pin to top'}</button><hr><button data-act="archive">${I.archive} Archive</button><button class="danger" data-act="dellist">${I.trash} Delete list…</button><p class="popnote">Edited ${esc(l.edited || 'just now')}</p>`,
       color: [0, 1, 2, 3, 4, 5].map((c) => `<button data-act="color" data-c="${c}"><span class="dot" style="--c:var(--n${c});--ci:var(--n${c}-ink)"></span>${D.COLOR_NAMES[c]}${l.color === c ? ' (current)' : ''}</button>`).join(''),
     }[state.pop.kind];
     popEl.innerHTML = items;
@@ -804,7 +665,6 @@
         }
         it.d = !it.d; break;
       }
-      case 'focusadd': { const i = app.querySelector('.notecard .capture input'); if (i) i.focus(); return; }
       case 'move': { moveItem(findItem(+b.dataset.id), +b.dataset.dir); break; }
       case 'select': state.sel = +b.dataset.id; if (phone()) state.psheet = 'item'; break;
       case 'deselect': state.sel = null; break;

@@ -46,7 +46,8 @@ svg { display: block; }
 .minibar .grip { color: var(--faint); }
 .minibar .dot, .sheet .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; background: var(--c, var(--accent)); border: 1px solid var(--ci, transparent); }
 .minibar .name { font-weight: 500; max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
-.minibar .meta { color: var(--muted); }
+.minibar .meta { color: var(--muted); transition: opacity var(--dur-fast) var(--ease-out); }
+.minibar.is-open .meta { opacity: 0; } /* C1: the open sheet's header says it; the bar keeps its width */
 .minibar .meta b { font-weight: 400; color: var(--text); }
 .minibar .meta .late { color: var(--negative); }
 
