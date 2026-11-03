@@ -1,16 +1,15 @@
 {
- "url": "http://localhost:8765/03-app/index.html",
- "at": "2026-11-03T10:42:24.378Z",
+ "url": "http://localhost:8765/03-app/index.html#list=4",
+ "at": "2026-11-03T11:13:04.657Z",
  "allow": [],
  "viewports": [
   {
    "width": 1440,
    "height": 900,
    "load": "load",
-   "screens": 2,
+   "screens": 1,
    "filled": [
-    0.64,
-    0.73
+    0.39
    ],
    "motion": {
     "elements": 0,
@@ -26,19 +25,19 @@
      "h": 900
     },
     "page": {
-     "height": 1142,
-     "screens": 1.3,
-     "words": 281,
+     "height": 900,
+     "screens": 1,
+     "words": 118,
      "img": 0,
      "video": 0,
      "canvas": 0,
-     "svg": 24,
-     "sections": 5,
+     "svg": 23,
+     "sections": 2,
      "horizontalOverflow": 0,
      "overflowCulprits": [],
      "uiFragments": 0,
      "uiAbuse": false,
-     "realPictures": 1,
+     "realPictures": 0,
      "videoCount": 0,
      "uiPictures": 0,
      "pictureSamples": [],
@@ -49,9 +48,9 @@
      "videosNoPoster": 0
     },
     "hero": {
-     "text": "Up next",
-     "words": 2,
-     "chars": 7,
+     "text": "Packing — Goa",
+     "words": 3,
+     "chars": 13,
      "lines": 1,
      "size": 24,
      "vw": 1.7,
@@ -66,8 +65,8 @@
      "position": "left"
     },
     "h1": {
-     "text": "Up next",
-     "words": 2,
+     "text": "Packing — Goa",
+     "words": 3,
      "lines": 1,
      "size": 24,
      "font": "Geist"
@@ -107,14 +106,14 @@
       "leading": 1.54,
       "weight": 400,
       "tracking": 0,
-      "contrast": 6.5
+      "contrast": 6.4
      },
      "measureChars": 63,
      "max": {
       "size": 24,
       "vw": 1.7,
       "font": "Geist",
-      "text": "Up next"
+      "text": "Packing — Goa"
      },
      "monoShare": 0,
      "monoProseShare": 0,
@@ -130,9 +129,9 @@
     "eyebrows": [],
     "numbered": [],
     "color": {
-     "bodyBg": "#f5f4f2",
+     "bodyBg": "#f4f5f2",
      "bodyBgHsl": {
-      "h": 40,
+      "h": 80,
       "s": 0.13,
       "l": 0.95
      },
@@ -141,22 +140,22 @@
      "textColors": [
       {
        "color": "#5f5e5e",
-       "share": 0.47
+       "share": 0.52
       },
       {
-       "color": "#0a0b0b",
-       "share": 0.44
+       "color": "#0b0a0b",
+       "share": 0.38
       },
       {
-       "color": "#c4252b",
-       "share": 0.04
-      },
-      {
-       "color": "#e6e7e7",
-       "share": 0.03
+       "color": "#e6e6e6",
+       "share": 0.07
       },
       {
        "color": "#6a6b6a",
+       "share": 0.03
+      },
+      {
+       "color": "#fefeff",
        "share": 0.01
       }
      ],
@@ -167,7 +166,7 @@
        "s": 0.03,
        "l": 0.94
       },
-      "fg": "#0a0b0b"
+      "fg": "#0b0a0b"
      },
      "lowContrast": []
     },
@@ -175,40 +174,38 @@
      "count": 4,
      "inHero": 4,
      "radius": 6,
-     "height": 72,
+     "height": 36,
      "withShadow": 0,
      "withGradient": 0,
      "mono": 0,
      "upper": 0,
      "heroLabels": [
-      "Up next 4",
-      "Errands In the mini bar 4 left · 1 overd",
-      "Groceries 4 left · no times set",
-      "Ideas 1 left · no times set"
+      "Packing — Goa 3",
+      "Show in mini bar",
+      "Share",
+      "Uncheck all"
      ]
     },
     "surfaces": {
-     "shadowStatic": 1,
+     "shadowStatic": 0,
      "shadowOverlay": 0,
-     "shadowSamples": [
-      "div.pbar.paper → rgba(0, 0, 0, 0.14) 0px 12px 32px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px"
-     ],
+     "shadowSamples": [],
      "gradients": 0,
      "scrims": 0,
      "gradientSamples": [],
      "gradientText": 0,
-     "hairlines": 6,
+     "hairlines": 14,
      "hairlineSamples": [
       "div.chrome 1440px",
       "nav.side 256px",
       "li.row 717px",
       "li.row 717px",
-      "li.row 717px"
+      "i 701px"
      ],
-     "outlinedBoxes": 8,
-     "dashed": 0,
+     "outlinedBoxes": 2,
+     "dashed": 1,
      "blurred": 0,
-     "roundedBoxes": 9,
+     "roundedBoxes": 2,
      "boxRadius": 8,
      "squareMedia": 0,
      "roundedMedia": 0,
@@ -216,12 +213,7 @@
      "textShadow": 0,
      "cardRows": []
     },
-    "heroMedia": [
-     {
-      "type": "svg",
-      "ratio": 0.11
-     }
-    ],
+    "heroMedia": [],
     "nav": {
      "links": 0,
      "fixed": true,
@@ -238,7 +230,7 @@
      "w": 1440,
      "h": 900
     },
-    "pageH": 1142,
+    "pageH": 900,
     "margins": {
      "left": 12,
      "right": 53
@@ -247,7 +239,7 @@
     "gaps": [],
     "h1s": [
      {
-      "text": "Up next",
+      "text": "Packing — Goa",
       "size": 24,
       "top": 68,
       "firstScreen": true
@@ -256,29 +248,25 @@
     "edgeText": [],
     "edges": [
      {
-      "x": 309,
-      "n": 3
+      "x": 314,
+      "n": 1
      },
      {
       "x": 1064,
-      "n": 2
-     },
-     {
-      "x": 288,
       "n": 1
      }
     ],
-    "leftBlocks": 6,
+    "leftBlocks": 2,
     "bodySize": 13,
     "stage": false,
     "explains": false,
     "slivers": [],
-    "voidShare": 0.04,
+    "voidShare": 0.21,
     "voidBox": {
-     "x": 0,
-     "y": 540,
-     "w": 300,
-     "h": 180
+     "x": 300,
+     "y": 600,
+     "w": 1140,
+     "h": 240
     }
    },
    "app": {
@@ -287,7 +275,7 @@
      "h": 900
     },
     "dark": false,
-    "ground": "#f5f4f2",
+    "ground": "#f4f5f2",
     "sidebar": {
      "w": 256,
      "tag": "nav",
@@ -298,13 +286,13 @@
      "h": 36
     },
     "canvas": {
-     "left": 50,
-     "right": 53
+     "left": 40,
+     "right": 32
     },
     "hero": {
-     "text": "Up next",
-     "words": 2,
-     "chars": 7,
+     "text": "Packing — Goa",
+     "words": 3,
+     "chars": 13,
      "lines": 1,
      "size": 24,
      "vw": 1.7,
@@ -318,39 +306,39 @@
      "align": "left",
      "position": "left"
     },
-    "charts": 1,
+    "charts": 0,
     "layout": {
-     "panels": 5,
-     "firstScreen": 4,
+     "panels": 2,
+     "firstScreen": 2,
      "ragged": [],
      "voids": []
     },
     "tiles": 0,
     "panels": {
-     "count": 12,
+     "count": 2,
      "radii": [
       [
-       6,
-       7
-      ],
-      [
        8,
-       5
+       2
       ]
      ],
-     "heavyBorders": 1,
-     "borderSamples": [
-      "#f4ccda on #ffffff (1.45:1)"
-     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
      "heavyShadows": 0,
      "softShadows": 0,
      "shadowSamples": [],
      "glass": 0
     },
     "chips": {
-     "count": 0,
-     "hues": 0,
-     "samples": []
+     "count": 1,
+     "hues": 1,
+     "samples": [
+      {
+       "hue": 338,
+       "size": 28,
+       "radius": "50%"
+      }
+     ]
     },
     "numbers": {
      "cells": 0,
@@ -360,10 +348,10 @@
      "kpiMax": null
     },
     "rows": null,
-    "chartHues": 2,
+    "chartHues": 0,
     "placeholders": [],
     "type": {
-     "under13": 0.04,
+     "under13": 0.1,
      "tiny": 0,
      "tinySamples": [],
      "sizes": [
@@ -376,11 +364,11 @@
      ]
     },
     "title": {
-     "text": "Up next",
+     "text": "Packing — Goa",
      "size": 24,
      "top": 68
     },
-    "colourShare": 0.002
+    "colourShare": 0.004
    },
    "consoleErrors": []
   },
@@ -388,10 +376,9 @@
    "width": 768,
    "height": 1024,
    "load": "load",
-   "screens": 2,
+   "screens": 1,
    "filled": [
-    0.67,
-    0.66
+    0.6
    ],
    "motion": {
     "elements": 0,
@@ -407,19 +394,19 @@
      "h": 1024
     },
     "page": {
-     "height": 1781,
-     "screens": 1.7,
-     "words": 260,
+     "height": 1024,
+     "screens": 1,
+     "words": 118,
      "img": 0,
      "video": 0,
      "canvas": 0,
-     "svg": 24,
-     "sections": 5,
+     "svg": 23,
+     "sections": 2,
      "horizontalOverflow": 0,
      "overflowCulprits": [],
      "uiFragments": 0,
      "uiAbuse": false,
-     "realPictures": 1,
+     "realPictures": 0,
      "videoCount": 0,
      "uiPictures": 0,
      "pictureSamples": [],
@@ -430,10 +417,10 @@
      "videosNoPoster": 0
     },
     "hero": {
-     "text": "Up next",
-     "words": 2,
-     "chars": 7,
-     "lines": 1,
+     "text": "Packing — Goa",
+     "words": 3,
+     "chars": 13,
+     "lines": 2,
      "size": 24,
      "vw": 3.1,
      "font": "Geist",
@@ -447,9 +434,9 @@
      "position": "left"
     },
     "h1": {
-     "text": "Up next",
-     "words": 2,
-     "lines": 1,
+     "text": "Packing — Goa",
+     "words": 3,
+     "lines": 2,
      "size": 24,
      "font": "Geist"
     },
@@ -488,14 +475,14 @@
       "leading": 1.54,
       "weight": 400,
       "tracking": 0,
-      "contrast": 6.5
+      "contrast": 6.4
      },
      "measureChars": 63,
      "max": {
       "size": 24,
       "vw": 3.1,
       "font": "Geist",
-      "text": "Up next"
+      "text": "Packing — Goa"
      },
      "monoShare": 0,
      "monoProseShare": 0,
@@ -511,43 +498,33 @@
     "eyebrows": [],
     "numbered": [],
     "color": {
-     "bodyBg": "#f5f4f2",
+     "bodyBg": "#f4f5f2",
      "bodyBgHsl": {
-      "h": 40,
+      "h": 80,
       "s": 0.13,
       "l": 0.95
      },
      "dark": false,
-     "sectionBgs": [
-      {
-       "color": "#ffffff",
-       "top": 340,
-       "hsl": {
-        "h": 0,
-        "s": 0,
-        "l": 1
-       }
-      }
-     ],
+     "sectionBgs": [],
      "textColors": [
       {
        "color": "#5f5e5e",
-       "share": 0.46
+       "share": 0.52
       },
       {
-       "color": "#0a0b0b",
-       "share": 0.45
+       "color": "#0b0a0b",
+       "share": 0.38
       },
       {
-       "color": "#c4252b",
-       "share": 0.04
-      },
-      {
-       "color": "#e6e7e7",
-       "share": 0.03
+       "color": "#e6e6e6",
+       "share": 0.07
       },
       {
        "color": "#6a6b6a",
+       "share": 0.03
+      },
+      {
+       "color": "#fefeff",
        "share": 0.01
       }
      ],
@@ -558,45 +535,46 @@
        "s": 0.03,
        "l": 0.94
       },
-      "fg": "#0a0b0b"
+      "fg": "#0b0a0b"
      },
      "lowContrast": []
     },
     "buttons": {
-     "count": 7,
-     "inHero": 1,
+     "count": 4,
+     "inHero": 4,
      "radius": 6,
-     "height": 72,
+     "height": 36,
      "withShadow": 0,
      "withGradient": 0,
      "mono": 0,
      "upper": 0,
      "heroLabels": [
-      "Up next 4"
+      "Packing — Goa 3",
+      "Show in mini bar",
+      "Share",
+      "Uncheck all"
      ]
     },
     "surfaces": {
-     "shadowStatic": 1,
+     "shadowStatic": 0,
      "shadowOverlay": 0,
-     "shadowSamples": [
-      "div.pbar.paper → rgba(0, 0, 0, 0.14) 0px 12px 32px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px"
-     ],
+     "shadowSamples": [],
      "gradients": 0,
      "scrims": 0,
      "gradientSamples": [],
      "gradientText": 0,
-     "hairlines": 9,
+     "hairlines": 14,
      "hairlineSamples": [
       "div.chrome 768px",
       "nav.side 224px",
       "li.row 470px",
       "li.row 470px",
-      "li.row 470px"
+      "i 454px"
      ],
-     "outlinedBoxes": 5,
-     "dashed": 0,
+     "outlinedBoxes": 2,
+     "dashed": 1,
      "blurred": 0,
-     "roundedBoxes": 6,
+     "roundedBoxes": 2,
      "boxRadius": 8,
      "squareMedia": 0,
      "roundedMedia": 0,
@@ -621,29 +599,29 @@
      "w": 768,
      "h": 1024
     },
-    "pageH": 1781,
+    "pageH": 1024,
     "margins": {
      "left": 12,
-     "right": 45
+     "right": 41
     },
     "sections": [
      {
-      "sel": "div.span-12",
+      "sel": "div.titlerow",
       "tag": "div",
-      "top": 154,
-      "height": 174,
-      "words": 6,
-      "media": 1,
-      "middle": 0,
+      "top": 60,
+      "height": 122,
+      "words": 17,
+      "media": 0,
+      "middle": 16,
       "heading": {
-       "text": "Today's thread",
-       "size": 16,
-       "tag": "h2"
+       "text": "Packing — Goa",
+       "size": 24,
+       "tag": "h1"
       },
-      "left": 269,
-      "right": 45,
-      "textLeft": 269,
-      "textRight": 45,
+      "left": 243,
+      "right": 24,
+      "textLeft": 248,
+      "textRight": 83,
       "fullBleed": false,
       "footer": false,
       "hero": true,
@@ -651,48 +629,25 @@
       "pinned": false
      },
      {
-      "sel": "div.span-8.stack",
+      "sel": "div.grid.listgrid",
       "tag": "div",
-      "top": 340,
-      "height": 714,
-      "words": 72,
+      "top": 206,
+      "height": 758,
+      "words": 47,
       "media": 0,
       "middle": 0,
       "heading": {
-       "text": "Today",
-       "size": 16,
-       "tag": "h2"
-      },
-      "left": 266,
-      "right": 45,
-      "textLeft": 269,
-      "textRight": 45,
-      "fullBleed": false,
-      "footer": false,
-      "hero": true,
-      "continues": false,
-      "pinned": false
-     },
-     {
-      "sel": "div.span-4.stack",
-      "tag": "div",
-      "top": 1066,
-      "height": 667,
-      "words": 80,
-      "media": 1,
-      "middle": 0,
-      "heading": {
-       "text": "Lists",
+       "text": "This list",
        "size": 16,
        "tag": "h2"
       },
       "left": 269,
-      "right": 45,
+      "right": 41,
       "textLeft": 269,
-      "textRight": 45,
+      "textRight": 56,
       "fullBleed": false,
       "footer": true,
-      "hero": false,
+      "hero": true,
       "continues": false,
       "pinned": false
      }
@@ -700,7 +655,7 @@
     "gaps": [],
     "h1s": [
      {
-      "text": "Up next",
+      "text": "Packing — Goa",
       "size": 24,
       "top": 60,
       "firstScreen": true
@@ -710,14 +665,10 @@
     "edges": [
      {
       "x": 269,
-      "n": 5
-     },
-     {
-      "x": 248,
-      "n": 1
+      "n": 2
      }
     ],
-    "leftBlocks": 6,
+    "leftBlocks": 2,
     "bodySize": 13,
     "stage": false,
     "explains": false,
@@ -731,7 +682,7 @@
      "h": 1024
     },
     "dark": false,
-    "ground": "#f5f4f2",
+    "ground": "#f4f5f2",
     "sidebar": {
      "w": 224,
      "tag": "nav",
@@ -742,14 +693,14 @@
      "h": 36
     },
     "canvas": {
-     "left": 38,
-     "right": 45
+     "left": 24,
+     "right": 30
     },
     "hero": {
-     "text": "Up next",
-     "words": 2,
-     "chars": 7,
-     "lines": 1,
+     "text": "Packing — Goa",
+     "words": 3,
+     "chars": 13,
+     "lines": 2,
      "size": 24,
      "vw": 3.1,
      "font": "Geist",
@@ -762,39 +713,39 @@
      "align": "left",
      "position": "left"
     },
-    "charts": 1,
+    "charts": 0,
     "layout": {
-     "panels": 5,
-     "firstScreen": 3,
+     "panels": 2,
+     "firstScreen": 2,
      "ragged": [],
      "voids": []
     },
     "tiles": 0,
     "panels": {
-     "count": 12,
+     "count": 2,
      "radii": [
       [
-       6,
-       7
-      ],
-      [
        8,
-       5
+       2
       ]
      ],
-     "heavyBorders": 1,
-     "borderSamples": [
-      "#f4ccda on #ffffff (1.45:1)"
-     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
      "heavyShadows": 0,
      "softShadows": 0,
      "shadowSamples": [],
      "glass": 0
     },
     "chips": {
-     "count": 0,
-     "hues": 0,
-     "samples": []
+     "count": 1,
+     "hues": 1,
+     "samples": [
+      {
+       "hue": 338,
+       "size": 28,
+       "radius": "50%"
+      }
+     ]
     },
     "numbers": {
      "cells": 0,
@@ -804,10 +755,10 @@
      "kpiMax": null
     },
     "rows": null,
-    "chartHues": 2,
+    "chartHues": 0,
     "placeholders": [],
     "type": {
-     "under13": 0.05,
+     "under13": 0.1,
      "tiny": 0,
      "tinySamples": [],
      "sizes": [
@@ -820,11 +771,11 @@
      ]
     },
     "title": {
-     "text": "Up next",
+     "text": "Packing — Goa",
      "size": 24,
      "top": 60
     },
-    "colourShare": 0.005
+    "colourShare": 0.007
    },
    "consoleErrors": []
   },
@@ -834,7 +785,7 @@
    "load": "load",
    "screens": 1,
    "filled": [
-    0.77
+    0.32
    ],
    "motion": {
     "elements": 0,
@@ -852,12 +803,12 @@
     "page": {
      "height": 844,
      "screens": 1,
-     "words": 165,
+     "words": 25,
      "img": 0,
      "video": 0,
      "canvas": 0,
-     "svg": 28,
-     "sections": 4,
+     "svg": 17,
+     "sections": 1,
      "horizontalOverflow": 0,
      "overflowCulprits": [],
      "uiFragments": 0,
@@ -873,16 +824,16 @@
      "videosNoPoster": 0
     },
     "hero": {
-     "text": "Up next",
-     "words": 2,
-     "chars": 7,
+     "text": "Packing — Goa",
+     "words": 3,
+     "chars": 13,
      "lines": 1,
-     "size": 24,
-     "vw": 6.2,
+     "size": 16,
+     "vw": 4.1,
      "font": "Geist",
      "weight": 500,
      "tracking": -0.01,
-     "leading": 1.33,
+     "leading": 2,
      "top": 52,
      "tag": "h1",
      "kind": "heading",
@@ -890,38 +841,16 @@
      "position": "left"
     },
     "h1": {
-     "text": "Up next",
-     "words": 2,
+     "text": "Packing — Goa",
+     "words": 3,
      "lines": 1,
      "size": 24,
      "font": "Geist"
     },
-    "headings": [
-     {
-      "text": "Up next",
-      "words": 2,
-      "chars": 7,
-      "lines": 1,
-      "size": 24,
-      "vw": 6.2,
-      "font": "Geist",
-      "weight": 500,
-      "tracking": -0.01,
-      "leading": 1.33,
-      "upper": false,
-      "italic": false,
-      "mono": false,
-      "align": "left",
-      "position": "center",
-      "widthRatio": 0.92,
-      "top": 52,
-      "tag": "h1",
-      "kind": "heading"
-     }
-    ],
+    "headings": [],
     "headingSummary": {
-     "count": 1,
-     "maxLines": 1,
+     "count": 0,
+     "maxLines": 0,
      "over2Lines": 0,
      "statements": 0,
      "centered": 0,
@@ -940,18 +869,17 @@
      "sizes": [
       13,
       14,
-      16,
-      24
+      16
      ],
-     "sizeCount": 4,
+     "sizeCount": 3,
      "notLoaded": [],
      "body": null,
      "measureChars": null,
      "max": {
-      "size": 24,
-      "vw": 6.2,
+      "size": 16,
+      "vw": 4.1,
       "font": "Geist",
-      "text": "Up next"
+      "text": "Packing — Goa"
      },
      "monoShare": 0,
      "monoProseShare": 0,
@@ -961,51 +889,38 @@
      "microLabelShare": 0,
      "microSamples": [],
      "upperShare": 0,
-     "centerShare": 0.01,
+     "centerShare": 0,
      "smallText": 0
     },
     "eyebrows": [],
     "numbered": [],
     "color": {
-     "bodyBg": "#f5f4f2",
+     "bodyBg": "#f4f5f2",
      "bodyBgHsl": {
-      "h": 40,
+      "h": 80,
       "s": 0.13,
       "l": 0.95
      },
      "dark": false,
      "sectionBgs": [
       {
-       "color": "#f5f4f2",
+       "color": "#f4f5f2",
        "top": 0,
        "hsl": {
-        "h": 40,
+        "h": 80,
         "s": 0.13,
         "l": 0.95
-       }
-      },
-      {
-       "color": "#ffffff",
-       "top": 322,
-       "hsl": {
-        "h": 0,
-        "s": 0,
-        "l": 1
        }
       }
      ],
      "textColors": [
       {
        "color": "#5f5e5e",
-       "share": 0.48
+       "share": 0.56
       },
       {
-       "color": "#0a0b0b",
-       "share": 0.46
-      },
-      {
-       "color": "#c4252b",
-       "share": 0.06
+       "color": "#0b0a0b",
+       "share": 0.44
       }
      ],
      "button": {
@@ -1015,20 +930,22 @@
        "s": 0.03,
        "l": 0.94
       },
-      "fg": "#0a0b0b"
+      "fg": "#0b0a0b"
      },
      "lowContrast": []
     },
     "buttons": {
-     "count": 4,
-     "inHero": 1,
+     "count": 2,
+     "inHero": 2,
      "radius": 6,
-     "height": 72,
+     "height": 30,
      "withShadow": 0,
      "withGradient": 0,
      "mono": 0,
      "upper": 0,
-     "heroLabels": []
+     "heroLabels": [
+      "Uncheck all"
+     ]
     },
     "surfaces": {
      "shadowStatic": 0,
@@ -1038,18 +955,17 @@
      "scrims": 0,
      "gradientSamples": [],
      "gradientText": 0,
-     "hairlines": 5,
+     "hairlines": 4,
      "hairlineSamples": [
       "li.row 340px",
       "li.row 340px",
-      "li.row 340px",
-      "li.row 340px",
+      "div.donebar 324px",
       "div.paddbar 390px"
      ],
-     "outlinedBoxes": 7,
+     "outlinedBoxes": 1,
      "dashed": 0,
      "blurred": 0,
-     "roundedBoxes": 7,
+     "roundedBoxes": 1,
      "boxRadius": 8,
      "squareMedia": 0,
      "roundedMedia": 0,
@@ -1057,16 +973,11 @@
      "textShadow": 0,
      "cardRows": []
     },
-    "heroMedia": [
-     {
-      "type": "svg",
-      "ratio": 0.1
-     }
-    ],
+    "heroMedia": [],
     "nav": {
      "links": 0,
      "fixed": false,
-     "height": 24,
+     "height": 729,
      "floatingPill": false,
      "blur": false
     },
@@ -1081,103 +992,14 @@
     },
     "pageH": 844,
     "margins": {
-     "left": 16,
-     "right": 12
+     "left": 8,
+     "right": 8
     },
-    "sections": [
-     {
-      "sel": "section.card.thread",
-      "tag": "section",
-      "top": 144,
-      "height": 166,
-      "words": 8,
-      "media": 1,
-      "middle": 0,
-      "heading": {
-       "text": "Today's thread",
-       "size": 16,
-       "tag": "h2"
-      },
-      "left": 33,
-      "right": 33,
-      "textLeft": 33,
-      "textRight": 85,
-      "fullBleed": false,
-      "footer": false,
-      "hero": true,
-      "continues": false,
-      "pinned": false
-     },
-     {
-      "sel": "section.card",
-      "tag": "section",
-      "top": 322,
-      "height": 416,
-      "words": 34,
-      "media": 0,
-      "middle": 92,
-      "heading": {
-       "text": "Today",
-       "size": 16,
-       "tag": "h2"
-      },
-      "left": 20,
-      "right": 33,
-      "textLeft": 33,
-      "textRight": 33,
-      "fullBleed": false,
-      "footer": false,
-      "hero": true,
-      "continues": false,
-      "pinned": false
-     },
-     {
-      "sel": "section.card",
-      "tag": "section",
-      "top": 750,
-      "height": 212,
-      "words": 3,
-      "media": 0,
-      "middle": 0,
-      "heading": {
-       "text": "Later this week",
-       "size": 16,
-       "tag": "h2"
-      },
-      "left": 20,
-      "right": 161,
-      "textLeft": 33,
-      "textRight": 241,
-      "fullBleed": false,
-      "footer": false,
-      "hero": false,
-      "continues": false,
-      "pinned": false
-     },
-     {
-      "sel": "section.card",
-      "tag": "section",
-      "top": 974,
-      "height": 343,
-      "words": 0,
-      "media": 0,
-      "middle": 8,
-      "heading": null,
-      "left": 33,
-      "right": 33,
-      "textLeft": null,
-      "textRight": null,
-      "fullBleed": false,
-      "footer": true,
-      "hero": false,
-      "continues": false,
-      "pinned": false
-     }
-    ],
+    "sections": [],
     "gaps": [],
     "h1s": [
      {
-      "text": "Up next",
+      "text": "Packing — Goa",
       "size": 24,
       "top": 52,
       "firstScreen": true
@@ -1186,16 +1008,12 @@
     "edgeText": [],
     "edges": [
      {
-      "x": 33,
-      "n": 3
-     },
-     {
-      "x": 16,
+      "x": 42,
       "n": 1
      }
     ],
-    "leftBlocks": 4,
-    "bodySize": 16,
+    "leftBlocks": 1,
+    "bodySize": 14,
     "stage": false,
     "explains": false,
     "slivers": [],
@@ -1208,56 +1026,50 @@
      "h": 844
     },
     "dark": false,
-    "ground": "#f5f4f2",
+    "ground": "#f4f5f2",
     "sidebar": null,
     "topbar": {
      "h": 48
     },
     "canvas": {
-     "left": 16,
-     "right": 12
+     "left": 8,
+     "right": 8
     },
     "hero": {
-     "text": "Up next",
-     "words": 2,
-     "chars": 7,
+     "text": "Packing — Goa",
+     "words": 3,
+     "chars": 13,
      "lines": 1,
-     "size": 24,
-     "vw": 6.2,
+     "size": 16,
+     "vw": 4.1,
      "font": "Geist",
      "weight": 500,
      "tracking": -0.01,
-     "leading": 1.33,
+     "leading": 2,
      "top": 52,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
      "position": "left"
     },
-    "charts": 1,
+    "charts": 0,
     "layout": {
-     "panels": 4,
-     "firstScreen": 3,
+     "panels": 1,
+     "firstScreen": 1,
      "ragged": [],
      "voids": []
     },
     "tiles": 0,
     "panels": {
-     "count": 10,
+     "count": 1,
      "radii": [
       [
-       6,
-       6
-      ],
-      [
        8,
-       4
+       1
       ]
      ],
-     "heavyBorders": 1,
-     "borderSamples": [
-      "#f4ccda on #ffffff (1.45:1)"
-     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
      "heavyShadows": 0,
      "softShadows": 0,
      "shadowSamples": [],
@@ -1276,10 +1088,10 @@
      "kpiMax": null
     },
     "rows": null,
-    "chartHues": 2,
+    "chartHues": 0,
     "placeholders": [],
     "type": {
-     "under13": 0.05,
+     "under13": 0.27,
      "tiny": 0,
      "tinySamples": [],
      "sizes": [
@@ -1287,16 +1099,15 @@
       13,
       14,
       15,
-      16,
-      24
+      16
      ]
     },
     "title": {
-     "text": "Up next",
+     "text": "Packing — Goa",
      "size": 24,
      "top": 52
     },
-    "colourShare": 0.004
+    "colourShare": 0
    },
    "consoleErrors": []
   }

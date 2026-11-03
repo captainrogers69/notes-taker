@@ -49,6 +49,11 @@ svg { display: block; flex: none; }
 .navrow .n { color: var(--muted); font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
 .navrow .onscreen { color: var(--muted); }
 .navrow .ndot { width: 16px; display: grid; place-items: center; }
+/* Each list's progress in its own colour: a short bar, the count beside it */
+.navrow .prog { flex: none; width: 24px; height: 4px; border-radius: 2px; overflow: hidden; background: color-mix(in srgb, var(--ci) 20%, var(--surface)); }
+.navrow .prog::before { content: ''; display: block; height: 100%; width: var(--p); background: var(--c); }
+.navrow .n { min-width: 12px; text-align: right; }
+.navrow.inbar:not(.on) { background: color-mix(in srgb, var(--c) var(--paper-mix), transparent); }
 .group { margin: 22px 8px 6px; color: var(--muted); font-size: var(--fs-small); display: flex; align-items: center; }
 .side .foot { margin-top: auto; padding-top: 16px; }
 .userrow { display: flex; align-items: center; gap: 10px; margin-top: 8px; padding: 8px; border-top: 1px solid var(--rule); padding-top: 14px; }
@@ -117,6 +122,8 @@ h1 [data-rename]:focus { box-shadow: 0 2px 0 var(--text); }
 .thread svg text { font-family: var(--font); font-size: 13px; fill: var(--muted); }
 .thread svg .lbl { fill: var(--text); font-size: 14px; }
 .thread svg .lbl.late { font-weight: 500; }
+.thread svg .lbl { cursor: pointer; }
+.thread svg .lbl:hover { text-decoration: underline; }
 .thread svg .lbl.done { fill: var(--muted); text-decoration: line-through; }
 .thread svg .lbl.late { fill: var(--negative); }
 .thread svg .now { fill: var(--text); font-weight: 500; }
@@ -164,6 +171,19 @@ h1 [data-rename]:focus { box-shadow: 0 2px 0 var(--text); }
 .notecard .row { border-top-color: color-mix(in srgb, var(--ci) 14%, transparent); }
 .notecard .row:hover, .notecard .row.sel { background: color-mix(in srgb, var(--text) 5%, transparent); }
 .notecard .donebar { border-top-color: color-mix(in srgb, var(--ci) 14%, transparent); }
+
+/* List page: the note and the rail share one height. Slack in the note becomes ruled lines that add a task. */
+.lay-desk .listgrid { align-items: stretch; }
+.lay-desk .listgrid > .notecard { display: flex; flex-direction: column; }
+.ruled { all: unset; box-sizing: border-box; cursor: text; flex: 1 1 0; min-height: 44px; contain: size; display: flex; flex-direction: column; overflow: hidden; color: var(--faint); }
+.ruled i { flex: none; height: 44px; border-top: 1px solid color-mix(in srgb, var(--ci) 14%, var(--surface)); display: flex; align-items: center; padding-left: 34px; font-style: normal; }
+.ruled:hover i:first-child, .ruled:focus-visible i:first-child { color: var(--text); }
+.lay-desk .listgrid > .span-4 { display: flex; flex-direction: column; }
+.lay-desk .listgrid > .span-4 > .card { flex: 1; }
+.railcard { display: flex; flex-direction: column; }
+.railcard .railfoot { margin-top: auto; padding-top: 16px; }
+.lstrip { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.lstrip svg { flex: 1; min-width: 0; }
 
 /* List editor */
 .items .row { align-items: flex-start; padding-top: 12px; padding-bottom: 12px; min-height: 0; }
@@ -306,6 +326,7 @@ h1 [data-rename]:focus { box-shadow: 0 2px 0 var(--text); }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 0s !important; animation: none !important; } }
 
 /* Phone overrides */
+.lay-phone input, .lay-phone select, .lay-phone textarea, .lay-phone [contenteditable] { font-size: 16px; }
 .lay-phone .titlerow { margin-bottom: 16px; }
 .lay-phone .srow { grid-template-columns: 1fr; gap: 12px; padding: 24px 0; }
 .lay-phone .srow .desc { max-width: none; }

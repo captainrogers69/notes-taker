@@ -12,7 +12,7 @@ Severity: **High** = a user would hit it or call the design generic · **Medium*
 |---|---|---|
 | A | `design-taste-frontend` critique (the skill's scoring guide, `references/critique.md`) | Done, below. Caveat: the reviewer also built the design. A designer should re-score it in step 2. |
 | B | `ui-ux-pro-max` (accessibility, touch, UX rules) plus an automated browser audit | Done, below |
-| C | `design-motion-principles` audit | Reconnaissance done; the full audit waits on the weighting confirmation |
+| C | `design-motion-principles` audit | Done: [`motion-audits/notes-taker-2026-11-03.html`](../../motion-audits/notes-taker-2026-11-03.html). 2 critical · 4 important · 6 opportunities. Waiting on your review. |
 | D | `flutter-ux-master` | Skipped: no Flutter screens yet (`lib/main.dart` is the template). Run it once the sheet is built in Flutter. |
 
 ### A · Taste critique
@@ -35,9 +35,9 @@ Cover-the-logo test (pass 3): **fails.** Put Todoist, Things or Linear's logo on
 | A2 | ✅ High | **The day thread is too small to be the signature.** It is the product's one original element, sized like a footnote. | 03 Up next | Make it the hero of Up next (taller; labels at body size; Now as a clear vertical line). Put it in the mini bar sheet too, as a one-line strip. |
 | A3 | ✅ High | **"Today" means three things.** A list called Today, a card called Today on Up next, and a grey "Today" chip on every row. Readers can't tell the list from the date. | 03 Up next, sample data | Rename the sample list (for example "Errands"). Show the list chip only when it adds information. |
 | A4 | ✅ Medium | **Quick capture reads as a generic form strip.** A full-width card holding a field, a select, a black button and a hint line looks like every dashboard's search bar. | 03 Up next | Merge capture into the Today card's header (the field as its first row), or into the thread. |
-| A5 | Medium | **The list page has a hole.** Everything below 560px is empty ground, and the right panel (colour, reminders, pin) is thin. | 03 List | Let the task card run the full height, or move list settings into the title row's menu and give tasks the full width. |
-| A6 | Medium | **The sidebar is the stock task-app sidebar** (Pinned / Lists / counts / New list). It works, but it is the most template-looking part. | 03 sidebar | Show each list's progress in its own colour (a short bar, not a number), or mark which list the mini bar shows more strongly. |
-| A7 | Low | The mark is a plain W in a yellow square: clean, but not yet a brand. | Everywhere | Draw a proper mark later (a thread, a folded note corner). |
+| A5 | ✅ Medium | **The list page has a hole.** Everything below 560px is empty ground, and the right panel (colour, reminders, pin) is thin. | 03 List | Let the task card run the full height, or move list settings into the title row's menu and give tasks the full width. |
+| A6 | ✅ Medium | **The sidebar is the stock task-app sidebar** (Pinned / Lists / counts / New list). It works, but it is the most template-looking part. | 03 sidebar | Show each list's progress in its own colour (a short bar, not a number), or mark which list the mini bar shows more strongly. |
+| A7 | ✅ Low | The mark is a plain W in a yellow square: clean, but not yet a brand. | Everywhere | Draw a proper mark later (a thread, a folded note corner). |
 
 ### B · UX and accessibility (`ui-ux-pro-max` plus the browser audit)
 
@@ -50,11 +50,11 @@ Automated audit (CDP, light and dark): **contrast 0 failures**, every control ha
 | B3 | ✅ High | `confirmation-dialogs` | "Delete forever" in Trash deletes at once, with no confirmation and no undo. | `app.js` purge |
 | B4 | ✅ High | `dragging-alternative` | The mini bar can only be moved by dragging, and list rows show a drag grip with no keyboard or button alternative (WCAG 2.5.7). | 01 bar, 03 list rows |
 | B5 | ✅ Medium | `web-target-size` | Toggles are 32×18 and the details chevron is 28×20; both are under 24px tall. | 03 settings, list |
-| B6 | Medium | `contrast` (idle state) | The bar at 50% idle opacity drops its text below 4.5:1 over most wallpapers. It is intended, but a user who needs contrast cannot read the bar without hovering. | 01 bar |
+| B6 | ⏸ Medium | `contrast` (idle state) | The bar at 50% idle opacity drops its text below 4.5:1 over most wallpapers. It is intended, but a user who needs contrast cannot read the bar without hovering. | 01 bar |
 | B7 | Medium | `tab-bar-ios` / `platform-adaptive` | iOS and Android use the same hamburger menu. iOS users expect a tab bar, and Android users expect predictive back. | 03 phone |
 | B8 | ✅ Medium | `voiceover-sr` | Colour swatches are announced as "Colour 1…6"; they should be named (Yellow, Blue…). The sheet dialog is labelled "Weave", not the list name. | 03 list, sheet |
-| B9 | Low | `truncation-strategy` | Phone thread labels cut off at 14 characters ("Pay electrici…"), with no way to see the full text. | 03 phone thread |
-| B10 | Low | `readable-font-size` | Inputs are 14px, so iOS Safari zooms in on focus on the web build. This does not apply to native Flutter. | Web build only |
+| B9 | ✅ Low | `truncation-strategy` | Phone thread labels cut off at 14 characters ("Pay electrici…"), with no way to see the full text. | 03 phone thread |
+| B10 | ✅ Low | `readable-font-size` | Inputs are 14px, so iOS Safari zooms in on focus on the web build. This does not apply to native Flutter. | Web build only |
 | B11 | ✅ Low | `keyboard-shortcuts` | The sheet opens with an animation when triggered by ⌥Space. Keyboard-triggered UI should open instantly. | `weave.css` .sheet |
 
 Rejected advice: the skill's own design-system pick for "productivity app" (teal/orange, Plus Jakarta Sans, flat SaaS) is the generic default look we are trying to avoid. Not adopted.
@@ -93,18 +93,25 @@ Rejected advice: the skill's own design-system pick for "productivity app" (teal
 
 Re-checked: `lint.mjs` 0 FAIL; `inspect.mjs` 0 FAIL on every page. Up next, list, settings, 01 and 02 have 0 WARN; Archive keeps its 2 accepted WARN. The headless smoke flows pass with a clean console, including new steps for move up/down, Alt+↓, purge then undo, arrow-key bar move, Move to corner, and the keyboard open with no animation.
 
+**Small items, fixed 2026-11-03:**
+
+| # | Fix |
+|---|---|
+| A5 | On the list page, the note and the rail now end on one line. Any slack in the note becomes ruled lines that put the cursor in the add field when clicked, so empty space is a place to write. The rail gained a one-line **Today** thread for the list, and **Pin to top** moved to its foot. No viewport stretching: the checker rightly flagged that as empty bands. |
+| A6 | Sidebar lists show a short progress bar in their own colour (done of total) beside the open count. The list shown in the mini bar is tinted in its note colour. |
+| A7 | New mark: a yellow sticky note with a folded corner, and the W as one thread running in from its edge. `markMono` (tray and status bar) is the same shape in outline. |
+| B9 | Thread labels carry the full text as a tooltip, and clicking or tapping one opens that task (on phones, its sheet). |
+| B10 | On phones, inputs, selects and the editable title are 16px, so iOS Safari no longer zooms on focus. |
+
+Checks: `inspect.mjs` 0 FAIL / 0 WARN on Up next, settings and all six lists. The click-through tests pass with a clean console.
+
 **Still open:**
-- A5: the list page's empty space below the task card.
-- A6: the sidebar.
-- A7: the mark.
-- B6: idle opacity versus contrast. This is a product decision: raise the floor to 70%, or keep 50% and add a "never fade" setting.
+- B6: **decided, keep 50%** (2026-11-03). The bar is meant to recede; it reaches full strength on hover, while open, and while dragging. Not fixing.
 - B7: iOS tab bar and Android predictive back. This is a layout decision for the phone shell.
-- B9: phone thread labels are still cut off at 16 characters.
-- B10: 14px web inputs.
-- C: the motion audit, which waits on the weighting.
+- C: the motion audit is written. Its findings wait on your review before any fix.
 
 ---
 
 ## Next
 
-Decide B6 and B7, run the motion audit (C), run round 2 of the AI passes on the new screenshots, then go to designer review (plan step 2).
+Review the motion audit, decide B7, run round 2 of the AI passes on the new screenshots, then go to designer review (plan step 2).
