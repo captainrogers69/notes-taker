@@ -16,6 +16,16 @@
     { id: 93, name: 'Old packing list', color: 5, n: 9, ago: 2 },
   ];
 
+  // A true conflict (F2.4): one task edited on two devices while one was offline. Both versions are kept.
+  (() => {
+    const g = D.lists.find((l) => l.id === 3);
+    const i = g.items.findIndex((x) => x.t === 'Oat milk');
+    Object.assign(g.items[i], { t: 'Oat milk, unsweetened', conflict: 1, from: 'This Mac' });
+    g.items.splice(i + 1, 0, { id: D.id(), type: 'check', t: 'Oat milk, 2 cartons', d: false, indent: 0, due: null, remind: null, repeat: null, conflict: 1, from: 'Pixel 8' });
+  })();
+  const EMAIL = 'mayank@example.com'; // taste-skill-ignore: reserved demo domain, never a real mailbox
+  const prefs = { bar: true, fullscreen: true, notif: true, snooze: '10m', capture: 1 };
+
   const state = {
     os: hash.get('os') || localStorage.getItem('weave2-os') || 'macos',
     view: hash.get('list') ? 'list' : (hash.get('view') || 'next'),
@@ -32,9 +42,17 @@
     leaving: new Set(), // rows fading out after a tick
     floatOpacity: 50,
     theme: 'system',
+    modal: hash.get('modal') || null, // signout · delacct · signin · keycheck · adddevice · newkey
+    step: hash.get('step') || null,   // the step inside a multi-step dialog
+    account: hash.get('account') === 'local' ? 'local' : 'in', // local mode = no account (S1)
+    existing: hash.has('existing'),   // signing in on a new device of an existing account (E3)
+    email: '',
+    up: 0,                            // lists uploaded so far (first sign-in)
+    keyErr: false,
   };
   const SYNC = { synced: `Synced · ${D.devices.length} devices`, syncing: 'Syncing…', offline: 'Offline · changes saved here', error: 'Sync error · retrying' };
   const isPhoneOS = () => state.os === 'ios' || state.os === 'android';
+  const here = () => (state.os === 'ios' || state.os === 'android' ? 'this phone' : state.os === 'windows' ? 'this PC' : 'this Mac');
   const bare = () => innerWidth < 720;
   const phone = () => isPhoneOS() || bare();
   const mod = () => (state.os === 'macos' || state.os === 'ios' ? '⌘' : 'Ctrl+');
@@ -48,7 +66,7 @@
   const HINT = `<span>Times and days are understood: 6pm, 18:30, tomorrow, tonight, in 2 h.</span>`;
   // One field (playbook C3): Enter adds; the list is a small chip inside the field; the hint shows only on focus.
   function capture(target, { phoneBar = false, inline = false } = {}) {
-    const chip = target ? '' : `<select class="lchip" name="list" aria-label="Add to list">${D.lists.map((l) => `<option value="${l.id}" ${l.id === 1 ? 'selected' : ''}>${esc(l.name)}</option>`).join('')}</select>`;
+    const chip = target ? '' : `<select class="lchip" name="list" aria-label="Add to list">${D.lists.map((l) => `<option value="${l.id}" ${l.id === prefs.capture ? 'selected' : ''}>${esc(l.name)}</option>`).join('')}</select>`;
     return `
       <form class="capture ${inline ? 'inline' : ''}" data-form="capture" ${target ? `data-list="${target.id}"` : ''}>
         <div class="field">${I.plus}<input name="t" autocomplete="off" placeholder="${target ? 'Add a task…' : 'Add a task… try “dentist fri 10am”'}" aria-label="Add a task${target ? ' to ' + esc(target.name) : ''}">${chip}</div>
@@ -275,7 +293,7 @@
   function itemRow(it) {
     if (it.type === 'text') return `<li class="noteline"><input class="ed" data-edit="${it.id}" value="${esc(it.t)}" aria-label="Text line"></li>`;
     const chips = [
-      it.remind ? `<span title="Reminder: ${esc(it.remind)}">${I.bell}</span>` : '',
+      remindsOf(it).length ? `<span class="bells" title="Reminders: ${esc(remindsOf(it).join(', '))}">${I.bell}${remindsOf(it).length > 1 ? `<span class="num">${remindsOf(it).length}</span>` : ''}</span>` : '',
       it.repeat ? `<span title="Repeats ${esc(it.repeat)}">${I.repeat}</span>` : '',
       it.due && !it.d ? itemWhen(it) : '',
     ].join('');
@@ -285,19 +303,31 @@
         <button class="check" data-act="tick" data-id="${it.id}" aria-label="${it.d ? 'Uncheck' : 'Check'} ${esc(it.t)}">${I.tick}</button>
         ${phone() ? `<button class="ed rowbtn" style="min-height:0" data-act="select" data-id="${it.id}">${esc(it.t)}</button>`
                   : `<input class="ed" data-edit="${it.id}" value="${esc(it.t)}" aria-label="Task. Alt+Up or Alt+Down moves it." data-act-focus="select" data-id="${it.id}">`}
-        ${chips ? `<span class="chips">${chips}</span>` : ''}
+        ${it.conflict ? `<span class="from">${esc(it.from)}</span><button class="btn ghost sm" data-act="keep" data-id="${it.id}">Keep only this</button>` : chips ? `<span class="chips">${chips}</span>` : ''}
         ${phone() ? '' : `<button class="ibtn chev" data-act="select" data-id="${it.id}" aria-label="Details for ${esc(it.t)}">${I.chevRight}</button>`}
       </li>`;
+  }
+
+  // Two versions of one task (F2.4): a note above them says what happened; each version can be kept alone.
+  function conflictRows(rows) {
+    const seen = new Set();
+    return rows.map((it) => {
+      if (!it.conflict || seen.has(it.conflict)) return itemRow(it);
+      seen.add(it.conflict);
+      const froms = rows.filter((x) => x.conflict === it.conflict).map((x) => x.from);
+      return `<li class="conflict" role="note">${I.alert}<span class="grow">Changed on ${froms.map((f) => esc(f.replace(/^This/, 'this'))).join(' and ')} while one was offline. Both versions are kept.</span><button class="link" data-act="keep" data-group="${it.conflict}">Keep both</button></li>${itemRow(it)}`;
+    }).join('');
   }
 
   function itemsBlock(l) {
     const open = l.items.filter((i) => i.type === 'text' || !i.d);
     const done = D.done(l);
     return `
-      <ul class="rows items">${open.map(itemRow).join('')}</ul>
+      <ul class="rows items">${conflictRows(open)}</ul>
       ${phone() ? '' : `<div class="ruled">${capture(l, { inline: true })}${'<i aria-hidden="true"></i>'.repeat(8)}</div>`}
       ${!D.checks(l).length ? '<p class="empty">Nothing here yet. Type below and press Enter.</p>' : ''}
-      ${done.length ? `<div class="donefoot">
+      ${done.length && l.hideDone ? `<div class="donebar"><span class="muted" style="font-size:13px">${done.length} done, hidden</span><span class="grow"></span><button class="btn ghost sm" data-act="hidedone">Show</button></div>` : ''}
+      ${done.length && !l.hideDone ? `<div class="donefoot">
         <div class="donebar">
           <button class="toggle" data-act="done" aria-expanded="${state.showDone}">${I.chevRight} Done · ${done.length}</button>
           <span class="grow"></span><button class="btn ghost sm" data-act="uncheckall">Uncheck all</button>
@@ -308,33 +338,61 @@
   // Today on one list, as one line (07:00–23:00): the lived part in ink, its tasks as marks.
 
 
+  // Dates: the prototype's day 0 is Tue 3 Nov 2026.
+  const DATE0 = new Date(2026, 10, 3);
+  const isoOf = (d) => { const x = new Date(DATE0); x.setDate(x.getDate() + d); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`; };
+  const daysTo = (iso) => Math.round((new Date(iso + 'T00:00') - DATE0) / 864e5);
+  const remindsOf = (o) => o.reminds || (o.remind ? [o.remind] : []);
+  const PRESET_DAYS = [0, 1, 6], PRESET_TIMES = ['09:00', '13:00', '17:00', '20:00'];
+
+  // Due, Remind me and Repeat — the same fields for a task and for a whole list (F4.1).
+  function whenFields(o) {
+    const opt = (field, val, label = val, on, multi) => `<button class="opt ${on ? 'on' : ''}" data-act="set" data-field="${field}" data-val="${esc(val)}" ${multi ? `aria-pressed="${!!on}"` : ''}>${label}</button>`;
+    const d = o.due ? o.due.d : null, t = o.due ? o.due.t : null;
+    const rs = remindsOf(o);
+    const every = /^Every (\d+) (\w+)/.exec(o.repeat || '');
+    const fixedRem = (d != null ? ['At due time', '15 min before', '1 h before', '1 day before'] : []).concat(['In 1 h', 'Tomorrow 09:00']);
+    return `
+        <span class="field-label">Due</span>
+        <div class="opts">${opt('day', '0', 'Today', d === 0)}${opt('day', '1', 'Tomorrow', d === 1)}${opt('day', '6', 'Next Mon', d === 6)}<label class="opt addtime ${d != null && !PRESET_DAYS.includes(d) ? 'on' : ''}">${I.clock}<span>${d != null && !PRESET_DAYS.includes(d) ? D.dueLabel({ d, t: null }) : 'Other date'}</span><input type="date" data-pick="date" value="${isoOf(d != null ? d : 0)}" min="${isoOf(0)}" aria-label="Pick a due date"></label>${opt('day', '', 'None', d == null)}</div>
+        ${d != null ? `<div class="opts" style="margin-top:6px">${PRESET_TIMES.map((v) => opt('time', v, v, t === v)).join('')}<label class="opt addtime ${t && !PRESET_TIMES.includes(t) ? 'on' : ''}">${I.clock}<span>${t && !PRESET_TIMES.includes(t) ? t : 'Other time'}</span><input type="time" data-pick="time" value="${t || '09:00'}" aria-label="Pick a due time"></label></div>` : ''}
+        <span class="field-label">Remind me</span>
+        <div class="opts">${fixedRem.map((v) => opt('remind', v, v, rs.includes(v), true)).join('')}${rs.filter((r) => !fixedRem.includes(r)).map((r) => opt('remind', r, r, true, true)).join('')}<label class="opt addtime">${I.plus}<span>At a time</span><input type="time" data-pick="remind" aria-label="Add a reminder at a time"></label>${opt('remind', '', 'None', !rs.length)}</div>
+        <p class="muted fine">${rs.length > 1 ? `${rs.length} reminders. ` : 'Pick as many as you like. '}${d != null ? '"Before" reminders move with the due time.' : ''}</p>
+        <span class="field-label">Repeat</span>
+        <div class="opts">${['Daily', 'Weekdays', 'Weekly', 'Monthly'].map((v) => opt('repeat', v, v, o.repeat === v)).join('')}${opt('repeat', 'custom', 'Custom', !!every)}${opt('repeat', '', 'Never', !o.repeat)}</div>
+        ${every ? `<div class="every"><span>Every</span><input type="number" class="textin num" min="1" max="99" value="${every[1]}" data-pick="every" aria-label="Repeat every how many"><select class="textin" data-pick="every" aria-label="Repeat unit">${['days', 'weeks', 'months'].map((u) => `<option ${every[2] === u ? 'selected' : ''}>${u}</option>`).join('')}</select></div>` : ''}`;
+  }
+
+  const closeDetails = () => (phone() ? '' : `<button class="ibtn" style="width:28px;height:28px;margin:-4px -6px 0 0" data-act="deselect" aria-label="Close details">${I.close}</button>`);
   function details(it) {
-    const opt = (field, val, label = val, on) => `<button class="opt ${on ? 'on' : ''}" data-act="set" data-field="${field}" data-val="${esc(val)}">${label}</button>`;
-    const d = it.due ? it.due.d : null, t = it.due ? it.due.t : null;
     const l = listOf(it);
     return `
       <section class="card" aria-labelledby="h-task">
-        <header><h2 id="h-task">Task</h2><span class="meta">in ${esc(l.name)}</span><span class="grow"></span>
-          ${phone() ? '' : `<button class="ibtn" style="width:28px;height:28px;margin:-4px -6px 0 0" data-act="deselect" aria-label="Close details">${I.close}</button>`}</header>
+        <header><h2 id="h-task">Task</h2><span class="meta">in ${esc(l.name)}</span><span class="grow"></span>${closeDetails()}</header>
         <input class="textin" data-edit="${it.id}" value="${esc(it.t)}" aria-label="Task text">
-        <span class="field-label">Due</span>
-        <div class="opts">${opt('day', '0', 'Today', d === 0)}${opt('day', '1', 'Tomorrow', d === 1)}${opt('day', '6', 'Next Mon', d === 6)}${opt('day', '', 'None', d == null)}</div>
-        ${d != null ? `<div class="opts" style="margin-top:6px">${['09:00', '13:00', '17:00', '20:00'].map((v) => opt('time', v, v, t === v)).join('')}</div>` : ''}
-        <span class="field-label">Remind me</span>
-        <div class="opts">${(d != null ? ['At due time', '15 min before', '1 h before', '1 day before'] : []).concat(['In 1 h', 'Tomorrow 09:00']).map((v) => opt('remind', v, v, it.remind === v)).join('')}${opt('remind', '', 'None', !it.remind)}</div>
-        ${d != null ? '<p class="muted" style="margin:8px 0 0;font-size:12px">"Before" reminders move with the due time.</p>' : ''}
-        <span class="field-label">Repeat</span>
-        <div class="opts">${['Daily', 'Weekdays', 'Weekly', 'Monthly'].map((v) => opt('repeat', v, v, it.repeat === v)).join('')}${opt('repeat', '', 'Never', !it.repeat)}</div>
+        ${whenFields(it)}
         <span class="field-label">Order</span>
         <div class="opts"><button class="opt" data-act="move" data-dir="-1" data-id="${it.id}">Move up</button><button class="opt" data-act="move" data-dir="1" data-id="${it.id}">Move down</button></div>
         <div style="margin-top:20px;display:flex"><button class="btn danger" data-act="delete" data-id="${it.id}">${I.trash} Delete task</button></div>
       </section>`;
   }
+  // The whole list's due date and reminders (F4.1), e.g. "pack by Friday".
+  function listDetails(l) {
+    return `
+      <section class="card" aria-labelledby="h-ldue">
+        <header><h2 id="h-ldue">Whole list</h2><span class="meta">${esc(l.name)}</span><span class="grow"></span>${closeDetails()}</header>
+        <p class="muted fine" style="margin:0">For a deadline that belongs to the list, not one task.</p>
+        ${whenFields(l)}
+      </section>`;
+  }
+  const target = () => (state.sel === 'list' ? cur() : findItem(state.sel));
 
   function listScreen() {
     const l = cur();
-    const sel = state.sel && findItem(state.sel);
-    const title = `<h1><button class="dotbtn" data-act="colormenu" aria-label="Change colour">${dot(l)}</button><span data-rename contenteditable="plaintext-only" spellcheck="false" aria-label="List name, editable">${esc(l.name)}</span></h1>`;
+    const sel = state.sel === 'list' ? 'list' : state.sel && findItem(state.sel);
+    const ldue = l.due ? `<button class="tchip" data-act="listdue" title="The list's due date and reminders">${I.clock}<span class="num">Due ${D.dueLabel(l.due)}</span>${remindsOf(l).length ? I.bell : ''}</button>` : '';
+    const title = `<h1><button class="dotbtn" data-act="colormenu" aria-label="Change colour">${dot(l)}</button><span data-rename contenteditable="plaintext-only" spellcheck="false" aria-label="List name, editable">${esc(l.name)}</span>${ldue}</h1>`;
     if (phone()) return `${title}<p class="subline">${listSubline(l)}</p><section class="card paper notecard" style="${cvars(l)}">${itemsBlock(l)}</section>`;
     return `
       <div class="titlerow">
@@ -347,7 +405,7 @@
       </div>
       <div class="grid listgrid">
         <section class="card ${sel ? 'span-8' : 'span-12'} paper notecard" style="${cvars(l)}" aria-label="Tasks">${itemsBlock(l)}</section>
-        ${sel ? `<div class="span-4">${details(sel)}</div>` : ''}
+        ${sel ? `<div class="span-4">${sel === 'list' ? listDetails(l) : details(sel)}</div>` : ''}
       </div>`;
   }
 
@@ -372,7 +430,8 @@
   function settingsScreen() {
     const tg = (key, on, label) => `<button class="tg" role="switch" aria-checked="${on}" data-act="pref" data-key="${key}" aria-label="${label}"></button>`;
     const seg = (key, val, opts) => `<div class="seg" role="group">${opts.map(([v, lbl]) => `<button aria-pressed="${val === v}" data-act="seg" data-key="${key}" data-val="${v}">${lbl}</button>`).join('')}</div>`;
-    const P = settingsScreen.p || (settingsScreen.p = { bar: true, fullscreen: true, notif: true, snooze: '10m' });
+    const P = prefs;
+    const capRow = `<div class="switchrow"><span class="lbl"><b>New tasks go to</b><small>${isPhoneOS() ? 'From the widget, Share to Weave and the notification.' : 'From the hotkey and Up next, unless you pick another list there.'}</small></span><select class="selin" data-pref="capture" aria-label="New tasks go to">${D.lists.map((l) => `<option value="${l.id}" ${l.id === P.capture ? 'selected' : ''}>${esc(l.name)}</option>`).join('')}</select></div>`;
     const floatPanel = state.os === 'ios' ? `
         <div class="switchrow"><span class="lbl"><b>Home-screen widget</b><small>iOS cannot float notes over other apps. The widget shows a chosen list, and items tick from there.</small></span>${tg('bar', P.bar, 'Widget')}</div>` : `
         <div class="switchrow"><span class="lbl"><b>Show the mini bar</b><small>${state.os === 'android' ? 'Needs "Display over other apps". Without it, Weave uses a notification and the home widget.' : 'A small bar above every app. Click it to open the sheet.'}</small></span>${tg('bar', P.bar, 'Show the mini bar')}</div>
@@ -387,23 +446,25 @@
         <section class="srow"><div><h2>Appearance</h2><p class="desc">Follows your system unless you pick one.</p></div>
           <div class="panel">${seg('theme', state.theme, [['system', 'System'], ['light', 'Light'], ['dark', 'Dark']])}</div></section>
         <section class="srow"><div><h2>${state.os === 'ios' ? 'Widgets' : 'Mini bar'}</h2><p class="desc">How Weave stays within reach without getting in the way.</p></div>
-          <div class="panel">${floatPanel}</div></section>
+          <div class="panel">${floatPanel}${capRow}</div></section>
         <section class="srow"><div><h2>Notifications</h2><p class="desc">Reminders ring on every signed-in device. Done or snoozed on one clears the rest.</p></div>
           <div class="panel">
             <div class="switchrow"><span class="lbl"><b>Reminders</b><small>Scheduled on this device, so they ring offline too.</small></span>${tg('notif', P.notif, 'Reminders')}</div>
             <div class="switchrow" style="display:block"><span class="lbl"><b>Default snooze</b></span><div style="margin-top:10px">${seg('snooze', P.snooze, [['10m', '10 min'], ['1h', '1 hour'], ['tmrw', 'Tomorrow']])}</div></div>
           </div></section>
+        ${state.account === 'local' ? `<section class="srow"><div><h2>Account and sync</h2><p class="desc">Weave works fully without an account. Sign in to see your lists on every device, end-to-end encrypted.</p></div>
+          <div class="panel"><div class="switchrow"><span class="lbl"><b>Sync is off</b><small>Your ${D.lists.length} lists are on ${here()} only. Nothing leaves it.</small></span><button class="btn primary" data-act="modal" data-m="signin">Sign in</button></div></div></section>` : `
         <section class="srow"><div><h2>Account and sync</h2><p class="desc">Notes are encrypted on this device before they sync. Weave's server cannot read them.</p><p class="desc">Your recovery key is the only way back in if you lose every device.</p></div>
           <div class="panel">
             <table class="devtable"><thead><tr><th>Device</th><th>Last seen</th></tr></thead><tbody>
               ${D.devices.map((d) => `<tr><td><span class="dn">${d.kind === 'This Mac' ? I.laptop : I.device}${esc(d.name)} <span class="muted">${esc(d.kind)}</span></span></td><td class="num muted">${esc(d.seen)}</td></tr>`).join('')}
             </tbody></table>
-            <div class="switchrow" style="margin-top:8px"><span class="lbl"><b>Recovery key</b><small>Saved 12 Oct. We'll remind you to check it every 6 months.</small></span><button class="btn sm">${I.key} Show again</button></div>
-            <div class="switchrow"><span class="lbl"><b>Add a device</b><small>Scan the code from the new device, or enter the recovery key there.</small></span><button class="btn sm">Show code</button></div>
-            <div class="switchrow"><span class="lbl"><b>Sign out</b><small>Removes your notes from this Mac. They stay on your other devices.</small></span><button class="btn sm">Sign out…</button></div>
+            <div class="switchrow" style="margin-top:8px"><span class="lbl"><b>Recovery key</b><small>Made 12 Oct and shown once. We ask you to check it every 6 months.</small></span><button class="btn sm" data-act="modal" data-m="keycheck">${I.key} Check it</button></div>
+            <div class="switchrow"><span class="lbl"><b>Add a device</b><small>Sign in on the new device, then let it in from here.</small></span><button class="btn sm" data-act="modal" data-m="adddevice">Add a device</button></div>
+            <div class="switchrow"><span class="lbl"><b>Sign out</b><small>Removes your notes from ${here()}. They stay on your other devices.</small></span><button class="btn sm" data-act="modal" data-m="signout">Sign out…</button></div>
           </div></section>
         <section class="srow danger-zone"><div><h2>Delete account</h2><p class="desc">Deletes every note on every device and on the server.</p></div>
-          <div class="panel"><p>This cannot be undone. You will type your email to confirm.</p><button class="btn danger">Delete account…</button></div></section>
+          <div class="panel"><p>This cannot be undone. You will type your email to confirm.</p><button class="btn danger" data-act="modal" data-m="delacct">Delete account…</button></div></section>`}
       </div>`;
   }
 
@@ -419,6 +480,7 @@
   }
 
   // ---------- Desktop shell ----------
+  const conflictList = () => D.lists.find((l) => l.items.some((i) => i.conflict));
   function sidebar() {
     const nav = (v, icon, label, n) => `<button class="navrow ${state.view === v && !state.query ? 'on' : ''}" data-act="nav" data-view="${v}">${icon}<span class="label">${label}</span>${n != null ? `<span class="n">${n}</span>` : ''}</button>`;
     const lrow = (l) => {
@@ -428,7 +490,8 @@
     return `
       <nav class="side" aria-label="Weave">
         <div class="brand">${I.mark}<b>Weave</b></div>
-        <button class="syncline s-${state.sync}" data-act="sync" title="Sync status (click to cycle, demo)">${I.cloud}${SYNC[state.sync]}</button>
+        ${state.account === 'local' ? `<span class="syncline">${I.laptop}On ${here()} only</span>` : conflictList() ? `<button class="syncline s-conflict" data-act="open" data-list="${conflictList().id}" title="Open ${esc(conflictList().name)}">${I.cloud}Synced · <span class="late">1 conflict</span></button>`
+          : `<button class="syncline s-${state.sync}" data-act="sync" title="Sync status (click to cycle, demo)">${I.cloud}${SYNC[state.sync]}</button>`}
         <label class="search">${I.search}<input data-search placeholder="Search" value="${esc(state.query)}" aria-label="Search notes"><kbd>${mod()}K</kbd></label>
         ${nav('next', I.sun, 'Up next', dueToday)}
         <div class="group">Pinned</div>
@@ -439,7 +502,9 @@
         <div class="foot">
           ${nav('archive', I.archive, 'Archive and trash', archived.length + trashed.length)}
           ${nav('settings', I.gear, 'Settings')}
-          <div class="userrow"><span class="avatar">MY</span><span class="who">Mayank Yadav<small>End-to-end encrypted</small></span></div>
+          ${state.account === 'local'
+            ? `<button class="userrow local" data-act="modal" data-m="signin"><span class="avatar">${I.laptop}</span><span class="who">Local mode<small>Sign in to sync devices</small></span></button>`
+            : `<div class="userrow"><span class="avatar">MY</span><span class="who">Mayank Yadav<small>End-to-end encrypted</small></span></div>`}
         </div>
       </nav>`;
   }
@@ -497,7 +562,7 @@
   // ---------- Phone shell ----------
   function phoneShell() {
     const l = cur();
-    const sel = state.sel && findItem(state.sel);
+    const sel = typeof state.sel === 'number' && findItem(state.sel);
     const inList = state.view === 'list';
     const sub = inList || state.view === 'archive'; // pushed inside the Lists tab
     // Back: iOS shows a chevron with the parent's name; Android a plain arrow (the system back gesture does the same).
@@ -514,10 +579,13 @@
       <button data-act="nav" data-view="${v}" ${tab === v ? 'aria-current="page"' : ''}><span class="ic">${icon}${v === 'next' && dueToday ? `<span class="badge num">${dueToday}</span>` : ''}</span><span class="tl">${label}</span></button>`).join('')}</nav>`;
     const showAdd = state.view === 'next' || inList;
     const sheet = state.psheet === 'item' && sel ? details(sel).replace('class="card"', 'class=""')
+      : state.psheet === 'listdue' ? listDetails(l).replace('class="card"', 'class=""')
       : state.psheet === 'share' ? `<h2>Share ${esc(l.name)}</h2><div class="sharerow"><button class="btn" data-act="share" data-as="Text">Text</button><button class="btn" data-act="share" data-as="Markdown">Markdown</button><button class="btn" data-act="share" data-as="Image">Image</button></div>`
       : state.psheet === 'more' ? `<h2>${esc(l.name)}</h2>
           <div class="switchrow"><span class="lbl"><b>${state.os === 'ios' ? 'Show in widget' : 'Show in the bar'}</b></span><button class="tg" role="switch" aria-checked="${!!l.onScreen}" data-act="onscreen" aria-label="${state.os === 'ios' ? 'Show in widget' : 'Show in the bar'}"></button></div>
           <div class="switchrow"><span class="lbl"><b>Pin to top</b></span><button class="tg" role="switch" aria-checked="${!!l.pinned}" data-act="pinned" aria-label="Pin to top"></button></div>
+          <div class="switchrow"><span class="lbl"><b>Hide done tasks</b></span><button class="tg" role="switch" aria-checked="${!!l.hideDone}" data-act="hidedone" aria-label="Hide done tasks"></button></div>
+          <div class="switchrow"><span class="lbl"><b>Due date for the list</b><small>${l.due ? 'Due ' + D.dueLabel(l.due) : 'None'}</small></span><button class="btn sm" data-act="listdue">${l.due ? 'Change' : 'Set'}</button></div>
           <span class="field-label">Colour</span><div class="swatches">${[0, 1, 2, 3, 4, 5].map((c) => `<button class="swatch ${l.color === c ? 'on' : ''}" aria-label="${D.COLOR_NAMES[c]}" aria-pressed="${l.color === c}" data-act="color" data-c="${c}" style="--c:var(--n${c});--ci:var(--n${c}-ink)">${l.color === c ? I.tick : ''}</button>`).join('')}</div>
           <div style="display:flex;gap:8px;margin-top:20px"><button class="btn" data-act="archive">Archive</button><button class="btn danger" data-act="dellist">Delete</button></div><p class="muted" style="margin:16px 0 0;font-size:var(--fs-small)">Edited ${esc(l.edited || 'just now')}</p>` : '';
     return `
@@ -529,7 +597,80 @@
         ${tabbar}
         <div class="homebar"></div>
         ${sheetLayer(sheet)}
+        ${modalLayer()}
       </div></div></div>`;
+  }
+
+  // ---------- Confirm dialogs (destructive account actions) ----------
+  const KEY = ['WV7K', '3MPQ', '9XHT', '2RDA', 'LC4E', '8NUF'];
+  const PAIR = '482 913';
+  const others = () => D.devices.slice(1).map((d) => d.name);
+  // A pairing code drawn as a grid (prototype stand-in for a real QR code).
+  function qr() {
+    let x = 7, cells = '';
+    for (let r = 0; r < 21; r++) for (let c = 0; c < 21; c++) {
+      const finder = (r < 7 && c < 7) || (r < 7 && c > 13) || (r > 13 && c < 7);
+      const on = finder ? (Math.max(Math.abs(r % 14 - 3), Math.abs(c % 14 - 3)) !== 2 && !(r === 7 || c === 7 || r === 13 || c === 13)) : ((x = (x * 73 + r * 31 + c * 17) % 101) % 3 === 0);
+      if (on) cells += `<rect x="${c}" y="${r}" width="1" height="1"/>`;
+    }
+    return `<svg class="qr" viewBox="-1 -1 23 23" role="img" aria-label="Pairing code. Or type ${PAIR} on your other device.">${cells}</svg>`;
+  }
+  const keyBox = () => `<div class="keybox num" aria-label="Recovery key ${KEY.join(' ')}">${KEY.map((g) => `<span>${g}</span>`).join('')}</div>
+    <div class="keyacts"><button class="btn sm" data-act="copykey">Copy</button><button class="btn sm" data-act="copykey" data-as="file">Save as file</button><button class="btn sm" data-act="copykey" data-as="print">Print</button></div>
+    <label class="ack"><input type="checkbox" data-ack> I've saved it somewhere safe, not only on ${here()}</label>`;
+
+  // Every dialog: { t, body, ok, act, danger, off, cancel, wide }. Multi-step flows pick their step from state.step.
+  function dialog() {
+    const st = state.step;
+    switch (state.modal) {
+      case 'signout': return { t: `Sign out on ${here()}?`, body: `<p>Your notes are removed from ${here()}. They stay on your other ${D.devices.length - 1} devices and come back when you sign in here again.</p><p class="muted">Anything not yet synced is sent first. Weave waits for it.</p>`, ok: 'Sign out', act: 'dosignout' };
+      case 'delacct': return { t: 'Delete your account?', body: `<p>This deletes every list on all ${D.devices.length} devices and on Weave's server, and it cannot be undone. Lists you want to keep: share them out first.</p><label class="fl" for="dlg-email">Type <b>${EMAIL}</b> to confirm</label><input id="dlg-email" class="textin" data-confirm autocomplete="off" spellcheck="false">`, ok: 'Delete account', act: 'dodelacct', danger: true, off: true };
+      case 'signin':
+        if (!st || st === 'choose') return { t: 'Sync your lists', body: `<p>Sign in or create an account. Lists are encrypted on ${here()} before they leave it, so Weave's server can't read them.</p>
+          <div class="authbtns"><button class="btn wide" data-act="step" data-s="${state.existing ? 'approve' : 'upload'}">Continue with Apple</button><button class="btn wide" data-act="step" data-s="${state.existing ? 'approve' : 'upload'}">Continue with Google</button></div>
+          <div class="or"><span>or with email</span></div>
+          <form data-form="email" class="emailform"><label class="sr" for="dlg-em">Email</label><input id="dlg-em" class="textin" type="email" name="em" placeholder="you@example.com" autocomplete="email"> <!-- taste-skill-ignore: reserved demo domain --><button class="btn primary wide">Email me a sign-in link</button></form>
+          <p class="fine muted">Prefer a password? <button class="link" data-act="step" data-s="password">Use a password</button></p>`, ok: null };
+        if (st === 'password') return { t: 'Sign in with a password', body: `<form data-form="email" class="emailform"><label class="fl" for="dlg-em">Email</label><input id="dlg-em" class="textin" type="email" name="em" autocomplete="email"><label class="fl" for="dlg-pw">Password</label><input id="dlg-pw" class="textin" type="password" autocomplete="current-password"><button class="btn primary wide" style="margin-top:16px">Sign in</button></form>
+          <p class="fine muted">Forgot it? <button class="link" data-act="step" data-s="choose">Email me a link instead</button>. Your lists stay encrypted either way.</p>`, ok: null };
+        if (st === 'sent') return { t: 'Check your email', body: `<p>We sent a sign-in link to <b>${esc(state.email)}</b>. Open it on ${here()}. It works for 15 minutes.</p><p class="fine muted">Nothing there? Check spam, or <button class="link" data-act="step" data-s="sent">send it again</button>.</p>`, ok: 'I opened the link', okClass: 'demo', act: 'step', s: state.existing ? 'approve' : 'upload' };
+        if (st === 'upload') {
+          const n = D.lists.length, going = state.up > 0, u = Math.floor(state.up);
+          return { t: `Bring your ${n} lists along?`, body: `<p>They're encrypted on ${here()}, then uploaded. Only your devices can read them.</p>
+            <ul class="uplist">${D.lists.map((l, k) => `<li style="${cvars(l)}">${dot(l)}<span class="grow">${esc(l.name)}</span><span class="muted fine0">${k < u ? 'Uploaded' : going && k === u ? 'Encrypting…' : `${D.checks(l).length} tasks`}</span></li>`).join('')}</ul>
+            ${going ? `<div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="${n}" aria-valuenow="${u}"><i style="width:${(u / n) * 100}%"></i></div>` : ''}`,
+            ok: going ? `Uploading ${Math.min(u + 1, n)} of ${n}…` : 'Encrypt and upload', act: 'upload', off: going };
+        }
+        if (st === 'recovery') return { t: 'Save your recovery key', body: `<p>If you lose every device, this key is the only way back into your lists. Weave can't reset it or read your lists without it.</p>${keyBox()}<p class="fine muted">You'll see it once. You can make a new one in Settings.</p>`, ok: 'Done', act: 'finishsignin', off: true, nocancel: true };
+        if (st === 'approve') return { t: `Let ${here()} in`, body: `<p>Your lists are encrypted, so a device you already use has to approve this one.</p>
+          <div class="qrwrap">${qr()}<ol><li>Open Weave on ${others().join(' or ')}.</li><li>Settings → Account and sync → <b>Add a device</b>.</li><li>Scan this code, or type <b class="num">${PAIR}</b>.</li></ol></div>
+          <p class="fine muted">No other device? <button class="link" data-act="step" data-s="keyentry">Use your recovery key</button></p>`, ok: `Approved on ${others()[0]}`, okClass: 'demo', act: 'finishsignin' };
+        if (st === 'keyentry') return { t: 'Enter your recovery key', body: `<p>The 24-character key you saved when you set up sync.</p><label class="sr" for="dlg-key">Recovery key</label><input id="dlg-key" class="textin num keyin" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false" data-keyfull>
+          ${state.keyErr ? '<p class="err">That key doesn\'t match. Check each group; 0 and O are different.</p>' : ''}`, ok: 'Open my lists', act: 'checkkeyfull' };
+        break;
+      case 'keycheck':
+        return { t: 'Do you still have your recovery key?', body: `<p>It's been 6 months. If you lose every device, the key is the only way back in, so check that you can still find it.</p><label class="fl" for="dlg-k4">Type its last group of 4 characters</label><input id="dlg-k4" class="textin num" maxlength="4" autocomplete="off" spellcheck="false" style="width:120px;text-transform:uppercase" data-k4>
+          ${state.keyErr ? '<p class="err">That doesn\'t match. Look again, or make a new key if it\'s lost.</p>' : ''}
+          <p class="fine muted">Can't find it? <button class="link" data-act="modal" data-m="newkey">Make a new key</button></p>`, ok: 'Check', act: 'checkkey', cancel: 'Later' };
+      case 'newkey':
+        return { t: 'Your new recovery key', body: `<p>Your old key stops working now. Save this one instead: it's the only way back in if you lose every device.</p>${keyBox()}`, ok: 'Done', act: 'closemodal', off: true, nocancel: true };
+      case 'adddevice':
+        if (!st) return { t: 'Add a device', body: `<p>Sign in on the new device first. It then shows a code.</p>${isPhoneOS()
+          ? `<div class="viewfinder" role="img" aria-label="Camera view"><i></i><span>Point at the code on the new device</span></div><p class="fine muted">Or <button class="link" data-act="step" data-s="type">type the code instead</button></p>`
+          : `<form data-form="pair"><label class="fl" for="dlg-pair">Type the 6-digit code shown on the new device</label><input id="dlg-pair" class="textin num" inputmode="numeric" placeholder="000 000" autocomplete="off" style="width:160px"></form>`}`,
+          ok: isPhoneOS() ? 'Code scanned' : 'Continue', okClass: isPhoneOS() ? 'demo' : '', act: 'step', s: 'confirm' };
+        if (st === 'type') return { t: 'Add a device', body: `<form data-form="pair"><label class="fl" for="dlg-pair">Type the 6-digit code shown on the new device</label><input id="dlg-pair" class="textin num" inputmode="numeric" placeholder="000 000" autocomplete="off" style="width:160px"></form>`, ok: 'Continue', act: 'step', s: 'confirm' };
+        return { t: 'Let this device read your lists?', body: `<div class="devconfirm">${I.laptop}<div><b>MacBook Pro</b><br><span class="muted">macOS · asked just now · Bengaluru</span></div></div><p>It will be able to read and change every list. Only approve a device you're holding right now.</p>`, ok: 'Approve', act: 'approvedev', cancel: "Don't allow" };
+    }
+    return null;
+  }
+
+  function modalLayer() {
+    const M = dialog();
+    if (!M) return '';
+    return `<div class="mscrim" ${M.nocancel ? '' : 'data-act="closemodal"'}></div>
+      <div class="dlg" role="alertdialog" aria-modal="true" aria-labelledby="dlg-t"><h2 id="dlg-t">${M.t}</h2>${M.body}
+        ${M.ok || !M.nocancel ? `<div class="dlgacts">${M.nocancel ? '' : `<button class="btn ${M.ok ? '' : 'ghost'}" data-act="closemodal">${M.cancel || 'Cancel'}</button>`}${M.ok ? `<button class="btn ${M.danger ? 'dangerfill' : M.okClass === 'demo' ? 'demo' : 'primary'}" data-act="${M.act}" ${M.s ? `data-s="${M.s}"` : ''} ${M.off ? 'disabled' : ''}>${M.ok}</button>` : ''}</div>` : ''}</div>`;
   }
 
   // ---------- Render ----------
@@ -541,7 +682,8 @@
     document.documentElement.style.setProperty('--accent', state.view === 'list' ? D.color(l) : 'var(--n0)');
     document.documentElement.style.setProperty('--accent-ink', state.view === 'list' ? D.ink(l) : 'var(--n0-ink)');
     const focused = document.activeElement && document.activeElement.matches('[data-search]');
-    app.innerHTML = ph ? phoneShell() : `${chrome()}<div class="desk">${sidebar()}<main class="canvas">${screen()}</main></div>`;
+    app.innerHTML = ph ? phoneShell() : `${chrome()}<div class="desk">${sidebar()}<main class="canvas">${screen()}</main></div>${modalLayer()}`;
+    const dlg = app.querySelector('.dlg'); if (dlg && !dlg.contains(document.activeElement)) { const f = dlg.querySelector('input:not([type=checkbox])') || dlg.querySelector('[data-act="closemodal"]') || dlg.querySelector('button'); if (f) f.focus({ preventScroll: true }); }
     if (focused) { const s = app.querySelector('[data-search]'); if (s) { s.focus(); s.setSelectionRange(s.value.length, s.value.length); } }
     state.newItem = null;
     if (ph) settleSheet(); else lastSheet = { open: false, html: '' };
@@ -602,7 +744,7 @@
     const l = cur();
     const items = {
       share: `<button data-act="share" data-as="Text">${I.text} Copy as text</button><button data-act="share" data-as="Markdown">${I.list} Copy as Markdown</button><button data-act="share" data-as="Image">${I.share} Share as image…</button>`,
-      more: `<button data-act="pinned">${I.pin} ${l.pinned ? 'Unpin from top' : 'Pin to top'}</button><hr><button data-act="archive">${I.archive} Archive</button><button class="danger" data-act="dellist">${I.trash} Delete list…</button><p class="popnote">Edited ${esc(l.edited || 'just now')}</p>`,
+      more: `<button data-act="pinned">${I.pin} ${l.pinned ? 'Unpin from top' : 'Pin to top'}</button><button data-act="listdue">${I.clock} ${l.due ? 'Change the list\'s due date' : 'Due date for the list'}</button><button data-act="hidedone">${I.check} ${l.hideDone ? 'Show done tasks' : 'Hide done tasks'}</button><hr><button data-act="archive">${I.archive} Archive</button><button class="danger" data-act="dellist">${I.trash} Delete list…</button><p class="popnote">Edited ${esc(l.edited || 'just now')}</p>`,
       color: [0, 1, 2, 3, 4, 5].map((c) => `<button data-act="color" data-c="${c}"><span class="dot" style="--c:var(--n${c});--ci:var(--n${c}-ink)"></span>${D.COLOR_NAMES[c]}${l.color === c ? ' (current)' : ''}</button>`).join(''),
     }[state.pop.kind];
     popEl.innerHTML = items;
@@ -668,6 +810,41 @@
       case 'move': { moveItem(findItem(+b.dataset.id), +b.dataset.dir); break; }
       case 'select': state.sel = +b.dataset.id; if (phone()) state.psheet = 'item'; break;
       case 'deselect': state.sel = null; break;
+      case 'listdue': state.sel = 'list'; state.pop = null; if (phone()) state.psheet = 'listdue'; break;
+      case 'hidedone': l.hideDone = !l.hideDone; state.pop = null; break;
+      case 'keep': {
+        const owner = D.lists.find((x) => x.items.some((i) => i.conflict)); if (!owner) return;
+        const g = b.dataset.group ? +b.dataset.group : findItem(+b.dataset.id).conflict;
+        const snap = owner.items.map((i) => [i, i.conflict, i.from]);
+        if (!b.dataset.group) owner.items = owner.items.filter((i) => i.conflict !== g || i.id === +b.dataset.id);
+        owner.items.forEach((i) => { if (i.conflict === g) { delete i.conflict; delete i.from; } });
+        render(); toast(b.dataset.group ? 'Kept both versions' : `Kept "${owner.items.find((i) => i.id === +b.dataset.id).t}"`, () => { owner.items = snap.map(([i, c, f]) => { if (c) { i.conflict = c; i.from = f; } return i; }); });
+        return;
+      }
+      case 'modal': state.modal = b.dataset.m; state.step = null; state.keyErr = false; state.up = 0; break;
+      case 'closemodal': state.modal = null; state.step = null; break;
+      case 'step': state.step = b.dataset.s; state.keyErr = false; break;
+      case 'upload': {
+        state.up = 0.001; render();
+        const n = D.lists.length;
+        const tick = () => { state.up = Math.floor(state.up) + 1; if (state.up >= n) { state.step = 'recovery'; state.up = 0; } render(); if (state.step === 'upload') setTimeout(tick, 320); };
+        setTimeout(tick, 320); return;
+      }
+      case 'copykey': toast(b.dataset.as === 'file' ? 'Saved Weave recovery key.txt' : b.dataset.as === 'print' ? 'Opening the print dialog…' : 'Recovery key copied. Paste it somewhere safe.'); return;
+      case 'finishsignin': state.modal = null; state.step = null; state.account = 'in'; render(); toast(state.existing ? `Approved. Your lists are arriving on ${here()}.` : 'Sync is on. Your lists are encrypted and backed up.'); return;
+      case 'checkkey': {
+        const v = (app.querySelector('[data-k4]').value || '').trim().toUpperCase();
+        if (v === KEY[KEY.length - 1]) { state.modal = null; render(); toast("That's the one. We'll ask again in 6 months."); return; }
+        state.keyErr = true; break;
+      }
+      case 'checkkeyfull': {
+        const v = (app.querySelector('[data-keyfull]').value || '').replace(/[^A-Z0-9]/gi, '').toUpperCase();
+        if (v === KEY.join('')) { act('finishsignin', b); return; }
+        state.keyErr = true; break;
+      }
+      case 'approvedev': state.modal = null; state.step = null; render(); toast('MacBook Pro can now read your lists.'); return;
+      case 'dosignout': state.modal = null; render(); toast(`Signed out on ${here()}. Your lists are safe on your other devices.`); return;
+      case 'dodelacct': state.modal = null; state.account = 'local'; render(); toast('Account deleted. Weave is back in local mode.'); return;
       case 'done': { // in place, so the rows grow open with the chevron
         state.showDone = !state.showDone;
         app.querySelectorAll('.donefoot').forEach((f) => {
@@ -678,16 +855,20 @@
       }
       case 'uncheckall': { const was = D.done(l); was.forEach((i) => { i.d = false; }); state.psheet = null; render(); toast(`Unchecked ${was.length} in ${l.name}`, () => was.forEach((i) => { i.d = true; })); return; }
       case 'set': {
-        const it = findItem(state.sel); const v = b.dataset.val;
+        const it = target(); const v = b.dataset.val;
         if (b.dataset.field === 'day') it.due = v === '' ? null : { d: +v, t: (it.due && it.due.t) || '09:00' };
         if (b.dataset.field === 'time') it.due = { ...(it.due || { d: 0 }), t: v };
-        if (b.dataset.field === 'remind') it.remind = v || null;
-        if (b.dataset.field === 'repeat') it.repeat = v || null;
+        if (b.dataset.field === 'remind') {
+          const rs = remindsOf(it);
+          it.reminds = v === '' ? [] : rs.includes(v) ? rs.filter((r) => r !== v) : [...rs, v];
+          it.remind = it.reminds[0] || null;
+        }
+        if (b.dataset.field === 'repeat') it.repeat = v === 'custom' ? (/^Every/.test(it.repeat || '') ? it.repeat : 'Every 2 weeks') : v || null;
         break;
       }
       case 'delete': { const it = findItem(+b.dataset.id); const owner = listOf(it); const idx = owner.items.indexOf(it); owner.items.splice(idx, 1); state.sel = null; state.psheet = null; render(); toast(`Deleted "${it.t}"`, () => owner.items.splice(idx, 0, it)); return; }
       case 'color': l.color = +b.dataset.c; state.pop = null; break;
-      case 'onscreen': D.lists.forEach((x) => { if (x !== l) x.onScreen = false; }); l.onScreen = !l.onScreen; break;
+      case 'onscreen': l.onScreen = !l.onScreen; break; // several lists can float at once (F1)
       case 'pinned': l.pinned = !l.pinned; state.pop = null; break;
       case 'share': state.pop = null; state.psheet = null; render(); toast(b.dataset.as === 'Image' ? `Sharing ${l.name} as an image…` : `Copied ${l.name} as ${b.dataset.as}`); return;
       case 'sharemenu': openPop('share', b, e); return;
@@ -709,8 +890,8 @@
         const r = app.querySelector('[data-rename]'); r.focus(); const rg = document.createRange(); rg.selectNodeContents(r); const sl = getSelection(); sl.removeAllRanges(); sl.addRange(rg); return;
       }
       case 'sync': { const k = Object.keys(SYNC); state.sync = k[(k.indexOf(state.sync) + 1) % k.length]; break; }
-      case 'pref': { const p = settingsScreen.p; p[b.dataset.key] = !p[b.dataset.key]; break; }
-      case 'seg': { if (b.dataset.key === 'theme') { state.theme = b.dataset.val; applyTheme(); } else settingsScreen.p[b.dataset.key] = b.dataset.val; break; }
+      case 'pref': { prefs[b.dataset.key] = !prefs[b.dataset.key]; break; }
+      case 'seg': { if (b.dataset.key === 'theme') { state.theme = b.dataset.val; applyTheme(); } else prefs[b.dataset.key] = b.dataset.val; break; }
       case 'psheet': state.psheet = b.dataset.sheet; break;
       case 'closesheet': state.psheet = null; state.sel = null; break;
       case 'pmenu': state.pmenu = !state.pmenu; break;
@@ -720,6 +901,7 @@
   }
 
   document.addEventListener('click', (e) => {
+    if (e.target.matches('.addtime input')) { try { e.target.showPicker(); } catch { /* older browsers: the field takes typing */ } return; }
     const b = e.target.closest('[data-act]');
     if (!b) { if (state.pop && !popEl.contains(e.target)) { state.pop = null; renderPop(); } return; }
     if (b.closest('.proto')) return;
@@ -738,9 +920,25 @@
     if (t.matches('[data-edit]')) { const it = findItem(+t.dataset.edit); if (it) it.t = t.value; }
     if (t.matches('[data-rename]')) { cur().name = t.textContent.trim() || 'Untitled list'; const side = app.querySelector('.side'); if (side) side.outerHTML = sidebar(); }
     if (t.matches('[data-search]')) { state.query = t.value; render(); }
+    if (t.matches('[data-confirm]')) app.querySelector('[data-act="dodelacct"]').disabled = t.value.trim().toLowerCase() !== EMAIL;
     if (t.matches('[data-range="opacity"]')) { state.floatOpacity = +t.value; const p = app.querySelector('.preview .pbar'); p.style.opacity = state.floatOpacity / 100; t.nextElementSibling.textContent = state.floatOpacity + '%'; }
   });
+  document.addEventListener('change', (e) => {
+    const t = e.target;
+    if (t.matches('[data-pref="capture"]')) { prefs.capture = +t.value; return; }
+    if (t.matches('[data-ack]')) { app.querySelector('.dlg .dlgacts button:last-child').disabled = !t.checked; return; }
+    if (!t.matches('[data-pick]') || !t.value) return;
+    const o = target(); if (!o) return;
+    const k = t.dataset.pick;
+    if (k === 'date') o.due = { d: Math.max(0, daysTo(t.value)), t: (o.due && o.due.t) || '09:00' };
+    if (k === 'time') o.due = { ...(o.due || { d: 0 }), t: t.value };
+    if (k === 'remind') { const r = `At ${t.value}`; const rs = remindsOf(o); if (!rs.includes(r)) { o.reminds = [...rs, r]; o.remind = o.reminds[0]; } }
+    if (k === 'every') { const w = t.closest('.every'); o.repeat = `Every ${Math.max(1, +w.querySelector('input').value || 1)} ${w.querySelector('select').value}`; }
+    render();
+  });
   document.addEventListener('submit', (e) => {
+    if (e.target.matches('[data-form="email"]')) { e.preventDefault(); state.email = e.target.elements.em.value.trim() || 'you@example.com' /* taste-skill-ignore: reserved demo domain */; state.step = state.step === 'password' ? (state.existing ? 'approve' : 'upload') : 'sent'; render(); return; }
+    if (e.target.matches('[data-form="pair"]')) { e.preventDefault(); state.step = 'confirm'; render(); return; }
     const f = e.target.closest('[data-form="capture"]');
     if (!f) return;
     e.preventDefault();
@@ -759,6 +957,7 @@
   // Inline editing on desktop: Enter adds below, Backspace on empty removes, Tab indents.
   document.addEventListener('keydown', (e) => {
     const t = e.target;
+    if (e.key === 'Escape' && state.modal) { if (!(dialog() || {}).nocancel) { state.modal = null; state.step = null; render(); } return; }
     if (e.key === 'Escape') { if (state.pop) { popEl.classList.add('kbd'); state.pop = null; renderPop(); return; } if (state.psheet || state.sel) { state.psheet = null; state.sel = null; render(); } return; }
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); const s = app.querySelector('[data-search]'); if (s) s.focus(); return; }
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'n') { e.preventDefault(); act('newlist'); return; }

@@ -32,7 +32,7 @@
       C('Pick the floating design', { d: true }),
       C('Finish architecture playbook', { d: true }),
     ] },
-    { id: 3, name: 'Groceries', color: 2, pinned: false, onScreen: false, edited: 'this morning on Pixel 8', items: [
+    { id: 3, name: 'Groceries', color: 2, pinned: false, onScreen: true, edited: 'this morning on Pixel 8', items: [
       C('Eggs'), C('Coffee beans'), C('Oat milk'), C('Spinach'),
       C('Bread', { d: true }),
     ] },
@@ -68,12 +68,17 @@
   const isOverdue = (it) => !it.d && it.due && it.due.t && it.due.d === 0 && toMin(it.due.t) < NOW.min;
   const leftLabel = (l) => (open(l).length ? `${open(l).length} left` : 'All done');
 
+  // Days beyond the table: the calendar date, "Thu 12 Nov".
+  function dateLabel(d) {
+    const x = new Date(2026, 10, 3 + d);
+    return `${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][x.getDay()]} ${x.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][x.getMonth()]}`;
+  }
   // "17:00" today, "Tomorrow 10:00", "Fri 6 Nov".
   function dueLabel(due) {
     if (!due) return '';
     if (due.d === 0) return due.t || 'Today';
     if (due.d === 1) return `Tomorrow${due.t ? ' ' + due.t : ''}`;
-    return `${DAYS[due.d] || `In ${due.d} days`}${due.t ? ' ' + due.t : ''}`;
+    return `${DAYS[due.d] || dateLabel(due.d)}${due.t ? ' ' + due.t : ''}`;
   }
 
   // The next open item with a time, today or later (overdue items are reported separately).

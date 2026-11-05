@@ -1,0 +1,99 @@
+/* 04 · Notifications. The OS draws the notification frame; Weave supplies the words, actions and mark.
+   Each OS frame keeps that OS's look; Weave's tokens apply to the content only. Prototype only. */
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&display=swap');
+@import url('../assets/tokens.css');
+
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body { font-family: var(--font); font-size: 14px; line-height: 20px; color: var(--text); background: var(--ground); -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; }
+svg { display: block; flex: none; }
+.num { font-variant-numeric: tabular-nums; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.mark { width: 16px; height: 16px; }
+
+.stage { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 32px; align-items: start; max-width: 1360px; margin: 0 auto; padding: 40px 32px 220px; }
+.devname { margin: 0 0 12px; font-size: 16px; font-weight: 500; }
+.caption { min-height: 20px; margin: 12px 0 0; color: var(--muted); font-size: 13px; }
+
+/* ---------- Desktop screen ---------- */
+.screen.desk { position: relative; height: 600px; border-radius: 10px; overflow: hidden; background: #1e1e1e url('../assets/desktop.png') center / cover; }
+.menubar { height: 26px; display: flex; align-items: center; gap: 16px; padding: 0 16px; background: rgba(28, 28, 30, .92); color: #f2f2f2; font-size: 13px; }
+.menubar .grow { flex: 1; }
+.taskbar { position: absolute; left: 0; right: 0; bottom: 0; height: 48px; display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 0 16px; background: #202020; color: #f2f2f2; font-size: 12px; }
+
+/* macOS banner: system material, Weave content */
+.mac-n { position: absolute; top: 38px; right: 12px; width: 360px; padding: 12px 14px; border-radius: 16px; background: rgba(246, 246, 246, .94); color: #1d1d1f; box-shadow: 0 8px 28px rgba(0, 0, 0, .28); }
+.t-dark .mac-n { background: rgba(44, 44, 46, .94); color: #f2f2f2; }
+.n-head { display: flex; align-items: flex-start; gap: 10px; }
+.n-head .mark { width: 32px; height: 32px; margin-top: 2px; }
+.n-head .txt { flex: 1; min-width: 0; }
+.n-app { display: flex; gap: 6px; font-size: 12px; opacity: .7; }
+.n-app .grow { flex: 1; }
+.n-title { font-weight: 500; }
+.n-body { font-size: 13px; opacity: .85; }
+.mac-acts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
+.mac-acts button, .win-acts button, .and-acts button, .snz button {
+  all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-height: 32px; padding: 0 10px; border-radius: 8px; font-size: 13px; font-weight: 500; text-align: center;
+}
+.mac-acts button { background: rgba(0, 0, 0, .07); }
+.t-dark .mac-acts button { background: rgba(255, 255, 255, .1); }
+.mac-acts button:hover { background: rgba(0, 0, 0, .12); }
+.t-dark .mac-acts button:hover { background: rgba(255, 255, 255, .16); }
+.snz { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 6px; }
+.snz button { border: 1px solid rgba(127, 127, 127, .35); }
+.snz button:hover { border-color: currentColor; }
+:is(.mac-acts, .win-acts, .and-acts, .snz) button:focus-visible { outline: 2px solid currentColor; outline-offset: 1px; }
+
+/* Windows toast */
+.win-n { position: absolute; right: 12px; bottom: 60px; width: 364px; padding: 14px 16px 16px; border-radius: 8px; background: #2b2b2b; color: #fff; border: 1px solid #3a3a3a; box-shadow: 0 8px 28px rgba(0, 0, 0, .4); }
+.t-light .win-n { background: #f9f9f9; color: #1a1a1a; border-color: #e0e0e0; }
+.win-n .n-head .mark { width: 20px; height: 20px; }
+.win-acts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+.win-acts button { border-radius: 4px; background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .08); }
+.t-light .win-acts button { background: #fff; border-color: #d6d6d6; }
+
+/* ---------- Phone ---------- */
+.screen.phone { position: relative; width: 360px; height: 740px; border-radius: 36px; overflow: hidden; background: #1d252e; /* the phone's wallpaper, flat */ border: 10px solid #0b0b0b; box-sizing: content-box; color: #fff; } /* the device bezel, a border, not a shadow */
+.pstat { display: flex; justify-content: space-between; height: 32px; align-items: center; padding: 0 22px; font-size: 13px; font-variant-numeric: tabular-nums; }
+.lock-time { margin: 28px 0 4px; text-align: center; font-size: 64px; line-height: 72px; font-weight: 500; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.lock-date { text-align: center; font-size: 15px; opacity: .85; margin-bottom: 24px; }
+.and-n { margin: 0 12px 8px; padding: 14px 16px 10px; border-radius: 20px; background: var(--surface); color: var(--text); }
+.and-n .n-head .mark { width: 16px; height: 16px; margin-top: 2px; }
+.and-n .n-app { opacity: 1; color: var(--muted); }
+.and-acts { display: flex; gap: 2px; margin: 8px -8px 0; }
+.and-acts button { border-radius: 18px; height: 36px; color: var(--text); }
+.and-acts button:hover { background: var(--hover); }
+.and-n .snz button { border-color: var(--control); color: var(--text); }
+.and-n .reply { display: flex; gap: 8px; margin-top: 10px; }
+.and-n .reply input { all: unset; flex: 1; min-width: 0; height: 40px; padding: 0 14px; border-radius: 20px; background: var(--raised); font-size: 16px; }
+.and-n .reply button { all: unset; cursor: pointer; height: 40px; padding: 0 16px; border-radius: 20px; background: var(--primary); color: var(--on-primary); font-size: 13px; font-weight: 500; }
+.and-n .parse { margin: 6px 4px 0; color: var(--muted); font-size: 12px; min-height: 16px; }
+.and-n.quiet { padding-bottom: 12px; }
+.and-n .n-sub { color: var(--muted); font-size: 13px; }
+.and-n .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: var(--c); border: 1px solid var(--ci); margin-right: 6px; vertical-align: 1px; }
+
+/* Leaving: a quick fade, then the space closes (OS-driven in the real app) */
+.leaving { opacity: 0; transform: scale(.98); transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out); }
+.arrive { animation: n-in 240ms var(--ease-out); }
+@keyframes n-in { from { opacity: 0; transform: translateY(-8px); } }
+.win-n.arrive { animation-name: n-up; }
+@keyframes n-up { from { opacity: 0; transform: translateY(12px); } }
+
+/* ---------- Prototype panel (not part of the design) ---------- */
+.proto { position: fixed; left: 16px; bottom: 16px; z-index: 5; width: 360px; padding: 16px; border-radius: var(--radius-card); background: #141414; color: #d6d6d6; font-size: 13px; line-height: 20px; }
+.proto h1 { margin: 0 0 6px; font-size: 16px; font-weight: 500; color: #fff; }
+.proto p { margin: 0 0 10px; }
+.proto .ctl { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 6px; }
+.proto button { all: unset; cursor: pointer; height: 28px; padding: 0 10px; border-radius: var(--radius-control); background: #262626; color: #e6e6e6; font-size: 12px; display: inline-flex; align-items: center; }
+.proto button[aria-pressed="true"] { background: #f2f2f2; color: #0a0a0a; }
+.proto a { color: #e6e6e6; font-size: 12px; padding: 0 6px; }
+@media (max-width: 1100px) { .stage { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 0s !important; animation: none !important; } }
+/* The phone column stays phone-wide on either side; the prototype panel sits above, not over, the devices. */
+.os-android .stage { grid-template-columns: 380px minmax(0, 1fr); }
+.proto { position: static; width: auto; max-width: 1296px; margin: 24px auto 0; display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: center; }
+.proto h1 { margin: 0; }
+.proto p { margin: 0; flex: 1 1 360px; }
+.proto .ctl { margin: 0; }
+.stage { padding-top: 24px; padding-bottom: 64px; }

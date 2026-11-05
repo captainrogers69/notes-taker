@@ -10,49 +10,49 @@ Last reviewed: 2026-11-05 (re-checked against design 02)
 
 ## v1 Must — missing or partial
 
-- [ ] **1. Several lists on screen** (F1, F1.2)
-  - [ ] More than one list floating at once (one bar per list, or one bar that holds several)
-  - [ ] Resize the sheet
-  - [ ] Collapse a note to a small handle
-- [ ] **2. Reminder notifications** (F4.5, F4.6)
-  - [ ] Android notification: Mark done · Snooze (10 min / 1 h / tomorrow) · Open
-  - [ ] macOS notification
-  - [ ] Windows notification
-  - [ ] Done or snoozed on one device clears it on the others
-- [ ] **3. iOS widgets** (F1-iOS)
-  - [ ] Home-screen widget: chosen list or "next up", items tickable
-  - [ ] Lock-screen widget: next reminder
-- [ ] **4. Android home widget** (fallback when overlay permission is denied)
-- [ ] **5. Sync conflict** (F2.4): keep both versions and tell the user
-- [ ] **6. Encryption setup** (E3, E4)
-  - [ ] Recovery key screen: shown once, with a clear warning
-  - [ ] Periodic prompt to save the recovery key
-  - [ ] New-device approval: QR from an existing device, or enter the recovery key
-- [ ] **7. Account** (S1) — partly in 03 Settings → Account and sync
-  - [ ] Email sign-in (magic link or password)
-  - [ ] First sign-in: uploading local notes
-  - [x] Sign out (03 Settings: "Removes your notes from this Mac") — ⏳ confirmation dialog not drawn
+- [x] **1. Several lists on screen** (F1, F1.2) — 01: one bar per list; right-click or Shift+F10 on a bar for Collapse / Take off screen; resize grip on the sheet
+  - [x] More than one list floating at once (one bar per list, or one bar that holds several)
+  - [x] Resize the sheet
+  - [x] Collapse a note to a small handle
+- [x] **2. Reminder notifications** (F4.5, F4.6) — 04
+  - [x] Android notification: Mark done · Snooze (10 min / 1 h / tomorrow) · Open
+  - [x] macOS notification
+  - [x] Windows notification
+  - [x] Done or snoozed on one device clears it on the others
+- [x] **3. iOS widgets** (F1-iOS) — 05
+  - [x] Home-screen widget: chosen list or "next up", items tickable
+  - [x] Lock-screen widget: next reminder
+- [x] **4. Android home widget** (fallback when overlay permission is denied) — 05; offered in 06 denied path
+- [x] **5. Sync conflict** (F2.4): keep both versions and tell the user — 03 Groceries (Keep both / Keep only this)
+- [x] **6. Encryption setup** (E3, E4) — 03 Settings → Account (Show again, Check it, Add a device) and sign-in flow
+  - [x] Recovery key screen: shown once, with a clear warning
+  - [x] Periodic prompt to save the recovery key
+  - [x] New-device approval: QR from an existing device, or enter the recovery key
+- [x] **7. Account** (S1) — 03: Sign in (local mode `#account=local`), Sign out…, Delete account…
+  - [x] Email sign-in (magic link or password)
+  - [x] First sign-in: uploading local notes
+  - [x] Sign out (03 Settings: "Removes your notes from this Mac") — confirmation dialog in 03 (Settings → Sign out…)
   - [x] Delete account and all data (03 Settings danger zone, type your email to confirm)
-- [ ] **8. Mobile quick capture** (F6.2, F6.3)
-  - [ ] "Share to Weave" target from the OS share sheet
-  - [ ] Widget `+` button
-  - [ ] Android opt-in permanent "Add to Weave" notification (separate from the hidden-bar notification)
-- [ ] **9. Settings** (S4): default list for quick capture
-- [ ] **10. First run** (G: understand in < 2 min)
-  - [ ] Onboarding
-  - [ ] Android "display over other apps" permission ask, and the denied path
+- [x] **8. Mobile quick capture** (F6.2, F6.3) — 05 (share, widget +), 04 (Android "Add to Weave")
+  - [x] "Share to Weave" target from the OS share sheet
+  - [x] Widget `+` button
+  - [x] Android opt-in permanent "Add to Weave" notification (separate from the hidden-bar notification)
+- [x] **9. Settings** (S4): default list for quick capture — 03 Settings → "New tasks go to"
+- [x] **10. First run** (G: understand in < 2 min) — 06
+  - [x] Onboarding
+  - [x] Android "display over other apps" permission ask, and the denied path
 
 ## Smaller gaps in existing designs
 
-- [ ] Task details: custom date/time picker (F4)
-- [ ] Task details: custom repeat interval (F4.3)
-- [ ] More than one reminder per task (F4.1)
-- [ ] Due date / reminder on a whole list, not only a task (F4.1)
-- [ ] Option to hide checked items, not only collapse into "Done" (F3.4)
+- [x] Task details: custom date/time picker (F4)
+- [x] Task details: custom repeat interval (F4.3)
+- [x] More than one reminder per task (F4.1)
+- [x] Due date / reminder on a whole list, not only a task (F4.1)
+- [x] Option to hide checked items, not only collapse into "Done" (F3.4)
 - [x] Sync status in the sheet, not only in the full app (F2.5) — sheet footer
 - [x] Sheet shows a list's text lines, not only its tasks (F3.1)
 - [x] Arrow-key navigation in the sheet's lists menu (NFR9; playbook §6)
-- [ ] Sheet error and offline states (empty and all-done states are drawn)
+- [x] Sheet error and offline states (empty and all-done states are drawn) — 01 proto: Sync → Offline / Error (Retry)
 
 ## Later releases (not needed for v1)
 

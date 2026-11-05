@@ -203,3 +203,24 @@ svg { display: block; }
 .proto a { color: #e6e6e6; margin-left: auto; font-size: 12px; }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 0s !important; animation: none !important; } }
+
+/* ---------- Checklist gaps (2026-11-05) ---------- */
+/* Resize grip: bottom-right corner of the sheet (F1.2). The sheet keeps the size per list. */
+.sheet .resize { all: unset; position: absolute; right: 2px; bottom: 2px; z-index: 2; width: 16px; height: 16px; display: grid; place-items: center; color: var(--faint); cursor: nwse-resize; border-radius: 4px; }
+.sheet .resize:hover, .sheet .resize:focus-visible { color: var(--text); }
+.sheet.is-resizing { transition: none; user-select: none; }
+.sheet .foot .sync.err { color: var(--negative); }
+/* Several lists on screen: each bar is its own window. Collapsed: a 28px handle, dot + count (F1.2). */
+.minibar.collapsed { height: 28px; gap: 6px; padding: 0 10px 0 9px; border-radius: 14px; }
+.minibar.collapsed .grip, .minibar.collapsed .name { display: none; }
+.minibar.collapsed .meta .rest { display: none; }
+/* Right-click menu on a bar (also the Menu key / Shift+F10) */
+.ctxmenu { position: fixed; z-index: 40; min-width: 200px; padding: 6px; border-radius: var(--radius-card); background: var(--surface); color: var(--text); box-shadow: var(--float-shadow); font-size: var(--fs-body); animation: wv-menu-in var(--dur) var(--ease-out); transform-origin: left top; }
+.ctxmenu.kbd { animation: none; }
+.ctxmenu button { all: unset; box-sizing: border-box; cursor: pointer; width: 100%; display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px; border-radius: var(--radius-control); }
+.ctxmenu button:hover, .ctxmenu button:focus-visible { background: var(--hover); outline: none; }
+.ctxmenu button svg { color: var(--muted); }
+.ctxmenu hr { border: 0; border-top: 1px solid var(--rule); margin: 6px 0; }
+.sheet { z-index: 21; } /* above the other bars on screen */
+.sheet .foot .sync { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sheet .foot .fbtn { white-space: nowrap; flex: none; }

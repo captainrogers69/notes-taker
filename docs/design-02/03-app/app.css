@@ -383,3 +383,74 @@ h1 [data-rename]:focus { box-shadow: 0 2px 0 var(--text); }
 .marks { position: fixed; inset: 0; pointer-events: none; z-index: 90; }
 .marks .mk { position: absolute; z-index: 2; height: 20px; padding: 0 6px; border-radius: 10px; background: #e5484d; color: #fff; font: 600 12px/20px var(--font); }
 .marks .mkbox { position: absolute; border: 2px solid #e5484d; border-radius: 8px; }
+
+/* ---------- Checklist gaps (design-checklist.md, 2026-11-05) ---------- */
+/* Custom date / time / reminder pickers sit in the option row as one more option */
+
+
+
+.opt.addtime { position: relative; gap: 6px; color: var(--muted); }
+.opt.addtime input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+.opt.addtime:focus-within { outline: 2px solid var(--text); outline-offset: 2px; }
+.fine { margin: 8px 0 0; font-size: 12px; }
+.every { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; }
+.every .textin { width: 64px; height: 32px; padding: 0 10px; }
+.every select.textin { width: auto; padding: 0 10px; cursor: pointer; }
+/* The list's own due date, beside its title */
+.tchip { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 13px; background: color-mix(in srgb, var(--text) 6%, transparent); color: var(--muted); font-size: 13px; font-weight: 400; letter-spacing: 0; white-space: nowrap; }
+.tchip:hover { color: var(--text); }
+.items .bells { display: inline-flex; align-items: center; gap: 2px; }
+/* Sync conflict: both versions kept, a note says why */
+.items .conflict { display: flex; align-items: flex-start; gap: 8px; margin: 8px 0 4px; padding: 10px 12px; border-radius: var(--radius-control); background: color-mix(in srgb, var(--text) 6%, transparent); font-size: 13px; line-height: 20px; }
+.items .conflict svg { margin-top: 4px; color: var(--muted); }
+.items .row .from { flex: none; color: var(--muted); font-size: 13px; line-height: 20px; }
+.items .row .btn.sm { margin: -5px -4px -5px 0; }
+.selin { height: 32px; max-width: 180px; padding: 0 8px; border: 1px solid var(--control); border-radius: var(--radius-control); background: var(--surface); font-size: 13px; cursor: pointer; }
+/* Confirm dialog: fades and settles in; on the phone it stays inside the device */
+.mscrim { position: fixed; inset: 0; z-index: 70; background: rgba(0, 0, 0, .32); animation: fade-in var(--dur) var(--ease-out); }
+.dlg { position: fixed; z-index: 71; left: 50%; top: 50%; width: min(420px, calc(100% - 32px)); transform: translate(-50%, -50%); padding: 24px; border-radius: var(--radius-card); background: var(--surface); box-shadow: var(--float-shadow); animation: dlg-in var(--dur) var(--ease-out); }
+.lay-phone .mscrim, .lay-phone .dlg { position: absolute; }
+.dlg h2 { margin: 0 0 8px; font-size: var(--fs-section); line-height: 24px; font-weight: 500; }
+.dlg p { margin: 0 0 12px; }
+.dlg .fl { display: block; margin: 16px 0 8px; font-size: 13px; color: var(--muted); }
+.dlg .fl b { font-weight: 500; color: var(--text); }
+.dlgacts { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+.btn.dangerfill { background: var(--negative); color: #fff; }
+.btn.dangerfill:hover { background: color-mix(in srgb, var(--negative) 85%, #000); }
+.btn[disabled] { opacity: .45; pointer-events: none; }
+@keyframes fade-in { from { opacity: 0; } }
+@keyframes dlg-in { from { opacity: 0; transform: translate(-50%, -48%) scale(.97); } }
+.opt.addtime.on { color: var(--on-primary); }
+/* Account and encryption dialogs */
+.dlg { max-height: calc(100% - 32px); overflow: auto; }
+.btn.wide { width: 100%; }
+.authbtns { display: grid; gap: 8px; margin-top: 16px; }
+.or { display: flex; align-items: center; gap: 12px; margin: 16px 0; color: var(--muted); font-size: 13px; }
+.or::before, .or::after { content: ''; flex: 1; border-top: 1px solid var(--rule); }
+.emailform { display: grid; gap: 8px; }
+.emailform .fl { margin: 8px 0 0; }
+.fine0 { font-size: 12px; }
+.uplist { list-style: none; margin: 12px 0 0; padding: 0; }
+.uplist li { display: flex; align-items: center; gap: 10px; height: 36px; border-top: 1px solid var(--rule); }
+.dlg .bar { height: 4px; margin-top: 12px; border-radius: 2px; background: var(--raised); overflow: hidden; }
+.dlg .bar i { display: block; height: 100%; background: var(--text); transition: width 300ms var(--ease-out); }
+.keybox { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 16px 0 8px; padding: 14px; border: 1px solid var(--control); border-radius: var(--radius-control); font-size: 18px; line-height: 28px; font-weight: 500; letter-spacing: .08em; text-align: center; user-select: all; }
+.keyacts { display: flex; gap: 6px; }
+.ack { display: flex; align-items: flex-start; gap: 8px; margin: 16px 0 4px; cursor: pointer; }
+.ack input { width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--text); flex: none; }
+.qrwrap { display: flex; gap: 20px; align-items: center; margin: 16px 0 8px; }
+.qr { width: 132px; height: 132px; flex: none; padding: 8px; border: 1px solid var(--border); border-radius: var(--radius-control); background: #fff; fill: #0a0a0a; }
+.qrwrap ol { margin: 0; padding-left: 18px; font-size: 13px; line-height: 20px; }
+.qrwrap li + li { margin-top: 6px; }
+.keyin { letter-spacing: .06em; text-transform: uppercase; }
+.err { margin: 8px 0 0; color: var(--negative); font-size: 13px; }
+.viewfinder { position: relative; height: 200px; margin-top: 12px; border-radius: var(--radius-control); background: #111; color: #ddd; display: grid; place-items: end center; padding-bottom: 14px; font-size: 13px; }
+.viewfinder i { position: absolute; left: 50%; top: 44%; width: 112px; height: 112px; transform: translate(-50%, -50%); border: 2px solid #fff; border-radius: 12px; clip-path: polygon(0 0, 30% 0, 30% 100%, 70% 100%, 70% 0, 100% 0, 100% 30%, 0 30%, 0 70%, 100% 70%, 100% 100%, 0 100%); }
+.devconfirm { display: flex; gap: 12px; align-items: center; margin: 12px 0 16px; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-control); line-height: 20px; }
+.devconfirm svg { width: 24px; height: 24px; color: var(--muted); }
+.devconfirm b { font-weight: 500; }
+/* Prototype-only stand-in for something that happens outside the app (opening the email, approving on a phone) */
+.btn.demo { background: none; border: 1px dashed var(--control); color: var(--muted); }
+button.userrow { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 10px; width: 100%; margin-top: 8px; padding: 14px 8px 8px; border-top: 1px solid var(--rule); border-radius: 0; }
+button.userrow:hover .who { text-decoration: underline; text-underline-offset: 3px; }
+.userrow .avatar svg { color: var(--muted); }

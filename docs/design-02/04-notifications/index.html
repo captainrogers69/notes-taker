@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" class="t-light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weave · 04 Notifications</title>
+<link rel="stylesheet" href="notif.css">
+</head>
+<body>
+<aside class="proto">
+  <h1>04 · Notifications</h1>
+  <p>Reply to design review is due at 17:00, with a reminder 15 min before. It rings on every signed-in device. Act on one, and the other clears (F4.5, F4.6).</p>
+  <div class="ctl">
+    <button data-os="macos">macOS</button>
+    <button data-os="windows">Windows</button>
+    <button data-os="android">Android</button>
+  </div>
+  <div class="ctl">
+    <button data-replay>Ring again</button>
+    <button data-capture aria-pressed="false">Add to Weave notification</button>
+  </div>
+  <div class="ctl">
+    <button data-theme="t-light">Light</button>
+    <button data-theme="t-dark">Dark</button>
+    <a href="../index.html">All prototypes</a>
+  </div>
+</aside>
+<main class="stage">
+  <section class="dev" aria-labelledby="h-here">
+    <h2 id="h-here" class="devname"></h2>
+    <div class="screen" id="here"></div>
+    <p class="caption" id="cap-here" aria-live="polite"></p>
+  </section>
+  <section class="dev other" aria-labelledby="h-other">
+    <h2 id="h-other" class="devname"></h2>
+    <div class="screen" id="other"></div>
+    <p class="caption" id="cap-other" aria-live="polite"></p>
+  </section>
+</main>
+<script src="../assets/data.js"></script>
+<script src="../assets/icons.js"></script>
+<script src="notif.js"></script>
+</body>
+</html>

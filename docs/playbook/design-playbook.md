@@ -102,6 +102,8 @@ Weave is glanced at dozens of times a day, so every extra word, label and contro
 - Whole bar is the drag handle and the tap target. No buttons inside it.
 - While the sheet is open the meta fades out (the sheet header says it, C1); the bar keeps its width.
 - Name, count and colour update live as the user ticks, adds or switches list.
+- **Several bars:** each list with "Show in mini bar" on gets its own bar. One sheet at a time; opening a bar's sheet closes the other.
+- **Bar menu** (right-click, or Shift+F10 / ContextMenu key): Collapse to a 28 px handle (dot + count, ✓ when all done, red when overdue) · Take off screen · Hide all to menu bar / tray.
 
 ### Sheet
 
@@ -112,6 +114,8 @@ Weave is glanced at dozens of times a day, so every extra word, label and contro
 - **Body:** the list's text lines, then open tasks in **time order** (overdue → by time → untimed newest first), times right-aligned, then a collapsed **Done · N**.
 - **Lists menu** (from the name or Backspace in an empty field): dot · name · open count · ✓ on current, and a "New list…" field at the bottom. Enter creates the list and switches to it.
 - **Footer:** opened from the bar → sync status ("Synced · 3 devices") + `⌥ Space`. Opened from the tray → **Show bar** (if hidden) + **Pause reminders 1 h** (→ "Paused till 17:20 · Resume").
+- **Resize:** grip in the bottom-right corner; drag, or arrow keys (Shift = 48 px). Width 300–560, height 300–720, remembered per list.
+- **Sync line states:** "Synced · N devices" · "Offline · saved here" · "Can't sync" + **Retry**.
 - **No close button.** Close by tapping the bar, Esc, or clicking outside.
 
 ### Quick capture (sheet, app, Android notification)
@@ -398,10 +402,13 @@ List rows: colour dot · name · screen icon if in the mini bar · open count. *
 ### Task details (panel on desktop, bottom sheet on phone)
 
 - Header "Task · in *list*" with close (desktop). Editable task text.
-- **Due:** Today · Tomorrow · Next Mon · None; then 09:00 · 13:00 · 17:00 · 20:00 (⏳ custom date/time picker).
-- **Remind me:** with a due → At due time · 15 min / 1 h / 1 day before ("Before" reminders move with the due time, F4.2); always → In 1 h · Tomorrow 09:00 · None.
-- **Repeat:** Daily · Weekdays · Weekly · Monthly · Never (⏳ custom interval).
+- **Due:** Today · Tomorrow · Next Mon · None; then 09:00 · 13:00 · 17:00 · 20:00 · **Other date** / **Other time** (system picker); a far date reads "Thu 12 Nov".
+- **Remind me:** with a due → At due time · 15 min / 1 h / 1 day before ("Before" reminders move with the due time, F4.2); always → In 1 h · Tomorrow 09:00 · **At a time**. Several can be on at once (toggle buttons); None clears them.
+- **Repeat:** Daily · Weekdays · Weekly · Monthly · Never · **Custom** ("Every [n] [days/weeks/months]").
 - **Order:** Move up · Move down. Footer: **Delete task** (Undo toast).
+
+- **List options** (••• on the list): **Due date for the list** (shown as a chip under the title) and **Hide done tasks** (then a "N done, hidden · Show" line replaces the Done group).
+- **Sync conflict:** the task shows both versions, each with where it came from ("This Mac", "Pixel 8"), and **Keep both** / **Keep only this**. Undo restores the conflict. The sidebar sync line links to the list.
 
 ### Archive and trash
 
@@ -418,8 +425,16 @@ Saved as you change them. One row per section: heading + one-line description on
 - **Appearance:** System · Light · Dark.
 - **Mini bar** (iOS: **Widgets**): Show the mini bar (Android: needs "Display over other apps", else notification + widget) · Opacity when idle (20–100%, live bar preview) · Quick-capture hotkey `⌥ Space` · Hide in full-screen apps.
 - **Notifications:** Reminders on/off · Default snooze 10 min / 1 hour / Tomorrow.
-- **Account and sync:** devices table (device, last seen) · Recovery key (Show again) · Add a device (Show code) · Sign out.
-- **Delete account** (danger zone; type your email to confirm).
+- **Quick capture:** **New tasks go to** [list] (widget +, share, notification reply, hotkey).
+- **Account and sync:** devices table (device, last seen) · Recovery key (Show again · **Check it**: type the key to prove it is saved) · Add a device (QR + 6-digit code, then confirm the device) · **Sign out…** (dialog: notes leave this device, still in your account).
+- **Delete account…** (dialog; type your email to enable the red button). Afterwards the app keeps working on this device only.
+- **Not signed in:** the app works locally ("On this Mac only"); Account shows **Sign in**.
+
+### Account and encryption (dialogs)
+
+- **Sign in:** Continue with Apple / Google, or email → password or magic link ("Check your email").
+- **First sign-in on a device with notes:** uploads them with a progress line ("Uploading 18 of 42"), then shows the **recovery key** once: 6×4 characters, Copy / Download, and "I've saved it" must be ticked to continue. It cannot be closed by Esc or the scrim.
+- **Signing in on a second device:** approve from a signed-in device (it shows "Approve this device?" with the device name), or enter the recovery key. Wrong key → error under the field.
 
 ### Undo
 
@@ -437,6 +452,15 @@ Toast with **Undo** after check, delete task, uncheck all, archive list, delete 
 
 No floating action button on any platform: the add bar is always at the thumb.
 
+### Off the app (04–06)
+
+- **Reminder notifications:** title = task, body = list · time. Actions **Mark done** · **Snooze** (10 min / 1 hour / Tomorrow) · **Open**. Acting on one device clears it on the others.
+- **Android "Add to Weave"** (opt-in, quiet, permanent; separate from the hidden-bar notification): reply field that reads times like the add field.
+- **iOS widgets:** home medium = one list, tickable, + opens quick add, the header count says what doesn't fit; small = "Next up" time + overdue count; lock screen = next reminder (inline, rectangular) and tasks left today (circular).
+- **Android widget:** one list, tickable, "+N more in Weave"; the fallback when the overlay permission is denied.
+- **Share to Weave:** OS share sheet → small sheet with the text, "One task" or "N tasks, one per line", list chip, Cancel / Add.
+- **First run:** Welcome (one sentence, Get started) → the bar unrolls → notification pre-prompt then the OS ask → done. Android asks "Display over other apps" with an explanation first; denied → "No problem" with the widget and notification instead. iOS teaches the widget instead of the bar.
+
 ### Keyboard (desktop)
 
 `⌘K` search · `⌘N` new list · `Enter` / `Backspace` / `Tab` / `Alt+↑↓` inline editing · `Esc` closes menus, details and phone sheets · `⌥ Space` mini bar sheet · `⌘O` from the sheet opens the app · `⌘H` from the sheet hides the bar.
@@ -452,6 +476,9 @@ Clickable prototypes over a real desktop screenshot. Open [`docs/design-02/index
 | [01](../design-02/01-mini-bar/index.html) | **Mini bar and sheet** | Bar, sheet, quick capture, lists menu, move, first-run unroll (`#first`) | **Locked** 2026-11-05 |
 | [02](../design-02/02-tray/index.html) | **Hide to tray** | macOS menu bar, Windows tray, Android notification + tile | **Locked** 2026-11-05 |
 | [03](../design-02/03-app/index.html) | **Weave app** | Up next, list, details, archive and trash, search, settings; desktop + phone, 4 platforms | **Locked** 2026-11-05 |
+| [04](../design-02/04-notifications/index.html) | **Reminder notifications** | macOS, Windows, Android; cross-device clear; Android "Add to Weave" | Added 2026-11-05 |
+| [05](../design-02/05-widgets/index.html) | **Widgets and share** | iOS home + lock widgets, Android widget, quick add, Share to Weave | Added 2026-11-05 |
+| [06](../design-02/06-first-run/index.html) | **First run** | Welcome, bar, notification ask; Android overlay permission and denied path | Added 2026-11-05 |
 | [declutter](../design-02/declutter.html) | Declutter study | Before / after for D1–D13, with markers | Reference |
 | [review.md](../design-02/review.md) | Review log | Round 1 findings, motion audit M1–M12, declutter D1–D13, E1–E9 | Reference |
 
@@ -461,7 +488,7 @@ Design 01 ([`docs/design/`](../design/index.html): 003 mini bar, 004 bubble, 005
 
 **Changing a locked design:** propose the change behind a URL flag in the prototype, compare it side by side with the current screen (as the declutter study did), run the clutter check (§0), and log the decision below before editing this playbook.
 
-Open design work is tracked in [`docs/design/design-checklist.md`](../design/design-checklist.md). Resolve every ⏳ above.
+Open design work is tracked in [`docs/design/design-checklist.md`](../design/design-checklist.md). All v1 items are drawn; only later-release items remain.
 
 ---
 
@@ -490,3 +517,4 @@ Open design work is tracked in [`docs/design/design-checklist.md`](../design/des
 | 2026-11-03 | **Motion table rewritten** to the audited values: `--dur-fast` 120 / `--dur` 180 / `--ease-out` tokens, instant keyboard UI, fade-only exits, FLIP tick, 260 ms tray flight, two once-only delights | Motion audit M1–M12 (2026-11-03) fixed and verified in design-02; the old table (280 ms tick, 1 s highlight, `cubic-bezier(.2,.8,.2,1)`) no longer matched |
 | 2026-11-03 | **Clutter rules C1–C12** added to §0 and made mandatory for every screen, with a clutter check before review | Declutter study against a before/after reference (design-02 `declutter.html`, D1–D13). User: "these are very critical" |
 | 2026-11-05 | **Design 02 locked** and this playbook synced to it: achromatic ledger style, **Geist** (400/500, tabular figures) replaces Inter, light default, radius 8 / 6, no colour strip (list colour as note paper), sheet in time order with quick-capture parsing, lists menu instead of a sideways slide, app opens on Up next with the day thread, phone tab bar + bottom add bar instead of cards home + FAB, archive and trash on one screen. Design 01 superseded | User: "we are locking the design-02" |
+| 2026-11-05 | **Design checklist v1 gaps drawn** in design-02: several bars + collapse + sheet resize + sync states (01); list due date, several reminders, custom date / time / repeat, Hide done, sync conflict, account and encryption dialogs, default capture list (03); notifications (04); widgets and share (05); first run (06). Same style and clutter rules; no change to locked screens | User: "let's make the missing things that are mentioned in design checklist in design-02" |

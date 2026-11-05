@@ -220,6 +220,22 @@ Checks: the click-through tests pass with a clean console on 01, 02 and 03 (desk
 
 ---
 
+## Checklist gaps (2026-11-05)
+
+Built every open v1 item and smaller gap from `docs/design/design-checklist.md`:
+
+| Where | What |
+|---|---|
+| 01 | One bar per on-screen list; bar menu (Collapse to handle, Take off screen, Hide all); sheet resize (drag or arrows); sync line Offline / Can't sync + Retry (proto buttons) |
+| 03 | List due date chip; several reminders + "At a time"; Other date / Other time; custom repeat; Hide done; sync conflict (Keep both / Keep only this, undoable); Settings "New tasks go to"; Sign in (`#account=local`), Sign out…, Delete account…, recovery key Check it, Add a device |
+| 04 | Notifications: macOS, Windows, Android; Mark done / Snooze / Open; clears on the other device; Android "Add to Weave" reply |
+| 05 | iOS home + lock widgets, Android widget, quick add from +, Share to Weave |
+| 06 | First run on macOS, iOS, Android, incl. overlay permission denied → widget |
+
+Checks: click tests for each flow pass with a clean console; older 01/03 tests still pass. Lint 0 FAIL. Inspector 0 FAIL on 01, 03, 04, 05, 06 and index; 04 keeps 2 WARN (two device mockups of different heights, accepted). Phone bezels are a border, not a shadow.
+
+---
+
 ## Next
 
 Run round 2 of the AI passes on the new screenshots, then go to designer review (plan step 2).

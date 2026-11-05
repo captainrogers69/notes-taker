@@ -1,0 +1,66 @@
+/* 06 · First run. Phone frame and widget styles come from 05; desktop welcome window here. Prototype only. */
+@import url('../05-widgets/widgets.css');
+
+.desk { position: relative; width: min(1200px, calc(100vw - 48px)); height: 680px; border-radius: 10px; overflow: hidden; background: #1e1e1e url('../assets/desktop.png') center / cover; }
+.desk .menubar { height: 26px; display: flex; align-items: center; gap: 16px; padding: 0 16px; background: rgba(28, 28, 30, .92); color: #f2f2f2; font-size: 13px; }
+.desk .menubar .grow { flex: 1; }
+
+/* Weave's own screens: welcome, permission asks, outcomes */
+.win { position: absolute; left: 50%; top: 50%; width: 440px; transform: translate(-50%, -50%); padding: 28px; border-radius: var(--radius-card); background: var(--surface); color: var(--text); box-shadow: var(--float-shadow); animation: win-in var(--dur) var(--ease-out); }
+@keyframes win-in { from { opacity: 0; transform: translate(-50%, -48%) scale(.98); } }
+.scr { position: absolute; inset: 50px 0 0; display: flex; flex-direction: column; padding: 24px 24px 40px; background: var(--ground); color: var(--text); animation: fade var(--dur) var(--ease-out); }
+.android .scr { inset: 32px 0 0; }
+.big-mark .mark { width: 48px; height: 48px; }
+.fr h2 { margin: 16px 0 6px; font-size: 24px; line-height: 32px; font-weight: 500; letter-spacing: -.01em; }
+.fr .lede { margin: 0 0 20px; color: var(--muted); }
+.fr ol, .fr ul.pts { list-style: none; margin: 0 0 24px; padding: 0; display: grid; gap: 14px; }
+.fr .pt { display: grid; grid-template-columns: 28px 1fr; gap: 12px; align-items: start; }
+.fr .pt i { width: 28px; height: 28px; border-radius: 50%; background: var(--raised); display: grid; place-items: center; font-style: normal; font-size: 13px; font-weight: 500; }
+.fr .pt b { display: block; font-weight: 500; }
+.fr .pt span { color: var(--muted); font-size: 13px; }
+.fr .acts { display: grid; gap: 8px; margin-top: auto; }
+.win .acts { margin-top: 0; }
+.btn { all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; padding: 0 16px; border-radius: var(--radius-control); background: var(--raised); color: var(--text); font-weight: 500; font-size: 14px; }
+.btn.primary { background: var(--primary); color: var(--on-primary); }
+.btn.ghost { background: none; }
+.btn:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+.fine { color: var(--muted); font-size: 12px; margin: 12px 0 0; }
+.kbd { display: inline-block; padding: 0 6px; border: 1px solid var(--control); border-radius: 4px; font-size: 12px; line-height: 18px; }
+/* A picture of the bar over another app */
+.demo-app { position: relative; height: 200px; margin: 4px 0 20px; border-radius: 16px; background: #e5e8eb; overflow: hidden; }
+.t-dark .demo-app { background: #25282c; }
+.demo-app .ln { position: absolute; left: 18px; right: 60px; height: 10px; border-radius: 5px; background: rgba(0, 0, 0, .08); }
+.t-dark .demo-app .ln { background: rgba(255, 255, 255, .08); }
+.mbar { position: absolute; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px 0 12px; border-radius: var(--radius-card); background: color-mix(in srgb, var(--n0) var(--paper-mix), var(--surface)); color: var(--text); box-shadow: var(--float-shadow); font-size: 14px; white-space: nowrap; }
+.mbar .m { color: var(--muted); }
+.mbar .dot { --c: var(--n0); --ci: var(--n0-ink); }
+.home-bar { top: 120px; left: 40px; animation: unroll 420ms var(--ease-out) 200ms both; }
+@keyframes unroll { from { clip-path: inset(0 calc(100% - 40px) 0 0 round 8px); } to { clip-path: inset(0 0 0 0 round 8px); } }
+
+/* The OS's own screens (settings page, permission dialog): their look, not Weave's */
+.sys { position: absolute; inset: 32px 0 0; background: #f6f7f2; color: #1b1c18; padding: 0 0 24px; animation: fade var(--dur) var(--ease-out); }
+.sys .bar { display: flex; align-items: center; gap: 12px; height: 64px; padding: 0 12px; font-size: 22px; }
+.sys .bar button { all: unset; cursor: pointer; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; }
+.sys .appid { display: flex; align-items: center; gap: 14px; padding: 12px 24px 20px; font-size: 18px; }
+.sys .appid .mark { width: 40px; height: 40px; }
+.sys .sw { display: flex; align-items: center; gap: 16px; margin: 0 16px; padding: 18px 20px; border-radius: 28px; background: #e2e5d8; font-size: 17px; }
+.sys .sw span { flex: 1; }
+.sys .sw button { all: unset; cursor: pointer; width: 52px; height: 32px; border-radius: 16px; background: #75796c; position: relative; }
+.sys .sw button::after { content: ''; position: absolute; left: 8px; top: 8px; width: 16px; height: 16px; border-radius: 50%; background: #e2e5d8; transition: left var(--dur) var(--ease-out), top var(--dur) var(--ease-out), width var(--dur) var(--ease-out), height var(--dur) var(--ease-out); } /* taste-skill-ignore: the OS switch thumb, not Weave's */
+.sys .sw button[aria-checked="true"] { background: #4a6620; }
+.sys .sw button[aria-checked="true"]::after { left: 24px; top: 4px; width: 24px; height: 24px; background: #fff; }
+.sys .note { margin: 16px 28px; color: #45483c; font-size: 14px; line-height: 20px; }
+.osalert { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 280px; border-radius: 14px; background: rgba(242, 242, 247, .97); color: #111; text-align: center; overflow: hidden; box-shadow: 0 10px 40px rgba(0, 0, 0, .35); animation: fade var(--dur) var(--ease-out); }
+.osalert .bd { padding: 18px 16px 14px; font-size: 13px; line-height: 18px; }
+.osalert .bd b { display: block; font-size: 16px; line-height: 21px; margin-bottom: 4px; font-weight: 600; }
+.osalert .bt { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid #c8c8cc; }
+.osalert .bt button { all: unset; cursor: pointer; height: 44px; color: #0a64d8; font-size: 16px; }
+.osalert .bt button + button { border-left: 1px solid #c8c8cc; font-weight: 600; }
+.osalert.mac { width: 300px; border-radius: 12px; }
+.osalert.and { width: 300px; border-radius: 28px; text-align: left; background: #eef0e6; }
+.osalert.and .bd { padding: 24px 24px 8px; }
+.osalert.and .bt { display: flex; justify-content: flex-end; gap: 8px; border: 0; padding: 8px 16px 16px; }
+.osalert.and .bt button { height: 40px; padding: 0 12px; color: #4a6620; border: 0; font-size: 14px; font-weight: 500; }
+.widget-pick { margin: 4px 0 20px; display: grid; justify-items: center; gap: 8px; }
+.ok-row { display: flex; align-items: center; gap: 10px; margin: 8px 0 16px; padding: 12px 14px; border-radius: var(--radius-control); background: color-mix(in srgb, var(--text) 5%, transparent); font-size: 13px; }
+.ok-row svg { color: var(--muted); }

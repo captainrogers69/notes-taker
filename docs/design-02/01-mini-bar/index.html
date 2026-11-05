@@ -8,21 +8,24 @@
 </head>
 <body>
 
-<div class="minibar paper" id="minibar" role="button" tabindex="0" aria-label="Open Weave. Arrow keys move the bar." aria-expanded="false" title="Open Weave (⌥ Space)">
-  <span class="grip" id="grip"></span>
-  <span class="dot" id="dot"></span>
-  <span class="name" id="name"></span>
-  <span class="meta" id="meta"></span>
-</div>
-
+<div id="bars"></div>
 <aside class="proto">
   <h1>01 · Mini bar</h1>
   <ol>
     <li>Click the faded bar. Type <i>call the bank tomorrow 10am</i> and watch the line under the field, then press Enter.</li>
     <li>Tick the overdue bill, then close the sheet: the bar now shows the next time instead of "1 overdue". While the sheet is open the bar hides its count, since the sheet says it.</li>
     <li>Click the list name (or Backspace in an empty field) to switch or create a list.</li>
-    <li>Drag the bar anywhere, or focus it and use the arrow keys (Shift for bigger steps), or press <i>Move to corner</i> in the sheet. Near the bottom, the sheet opens upward.</li>
+    <li>Drag a bar anywhere, or focus it and use the arrow keys (Shift for bigger steps), or press <i>Move to corner</i> in the sheet. Near the bottom, the sheet opens upward.</li>
+    <li>Two lists float here: each bar opens the sheet on its own list. Right-click a bar (or the Menu key) to collapse it to a dot or take it off the screen.</li>
+    <li>Drag the sheet's bottom-right corner to resize it. Each list keeps its size.</li>
   </ol>
+  <div class="ctl" style="margin-bottom:8px">
+    <span>Sync</span>
+    <button data-sync="synced">Synced</button>
+    <button data-sync="offline">Offline</button>
+    <button data-sync="error">Error</button>
+    <button data-reset>Reset bars</button>
+  </div>
   <div class="ctl">
     <button data-theme="t-light">Light</button>
     <button data-theme="t-dark">Dark</button>
@@ -35,37 +38,125 @@
 <script src="../assets/weave.js"></script>
 <script>
 (() => {
-  const { mount, draggable, bindTheme, barMeta, clamp } = WeaveSheet;
-  const D = WeaveData;
+  const { mount, draggable, bindTheme, barMeta, clamp, state: S } = WeaveSheet;
+  const D = WeaveData, I = WeaveIcons;
   const EDGE = 12, GAP = 8;
-  const bar = document.getElementById('minibar');
-  document.getElementById('grip').innerHTML = WeaveIcons.grip;
+  const host = document.getElementById('bars');
+  // One bar per list shown on screen (F1). One sheet at a time: it opens from the bar you used, on that bar's list.
+  const bars = [];
+  let active = null;
+  const barOf = (id) => bars.find((b) => b.l.id === id);
 
-  let pos = { x: Math.round(innerWidth / 2 - 120), y: 72 };
-  let origin = pos;
-  function applyPos() {
-    pos.x = clamp(pos.x, EDGE, innerWidth - bar.offsetWidth - EDGE);
-    pos.y = clamp(pos.y, EDGE, innerHeight - bar.offsetHeight - EDGE);
-    bar.style.left = pos.x + 'px';
-    bar.style.top = pos.y + 'px';
+  function makeBar(l, i) {
+    const el = document.createElement('div');
+    el.className = 'minibar paper';
+    el.tabIndex = 0;
+    el.setAttribute('role', 'button');
+    el.setAttribute('aria-expanded', 'false');
+    el.setAttribute('aria-haspopup', 'dialog');
+    // The first bar keeps the ids the single-bar version had (links and tests use them).
+    const id = (n) => (i ? '' : ` id="${n}"`);
+    if (!i) el.id = 'minibar';
+    el.innerHTML = `<span class="grip"${id('grip')}>${I.grip}</span><span class="dot"${id('dot')}></span><span class="name"${id('name')}></span><span class="meta"${id('meta')}></span>`;
+    host.appendChild(el);
+    const b = { el, l, pos: i ? { x: innerWidth - 300, y: 120 } : { x: Math.round(innerWidth / 2 - 120), y: 72 }, collapsed: false };
+    bars.push(b);
+    let origin = b.pos;
+    draggable(el, {
+      onStart(phase) { if (phase === 'down') origin = { ...b.pos }; else sheet.close(); },
+      onMove(dx, dy) { b.pos = { x: origin.x + dx, y: origin.y + dy }; applyPos(b); },
+      onTap: () => use(b),
+    });
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'ContextMenu' || (e.shiftKey && e.key === 'F10')) { e.preventDefault(); const r = el.getBoundingClientRect(); return ctx(b, r.left, r.bottom + 6, true); }
+      if (!e.altKey && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); return use(b, { keyboard: true }); }
+      const step = e.shiftKey ? 64 : 16;
+      const d = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
+      if (!d) return;
+      e.preventDefault(); sheet.close();
+      b.pos = { x: b.pos.x + d[0], y: b.pos.y + d[1] }; applyPos(b);
+    });
+    el.addEventListener('contextmenu', (e) => { e.preventDefault(); ctx(b, e.clientX, e.clientY, false); });
+    return b;
   }
-
+  function applyPos(b) {
+    b.pos.x = clamp(b.pos.x, EDGE, innerWidth - b.el.offsetWidth - EDGE);
+    b.pos.y = clamp(b.pos.y, EDGE, innerHeight - b.el.offsetHeight - EDGE);
+    b.el.style.left = b.pos.x + 'px';
+    b.el.style.top = b.pos.y + 'px';
+  }
+  function paint(b) {
+    const l = b.l, late = D.open(l).filter(D.isOverdue).length, left = D.open(l).length;
+    b.el.style.setProperty('--accent', D.color(l));
+    b.el.querySelector('.dot').style.setProperty('--ci', D.ink(l));
+    b.el.querySelector('.name').textContent = l.name;
+    // Collapsed: the dot and the count only; red with the icon when something is overdue.
+    b.el.querySelector('.meta').innerHTML = b.collapsed
+      ? (late ? `<span class="late">${I.alert}<b class="num" style="color:inherit">${left}</b></span>` : (left ? `<b class="num">${left}</b>` : I.check))
+      : barMeta(l);
+    b.el.classList.toggle('collapsed', b.collapsed);
+    b.el.setAttribute('aria-label', `Open ${l.name}, ${D.leftLabel(l)}${late ? `, ${late} overdue` : ''}. Arrow keys move the bar; the Menu key shows more.`);
+    b.el.title = `${l.name} (⌥ Space)`;
+    applyPos(b);
+  }
+  function use(b, o) {
+    if (sheet.isOpen() && active === b) return sheet.close(o);
+    const wasOpen = sheet.isOpen();
+    active = b; S.cur = b.l.id; S.showDone = false;
+    if (wasOpen) sheet.close({ keyboard: true });
+    sheet.open(o);
+  }
   // One-click alternative to dragging: each press moves the bar to the next corner, clockwise.
   let corner = -1;
   function nextCorner() {
     corner = (corner + 1) % 4;
     const right = corner === 0 || corner === 1, bottom = corner === 1 || corner === 2;
-    pos = { x: right ? innerWidth : 0, y: bottom ? innerHeight : 0 };
-    applyPos();
+    active.pos = { x: right ? innerWidth : 0, y: bottom ? innerHeight : 0 };
+    applyPos(active);
   }
 
+  // ---------- Right-click menu on a bar ----------
+  let menu = null;
+  function closeCtx() { if (menu) { menu.remove(); menu = null; } }
+  function ctx(b, x, y, keyboard) {
+    closeCtx(); sheet.close();
+    menu = document.createElement('div');
+    menu.className = 'ctxmenu' + (keyboard ? ' kbd' : '');
+    menu.setAttribute('role', 'menu');
+    menu.innerHTML = `
+      <button role="menuitem" data-c="collapse">${I.show} ${b.collapsed ? 'Expand the bar' : 'Collapse to a dot'}</button>
+      <button role="menuitem" data-c="remove">${I.close} Take ${D.esc(b.l.name)} off the screen</button>
+      <hr><button role="menuitem" data-c="hide">${I.hide} Hide all to the menu bar</button>`;
+    document.body.appendChild(menu);
+    menu.style.left = clamp(x, EDGE, innerWidth - menu.offsetWidth - EDGE) + 'px';
+    menu.style.top = clamp(y, EDGE, innerHeight - menu.offsetHeight - EDGE) + 'px';
+    menu.querySelector('button').focus();
+    menu.addEventListener('keydown', (e) => {
+      const items = [...menu.querySelectorAll('button')], i = items.indexOf(document.activeElement);
+      if (e.key === 'Escape') { closeCtx(); b.el.focus(); }
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); items[(i + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length].focus(); }
+    });
+    menu.addEventListener('click', (e) => {
+      const c = e.target.closest('[data-c]')?.dataset.c; if (!c) return;
+      closeCtx();
+      if (c === 'collapse') { b.collapsed = !b.collapsed; paint(b); b.el.focus(); }
+      if (c === 'remove') { b.l.onScreen = false; bars.splice(bars.indexOf(b), 1); b.el.remove(); if (active === b) active = bars[0] || null; }
+      if (c === 'hide') location.href = '../02-tray/index.html#os=macos&hidden=1';
+    });
+  }
+  document.addEventListener('pointerdown', (e) => { if (menu && !menu.contains(e.target)) closeCtx(); });
+
+  D.lists.filter((l) => l.onScreen).forEach(makeBar);
+  active = bars[0];
+  S.cur = active.l.id;
+
   const sheet = mount({
-    trigger: bar,
+    trigger: () => active.el,
     hide: { label: 'Hide to menu bar', run: () => { location.href = '../02-tray/index.html#os=macos&hidden=1'; } },
     move: { label: 'Move to corner', run: nextCorner },
     place(win) {
-      const r = bar.getBoundingClientRect();
-      const w = win.offsetWidth, h = Math.min(win.scrollHeight, 460);
+      const r = active.el.getBoundingClientRect();
+      const w = win.offsetWidth, h = Math.min(win.offsetHeight || win.scrollHeight, innerHeight - 2 * EDGE);
       const below = r.bottom + GAP + h <= innerHeight - EDGE;
       const x = clamp(r.left, EDGE, innerWidth - w - EDGE);
       const y = below ? r.bottom + GAP : Math.max(EDGE, r.top - GAP - h);
@@ -75,40 +166,39 @@
       win.style.setProperty('--origin', `${r.left + 24 - x}px ${below ? 'top' : 'bottom'}`);
     },
     onRender(l) {
-      bar.style.setProperty('--accent', D.color(l));
-      document.getElementById('dot').style.setProperty('--ci', D.ink(l));
-      document.getElementById('name').textContent = l.name;
-      document.getElementById('meta').innerHTML = barMeta(l);
-      applyPos();
+      // Switching list inside the sheet: if another bar already shows it, the sheet moves to that bar;
+      // otherwise this bar now shows the new list.
+      if (active && active.l.id !== l.id) {
+        const other = barOf(l.id);
+        if (other) { active.el.classList.remove('is-open'); active.el.setAttribute('aria-expanded', 'false'); active = other; other.el.classList.add('is-open'); requestAnimationFrame(() => sheet.isOpen() && sheet.win && placeNow()); }
+        else { active.l.onScreen = false; active.l = l; l.onScreen = true; }
+      }
+      bars.forEach(paint);
     },
   });
+  function placeNow() { const r = active.el.getBoundingClientRect(); sheet.win.style.left = clamp(r.left, EDGE, innerWidth - sheet.win.offsetWidth - EDGE) + 'px'; sheet.win.style.top = r.bottom + GAP + 'px'; }
 
-  draggable(bar, {
-    onStart(phase) { if (phase === 'down') origin = { ...pos }; else sheet.close(); },
-    onMove(dx, dy) { pos = { x: origin.x + dx, y: origin.y + dy }; applyPos(); },
-    onTap: sheet.toggle,
-  });
-  // Keyboard alternative to dragging: arrow keys move the focused bar, Shift for bigger steps.
-  bar.addEventListener('keydown', (e) => {
-    const step = e.shiftKey ? 64 : 16;
-    const d = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
-    if (!d) return;
-    e.preventDefault();
-    sheet.close();
-    pos = { x: pos.x + d[0], y: pos.y + d[1] };
-    applyPos();
-  });
-  addEventListener('resize', applyPos);
+  // Prototype controls: sync state, reset.
+  document.querySelectorAll('[data-sync]').forEach((x) => x.addEventListener('click', () => {
+    S.sync = x.dataset.sync; sheet.render();
+    document.querySelectorAll('[data-sync]').forEach((y) => y.setAttribute('aria-pressed', String(y === x)));
+    if (!sheet.isOpen()) sheet.open();
+  }));
+  document.querySelector('[data-sync="synced"]').setAttribute('aria-pressed', 'true');
+  document.querySelector('[data-reset]').addEventListener('click', () => location.reload());
+
+  addEventListener('resize', () => bars.forEach(applyPos));
   bindTheme();
-  applyPos();
+  bars.forEach(paint);
   if (/(^|[#&])open/.test(location.hash)) sheet.open();
-
-  // First run: the bar unrolls from its dot, once ever (#first replays it).
+  if (/(^|[#&])sync=(offline|error)/.test(location.hash)) document.querySelector(`[data-sync="${location.hash.match(/sync=(\w+)/)[1]}"]`).click();
+  // First run: the first bar unrolls from its dot, once ever (#first replays it).
   const firstRun = /(^|[#&])first/.test(location.hash) || (() => { try { return !localStorage.getItem('weave-unrolled'); } catch { return false; } })();
   if (firstRun && !sheet.isOpen()) {
     try { localStorage.setItem('weave-unrolled', '1'); } catch { /* storage off */ }
-    bar.classList.add('unroll');
-    bar.addEventListener('animationend', (e) => { if (e.target === bar) bar.classList.remove('unroll'); });
+    const el = active.el;
+    el.classList.add('unroll');
+    el.addEventListener('animationend', (e) => { if (e.target === el) el.classList.remove('unroll'); });
   }
 })();
 </script>

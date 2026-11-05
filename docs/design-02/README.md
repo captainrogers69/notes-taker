@@ -8,7 +8,10 @@ A redesign of the prototypes in [`docs/design/`](../design/index.html): mini bar
 |---|---|---|
 | [01](01-mini-bar/index.html) | Mini bar and sheet | The bar shows the one thing to know: "1 overdue", otherwise "next 17:00". No hotkey chip or colour strip. The sheet orders tasks by time, with times right-aligned. The field reads times as you type ("tomorrow 6pm" → "Due Tomorrow 18:00"). Lists open in a menu instead of a sideways slide. The footer shows sync status. |
 | [02](02-tray/index.html) | Hide to tray | The same flow on macOS, Windows and Android. The Android notification lists the next two tasks with times, tick buttons, and a reply field. Linux is left out: it is the same as macOS. |
-| [03](03-app/index.html) | Weave app | The app opens on **Up next**: today's tasks from every list, with a **day thread** on top. A list screen is one task card at a reading width; task details open beside it once a task is selected (colour is on the title dot, Pin and Archive in •••). Archive and trash share one screen. Settings use one row per section, with a live preview of the mini bar's opacity. On phones (iOS and Android), a bottom tab bar (Up next · Lists · Search · Settings) replaces the menu, styled to each platform, and the add field sits just above it, near the thumb, instead of a floating button. Linux chrome is dropped. |
+| [03](03-app/index.html) | Weave app | The app opens on **Up next**: today's tasks from every list, with a **day thread** on top. A list screen is one task card at a reading width; task details open beside it once a task is selected (colour is on the title dot, Pin and Archive in •••). Archive and trash share one screen. Settings use one row per section, with a live preview of the mini bar's opacity. On phones (iOS and Android), a bottom tab bar (Up next · Lists · Search · Settings) replaces the menu, styled to each platform, and the add field sits just above it, near the thumb, instead of a floating button. Linux chrome is dropped. Later added from the design checklist: list due date, several reminders, custom date and repeat, Hide done, a sync conflict (Keep both), sign in / sign out / delete account dialogs, recovery key check, add a device, and "New tasks go to" in Settings. |
+| [04](04-notifications/index.html) | Reminder notifications | New. macOS, Windows and Android notifications with Mark done · Snooze (10 min / 1 h / Tomorrow) · Open; acting on one device clears the other. Android opt-in "Add to Weave" notification with reply. |
+| [05](05-widgets/index.html) | Widgets and share | New. iOS home (medium list widget, small "Next up") and lock-screen widgets, Android home widget, quick add from +, Share to Weave. |
+| [06](06-first-run/index.html) | First run | New. Welcome → bar → notification ask on macOS, iOS, Android; Android overlay permission with the denied path (widget instead). |
 
 ## Direction
 
@@ -29,6 +32,7 @@ Dealt by the `design-taste-frontend` skill (app run, `draw.mjs --app --kind work
 | Screen | Question it answers first | Main action, one click away |
 |---|---|---|
 | Mini bar | How much is left, and is anything late or next? | Click → type → Enter |
+| Mini bar (01) also | Several bars at once, one per list; right-click a bar to Collapse or Take off screen | Drag; resize the sheet from its corner |
 | Sheet | What's on this list, in time order? | The add field, focused on open |
 | Up next | What is due today across every list? | One add field at the top of the Today card, with the list as a chip inside |
 | List | What's left on this list? | Add field at the top; tick |

@@ -17,6 +17,8 @@
     clock: s('<circle cx="8" cy="8" r="5.5"/><path d="M8 5v3l2 1.5"/>'),
     repeat: s('<path d="M3 7V6a2 2 0 0 1 2-2h7.5"/><path d="m10.5 2 2 2-2 2"/><path d="M13 9v1a2 2 0 0 1-2 2H3.5"/><path d="m5.5 14-2-2 2-2"/>'),
     cloud: s('<path d="M4.5 12.5a3 3 0 0 1-.3-6A4 4 0 0 1 12 6a3.2 3.2 0 0 1 .3 6.5z"/><path d="m6 9.5 1.5 1.5 2.5-3"/>'),
+    cloudOff: s('<path d="M6 4.6A4 4 0 0 1 12 6a3.2 3.2 0 0 1 1.9 5.3M11 12.5H4.5a3 3 0 0 1-.5-6"/><path d="M2.5 2.5l11 11"/>'),
+    resize: `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><path d="M10.5 4.5 4.5 10.5M10.5 8l-2.5 2.5"/></svg>`,
     lock: s('<rect x="3.5" y="7" width="9" height="6.5" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2"/>'),
     search: s('<circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/>'),
     plus: s('<path d="M8 3v10M3 8h10"/>'),

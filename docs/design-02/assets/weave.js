@@ -7,9 +7,11 @@
   const MOD = /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl+';
   const TAP_SLOP = 5;
 
-  const state = { cur: 1, showDone: false, newItem: null, menu: false, ticking: new Set(), leaving: new Set() };
+  const state = { cur: 1, showDone: false, newItem: null, menu: false, ticking: new Set(), leaving: new Set(), sync: 'synced', size: {} };
+  const SIZE = { minW: 300, maxW: 560, minH: 300, maxH: 720 };
   const TICK_FILL = 120, TICK_FADE = 120; // ms: the circle fills, then the row fades, then rows below close up
   const current = () => D.lists.find((l) => l.id === state.cur);
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
   // Overdue first, then by time, then untimed (newest first) — so the sheet reads as "what's next".
   function ordered(l) {
@@ -72,6 +74,12 @@
       <span aria-hidden="true">23</span></div>`;
   }
 
+  // Footer sync line (F2.5): synced, offline (changes kept here), or an error with a retry.
+  function syncLine() {
+    if (state.sync === 'offline') return `<span class="sync" title="Changes are saved on this device and sync when you're back online">${I.cloudOff} Offline · saved here</span>`;
+    if (state.sync === 'error') return `<span class="sync err" title="Weave retries every 30 seconds">${I.cloudOff} Can't sync</span><button class="fbtn" data-act="retry">Retry</button>`;
+    return `<span class="sync">${I.cloud} Synced · ${D.devices.length} devices</span>`;
+  }
   function menuHtml() {
     return D.lists.map((l) => `
       <button class="mrow ${l.id === state.cur ? 'cur' : ''}" data-act="open" data-id="${l.id}" role="menuitemradio" aria-checked="${l.id === state.cur}">
@@ -85,7 +93,9 @@
 
   // mount({ trigger, place, onRender, hide: { label, run }, move: { label, run }, footer(l), onAction(act, el), ignore, container })
   // move: a one-click alternative to dragging the bar (WCAG 2.5.7).
+  // trigger: the element that opens the sheet, or a function returning it (several bars: the one last used).
   function mount({ trigger, place, onRender, hide, move, footer, onAction, ignore = [], container = document.body }) {
+    const T = () => (typeof trigger === 'function' ? trigger() : trigger);
     const win = document.createElement('div');
     win.className = 'sheet';
     win.setAttribute('role', 'dialog');
@@ -121,8 +131,13 @@
         </div>
         <div class="scroll">${body(l)}</div>
         <div class="foot">${footer ? footer(l) : `
-          <span class="sync">${I.cloud} Synced · ${D.devices.length} devices</span><span class="grow"></span>${move ? `<button class="fbtn" data-act="move" title="Or drag the bar, or use the arrow keys on it">${I.corner} ${move.label}</button>` : '<kbd>⌥ Space</kbd>'}`}</div>
-        <div class="menu ${state.menu ? 'on' : ''}" role="menu" aria-label="Lists">${menuHtml()}</div>`;
+          ${syncLine()}<span class="grow"></span>${move ? `<button class="fbtn" data-act="move" title="Or drag the bar, or use the arrow keys on it">${I.corner} ${move.label}</button>` : '<kbd>⌥ Space</kbd>'}`}</div>
+        <div class="menu ${state.menu ? 'on' : ''}" role="menu" aria-label="Lists">${menuHtml()}</div>
+        <button class="resize" data-resize aria-label="Resize the sheet. Arrow keys change its size." title="Drag to resize">${I.resize}</button>`;
+      const sz = state.size[l.id];
+      win.style.width = sz ? sz.w + 'px' : '';
+      win.style.height = sz ? sz.h + 'px' : '';
+      win.style.maxHeight = sz ? 'none' : '';
       state.newItem = null;
       updateParse();
       if (onRender) onRender(l);
@@ -190,6 +205,7 @@
       if (!b) { if (state.menu && !e.target.closest('.menu')) setMenu(false); return; }
       const act = b.dataset.act;
       if (act === 'app') return openApp();
+      if (act === 'retry') { state.sync = 'synced'; render(); return; }
       if (act === 'hide') { setOpen(false); return hide.run(); }
       if (act === 'move') { move.run(); place(win); return; }
       if (act === 'menu') return setMenu(!state.menu, { keyboard: e.detail === 0 }); // detail 0 = Enter/Space
@@ -236,7 +252,28 @@
       location.href = '../03-app/index.html#list=' + current().id;
     }
 
+    // Resize from the corner grip (F1.2); the size is kept per list on this device (F1.3).
+    win.addEventListener('pointerdown', (e) => {
+      const g = e.target.closest('[data-resize]'); if (!g) return;
+      e.preventDefault(); try { g.setPointerCapture(e.pointerId); } catch { /* pointer already gone */ }
+      const r = win.getBoundingClientRect(), x0 = e.clientX, y0 = e.clientY, id = state.cur;
+      win.classList.add('is-resizing');
+      const mv = (ev) => {
+        state.size[id] = { w: clamp(r.width + ev.clientX - x0, SIZE.minW, SIZE.maxW), h: clamp(r.height + ev.clientY - y0, SIZE.minH, SIZE.maxH) };
+        win.style.width = state.size[id].w + 'px'; win.style.height = state.size[id].h + 'px'; win.style.maxHeight = 'none';
+      };
+      const up = () => { g.removeEventListener('pointermove', mv); g.removeEventListener('pointerup', up); win.classList.remove('is-resizing'); };
+      g.addEventListener('pointermove', mv); g.addEventListener('pointerup', up);
+    });
     win.addEventListener('keydown', (e) => {
+      if (e.target.matches('[data-resize]') && e.key.startsWith('Arrow')) {
+        e.preventDefault();
+        const r = win.getBoundingClientRect(), st = e.shiftKey ? 48 : 16;
+        const dw = { ArrowLeft: -st, ArrowRight: st }[e.key] || 0, dh = { ArrowUp: -st, ArrowDown: st }[e.key] || 0;
+        state.size[state.cur] = { w: clamp(r.width + dw, SIZE.minW, SIZE.maxW), h: clamp(r.height + dh, SIZE.minH, SIZE.maxH) };
+        win.style.width = state.size[state.cur].w + 'px'; win.style.height = state.size[state.cur].h + 'px'; win.style.maxHeight = 'none';
+        return;
+      }
       if (e.key === 'Escape') { if (state.menu) return setMenu(false, { keyboard: true }); return setOpen(false, { keyboard: true }); }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'h' && hide) { e.preventDefault(); setOpen(false); return hide.run(); }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'o') { e.preventDefault(); return openApp(); }
@@ -259,22 +296,23 @@
         win.classList.add('pre'); void win.offsetHeight; win.classList.remove('pre'); // start the enter from scale .96 + slide
       }
       win.classList.toggle('is-open', isOpen);
-      trigger.classList.toggle('is-open', isOpen);
-      trigger.setAttribute('aria-expanded', String(isOpen));
+      document.querySelectorAll('.minibar.is-open').forEach((b) => { if (b !== T()) { b.classList.remove('is-open'); b.setAttribute('aria-expanded', 'false'); } });
+      T().classList.toggle('is-open', isOpen);
+      T().setAttribute('aria-expanded', String(isOpen));
       if (isOpen) setTimeout(focusInput, 60);
       else if (win.contains(document.activeElement)) document.activeElement.blur();
     }
 
     document.addEventListener('pointerdown', (e) => {
-      if (!isOpen || win.contains(e.target) || trigger.contains(e.target) || e.target.closest('.proto')) return;
+      if (!isOpen || win.contains(e.target) || T().contains(e.target) || e.target.closest('.minibar, .proto, .ctxmenu')) return;
       if (ignore.some((el) => el.contains(e.target))) return;
       setOpen(false);
     });
     document.addEventListener('keydown', (e) => { if (e.altKey && e.code === 'Space') { e.preventDefault(); setOpen(!isOpen, { keyboard: true }); } });
-    trigger.addEventListener('keydown', (e) => { if (!e.altKey && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); setOpen(!isOpen, { keyboard: true }); } });
+    if (typeof trigger !== 'function') trigger.addEventListener('keydown', (e) => { if (!e.altKey && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); setOpen(!isOpen, { keyboard: true }); } });
 
     render();
-    return { open: () => setOpen(true), close: () => setOpen(false), toggle: () => setOpen(!isOpen), isOpen: () => isOpen, render, win, current };
+    return { open: (o) => setOpen(true, o), close: (o) => setOpen(false, o), toggle: (o) => setOpen(!isOpen, o), isOpen: () => isOpen, render, win, current };
   }
 
   // Tap vs drag on one handle: movement under TAP_SLOP px counts as a tap.
@@ -328,6 +366,5 @@
     apply();
   }
 
-  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
   window.WeaveSheet = { mount, draggable, bindTheme, barMeta, clamp, state };
 })();
