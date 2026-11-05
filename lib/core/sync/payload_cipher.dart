@@ -9,7 +9,9 @@ abstract class PayloadCipher {
     Map<String, FieldValue> fields,
   );
 
-  /// Throws [FormatException] on malformed input.
+  /// Throws [FormatException] for an unreadable payload (the engine
+  /// quarantines the change). Anything else thrown is treated as transient:
+  /// the engine retries the change on a later pass.
   Future<Map<String, FieldValue>> open(
     EntityType t,
     String entityId,

@@ -33,6 +33,7 @@
 | 1 | 2026-11-05 | **Tasks 1–3 done, reviewed and staged** (setup + flavors + Supabase migration; theme tokens + Geist; ids, HLC, fractional index). `flutter analyze` 0 issues, 23/23 tests. Supabase done by the user (migration live, email + password auth, test user, `config/dev.json`); verified by sign-in and reads of `changes` and `devices`. **Still waiting on the user:** a Windows build check. Next: Task 4. |
 | 2 | 2026-11-05 | **Tasks 4–8 done, reviewed and staged** (Day 2 complete): database + change log (clock saved across restarts), task and list data, quick-capture parsing, lists repository (undo of delete forever restores tasks), items repository + Up next + search (tie-safe reordering, conflict resolution in one transaction). `flutter analyze` 0 issues, 99/99 tests. Supabase verified live. Quick-capture fixes (user request): "tonight" after 20:00 → tomorrow 20:00; punctuation after a date or time no longer drops the due. **Still waiting on the user:** Windows build check. Next: Task 9 (sync transport). |
 | 3 | 2026-11-05 | **Tasks 9–10 done, reviewed and staged.** Transport interface + in-memory transport + cipher seam (reproduces the late-commit skip). ChangeMerger after 4 fix rounds and 3 reviews: text conflicts detected by base HLC (`b`), greater HLC wins on every device, every loser kept (JSON arrays with device name + HLC, same set on all devices), same-device chains don't conflict; delete forever remembered on the deleting device (`purged.<id>`, incl. purgeTrash, mini bar removed, undo unmarks); trash older than a local edit is undone; malformed HLCs ignored; clock overflow carries instead of throwing; one synced-field map. Two- and three-device convergence tests, no ping-pong. `flutter analyze` 0 issues, 184/184 tests. **Still waiting on the user:** Windows build check. Next: Task 11 (sync engine) — read the Task 11 items in "Carried into" first. |
+| 4 | 2026-11-05 | **Task 11 done, reviewed and staged.** SyncEngine: pull (seq order across pages, re-read window cursor−100, applied-id dedupe + cursor in the same transaction as the merge, bounded markers) then push (oldest first, batches of 200, delete only acked). Quarantine of unreadable changes blocks only that entity; other apply errors stop the pull at that row but still push, then back off 2…60 s. One pass at a time; stop/start resets connectivity; `unregisterSync` for sign-out (Task 13). Local device-name cache. `SyncStatusCubit` global, `localOnly` when signed out. Not yet wired into bootstrap — Task 12 does that with the Supabase transport. `flutter analyze` 0 issues, 226/226 tests. **Still waiting on the user:** Windows build check. Next: Task 12 (Supabase transport, realtime hints, devices — Day 3 gate). |
 
 Carried into later tasks from reviews:
 - Task 10: the merger takes `ChangeWriter`; applying a list purge also deletes its tasks; late changes never bring back a purged list or task.
@@ -41,7 +42,9 @@ Carried into later tasks from reviews:
 - Task 11: `deviceName` must be a local lookup (cache), never network, since it runs inside the merge transaction. The cache includes this device.
 - Task 11: apply pulled rows strictly in ascending `seq` order, across pages too. Record a change id as applied even when the result is `ignored`. Rule 6 relies on a create preceding its edits in `seq` order. If a change is quarantined, also quarantine later changes for that entity id (do not mark them applied), so a fixed cipher can replay them. Malformed HLCs are not errors: the merger skips the field or returns `ignored`.
 - Known limit: cross-device undo of delete forever after the marker was pushed is not supported.
-- Task 13: after sign-out wipes the database, re-create the clock and writer so the new device id is used.
+- Task 12: `unregisterSync` unregisters the transport without disposing it; the Supabase transport must close its realtime channel (dispose it in `unregisterSync`'s `_drop<SyncTransport>` or in the engine's `dispose`).
+- Known limit: after a pull fails at a row, push still runs; a stuck remote text change without `b` (old format) is then treated as sequential because the outbox is empty. No such payloads exist yet.
+- Task 13: the device id is captured by the clock, writer, `DeviceNames`, `ChangeMerger` and `SyncEngine`. On sign-out: `unregisterSync(sl)` (disposes the engine, unregisters the transport, cipher, `DeviceNames` and `ChangeMerger`; detaches the `SyncStatusCubit`), then wipe, then re-register `DeviceId`, `HlcClock` and `ChangeWriter` with the new id, then `registerSync` again. The global `SyncStatusCubit` is kept (widgets hold one instance) and `registerSync` re-attaches it to the new engine's status.
 - Tasks 14 and 15 refresh list and Up next streams every minute and on app resume (overdue is computed when a stream starts).
 - Task 14 wires `weaveTheme` into `WeaveApp`. Add a `tick` colour token before Task 15.
 
@@ -610,8 +613,19 @@ Field maps live once in `lib/core/sync/synced_fields.dart`; purge keys and clean
     3. A single `FormatException` from `open` → log the id, put the change in `Kv('sync.quarantine.<changeId>')`, and continue.
   - Status mapping: `SyncOfflineException` or no connectivity → `offline`. Other errors → `error`, with exponential backoff of 2, 4, 8 … 60 s. A successful pass with an empty outbox → `synced`.
   - `class SyncStatusCubit extends Cubit<SyncStatus>`: global; mirrors `status`, and `localOnly` when signed out.
+- **Implementation decisions (Task 11):**
+  - Dedupe: `Kv('sync.applied.<changeId>') = seq`, written with the cursor in the row's transaction (the merger's transaction nests as a drift savepoint). Pruned after each pull for `seq < cursor - 100` (below the re-read window), so at most ~100 + one page are kept. No schema change.
+  - Quarantine: `Kv('sync.quarantine.<changeId>')` = JSON of the raw row plus `reason` (`unreadable` | `blocked`). Later-`seq` changes for a quarantined entity id are quarantined too, across passes. The cursor advances past them. Replay is not built yet.
+  - Device names: `DeviceNames` (`lib/core/sync/device_names.dart`) reads `Kv('device.name.<id>')`. It returns this device's own name, or "Another device" as a fallback. Task 12 calls `upsert` with names from the devices table.
+  - Apply errors: an error from `cipher.open` other than `FormatException`, or any error from the merger, is transient. It is not quarantined, since a transient DB error would park valid changes with no replay. The pull stops at that row, so the cursor does not pass it, and push still runs. The pass then ends as `error` with backoff, and the next pass retries the row.
+  - Known limit (multi-page catch-up): a late commit that lands deep in an early page of a long catch-up can fall below the final `cursor - 100` and is never read. Accepted for the 7-day build. Task 12 should keep server-side commit lag small, e.g. short insert transactions.
+  - Connectivity: `start()` asks for the current connectivity once before the first pass, because plugin streams need not replay it. `stop()` forgets connectivity and backoff, so a later `start()` never keeps a stale `offline`. The first connectivity report after `start()` does not add a pass; only a regain (false → true) does. `SyncOfflineException` schedules a retry with the same backoff, and the status stays `offline`.
+  - Status: the engine starts as `syncing`. `stop()` leaves the status as it was, so a pass cut short stays `syncing`. That is harmless because `stop()` is only used for sign-out and dispose, and the cubit shows `localOnly` once signed out. `dispose()` = `stop()` + closing the streams.
+  - Concurrency: one pass at a time; a `syncNow` during a pass makes that pass run once more and returns its future. `stop()` cancels triggers and awaits the pass, which stops at the next row/batch boundary. Automatic triggers (outbox insert, hint, 60 s tick) share the 300 ms debounce and are held while an error retry is pending. Connectivity regained runs at once.
+  - Engine extras: `connectivity` (`Stream<bool>`), `SyncTiming`, `now` and `log` are injectable. `current` and `retryIn` getters exist. `MergeEvent(MergeKind, entityId)` is emitted after commit.
+  - Wiring: `registerSync(sl, transport: …)` / `unregisterSync(sl)` in `lib/core/di/sync_di.dart`. It is not called yet: Task 12 calls it from `bootstrap` (main engine only) with the Supabase transport, and Task 13 passes `signedIn`/`signedInNow`. Until then the cubit stays `localOnly`.
 
-- [ ] **Step 1: Write the failing tests.** Two engines, A and B, each with its own in-memory DB and the same `InMemorySyncTransport` server.
+- [x] **Step 1: Write the failing tests.** Two engines, A and B, each with its own in-memory DB and the same `InMemorySyncTransport` server.
   - `two engines converge on lists and items`: A creates a list and 3 items; `syncNow` on both; B sees the same rows.
   - `offline edits converge when back online`:
     1. B is offline.
@@ -625,10 +639,10 @@ Field maps live once in `lib/core/sync/synced_fields.dart`; purge keys and clean
   - `delete on A trashes on B`
   - `status goes syncing → synced`
   - `pull runs before push`: a transport spy records the call order `[pull, push]`
-- [ ] **Step 2:** Run the tests. Expected: FAIL.
-- [ ] **Step 3:** Implement. Only the main engine registers `SyncEngine` (not `entrypoints/mini_bar_main.dart`).
-- [ ] **Step 4:** Run the tests. Expected: PASS.
-- [ ] **Step 5: Checkpoint.**
+- [x] **Step 2:** Run the tests. Expected: FAIL.
+- [x] **Step 3:** Implement. Only the main engine registers `SyncEngine` (not `entrypoints/mini_bar_main.dart`).
+- [x] **Step 4:** Run the tests. Expected: PASS.
+- [x] **Step 5: Checkpoint.**
 
 ### Task 12: Supabase transport, realtime hints, devices — **Day 3 gate**
 
