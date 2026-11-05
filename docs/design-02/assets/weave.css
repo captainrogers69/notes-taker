@@ -114,6 +114,9 @@ svg { display: block; }
 .sheet .parse { display: flex; visibility: hidden; min-height: 24px; box-sizing: border-box; align-items: center; gap: 6px; padding: 6px 2px 0; color: var(--muted); font-size: var(--fs-small); }
 .sheet .parse.on { visibility: visible; } /* the line's height is always reserved, so the list doesn't nudge while you type */
 .sheet .parse svg { color: var(--accent-ink); }
+.sheet .parse.hint { color: var(--muted); }
+.sheet .parse.hint svg { display: none; }
+.sheet:not(:focus-within) .parse.hint { visibility: hidden; }
 
 .sheet .scroll { flex: 1; min-height: 0; overflow: auto; padding: 8px 4px 8px; }
 .sheet ul { list-style: none; margin: 0; padding: 0; }

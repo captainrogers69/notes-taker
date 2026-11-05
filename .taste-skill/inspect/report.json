@@ -1,23 +1,20 @@
 {
- "url": "http://localhost:8765/01-mini-bar/index.html",
- "at": "2026-11-03T13:50:14.680Z",
- "allow": [
-  "button-fx",
-  "hero-void",
-  "unused-canvas"
- ],
+ "url": "http://localhost:8765/index.html",
+ "at": "2026-11-04T05:51:39.358Z",
+ "allow": [],
  "viewports": [
   {
    "width": 1440,
    "height": 900,
    "load": "load",
-   "screens": 1,
+   "screens": 2,
    "filled": [
-    0.14
+    0.46,
+    0.43
    ],
    "motion": {
-    "elements": 3,
-    "css": 3,
+    "elements": 0,
+    "css": 0,
     "transitions": 0,
     "scripted": 0,
     "videos": 0,
@@ -29,19 +26,19 @@
      "h": 900
     },
     "page": {
-     "height": 900,
-     "screens": 1,
-     "words": 143,
+     "height": 967,
+     "screens": 1.1,
+     "words": 253,
      "img": 0,
      "video": 0,
      "canvas": 0,
-     "svg": 16,
-     "sections": 0,
+     "svg": 1,
+     "sections": 1,
      "horizontalOverflow": 0,
      "overflowCulprits": [],
      "uiFragments": 0,
      "uiAbuse": false,
-     "realPictures": 0,
+     "realPictures": 3,
      "videoCount": 0,
      "uiPictures": 0,
      "pictureSamples": [],
@@ -52,27 +49,27 @@
      "videosNoPoster": 0
     },
     "hero": {
-     "text": "01 · Mini bar",
-     "words": 4,
-     "chars": 13,
+     "text": "Weave, design 02",
+     "words": 3,
+     "chars": 16,
      "lines": 1,
-     "size": 16,
-     "vw": 1.1,
+     "size": 24,
+     "vw": 1.7,
      "font": "Geist",
      "weight": 500,
-     "tracking": 0,
-     "leading": 1.25,
-     "top": 584,
+     "tracking": -0.01,
+     "leading": 1.33,
+     "top": 48,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
      "position": "left"
     },
     "h1": {
-     "text": "01 · Mini bar",
-     "words": 4,
+     "text": "Weave, design 02",
+     "words": 3,
      "lines": 1,
-     "size": 16,
+     "size": 24,
      "font": "Geist"
     },
     "headings": [],
@@ -95,27 +92,26 @@
      ],
      "familyCount": 1,
      "sizes": [
-      12,
-      13,
       14,
-      16
+      16,
+      24
      ],
-     "sizeCount": 4,
+     "sizeCount": 3,
      "notLoaded": [],
      "body": {
       "font": "Geist",
-      "size": 13,
-      "leading": 1.54,
+      "size": 14,
+      "leading": 1.43,
       "weight": 400,
       "tracking": 0,
-      "contrast": 12.7
+      "contrast": 5.9
      },
-     "measureChars": 45,
+     "measureChars": 91,
      "max": {
-      "size": 16,
-      "vw": 1.1,
+      "size": 24,
+      "vw": 1.7,
       "font": "Geist",
-      "text": "01 · Mini bar"
+      "text": "Weave, design 02"
      },
      "monoShare": 0,
      "monoProseShare": 0,
@@ -126,96 +122,83 @@
      "microSamples": [],
      "upperShare": 0,
      "centerShare": 0,
-     "smallText": 1
+     "smallText": 0
     },
     "eyebrows": [],
-    "numbered": [
-     {
-      "text": "07",
-      "size": 12,
-      "top": 69
-     }
-    ],
+    "numbered": [],
     "color": {
-     "bodyBg": "#1e1e1e",
+     "bodyBg": "#f5f5f3",
      "bodyBgHsl": {
-      "h": 0,
-      "s": 0,
-      "l": 0.12
+      "h": 60,
+      "s": 0.09,
+      "l": 0.96
      },
-     "dark": true,
+     "dark": false,
      "sectionBgs": [],
      "textColors": [
       {
-       "color": "#d7d7d6",
-       "share": 0.6
-      },
-      {
        "color": "#5f5e5e",
-       "share": 0.17
+       "share": 0.63
       },
       {
        "color": "#0b0a0b",
-       "share": 0.16
-      },
-      {
-       "color": "#c4252b",
-       "share": 0.03
-      },
-      {
-       "color": "#e7e6e7",
-       "share": 0.03
+       "share": 0.37
       }
      ],
-     "button": {
-      "bg": "#ffffff",
-      "hsl": {
-       "h": 0,
-       "s": 0,
-       "l": 1
-      },
-      "fg": "#0b0a0b"
-     },
+     "button": null,
      "lowContrast": []
     },
     "buttons": {
-     "count": 1,
-     "inHero": 1,
-     "radius": 8,
-     "height": 40,
-     "withShadow": 1,
+     "count": 0,
+     "inHero": 0,
+     "withShadow": 0,
      "withGradient": 0,
      "mono": 0,
      "upper": 0,
-     "heroLabels": [
-      "Errands 4 left · 1 overdue"
-     ]
+     "heroLabels": []
     },
     "surfaces": {
      "shadowStatic": 0,
-     "shadowOverlay": 2,
+     "shadowOverlay": 0,
      "shadowSamples": [],
      "gradients": 0,
      "scrims": 0,
      "gradientSamples": [],
      "gradientText": 0,
-     "hairlines": 1,
+     "hairlines": 5,
      "hairlineSamples": [
-      "div.foot 337px"
+      "section.notes 1056px",
+      "dd 437px",
+      "dd 437px",
+      "dd 437px",
+      "dd 437px"
      ],
-     "outlinedBoxes": 0,
+     "outlinedBoxes": 3,
      "dashed": 0,
      "blurred": 0,
      "roundedBoxes": 3,
      "boxRadius": 8,
      "squareMedia": 0,
-     "roundedMedia": 0,
-     "mediaRadius": 0,
+     "roundedMedia": 3,
+     "mediaRadius": 8,
      "textShadow": 0,
-     "cardRows": []
+     "cardRows": [
+      {
+       "count": 3,
+       "iconTopped": false,
+       "rounded": true,
+       "top": 156
+      }
+     ]
     },
     "heroMedia": [],
-    "nav": null,
+    "nav": {
+     "links": 0,
+     "fixed": false,
+     "height": 76,
+     "floatingPill": false,
+     "blur": false
+    },
     "fontsLoaded": [
      "geist"
     ]
@@ -225,33 +208,101 @@
      "w": 1440,
      "h": 900
     },
-    "pageH": 900,
+    "pageH": 967,
     "margins": {
-     "left": null,
-     "right": null
+     "left": 192,
+     "right": 193
     },
-    "sections": [],
+    "sections": [
+     {
+      "sel": "div.grid",
+      "tag": "div",
+      "top": 156,
+      "height": 362,
+      "words": 104,
+      "media": 3,
+      "middle": 14,
+      "heading": {
+       "text": "01 · Mini bar and sheet",
+       "size": 16,
+       "tag": "h2"
+      },
+      "left": 193,
+      "right": 193,
+      "textLeft": 213,
+      "textRight": 238,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "section.notes",
+      "tag": "section",
+      "top": 566,
+      "height": 337,
+      "words": 105,
+      "media": 0,
+      "middle": 58,
+      "heading": {
+       "text": "Direction",
+       "size": 16,
+       "tag": "h2"
+      },
+      "left": 192,
+      "right": 194,
+      "textLeft": 192,
+      "textRight": 194,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
     "gaps": [],
     "h1s": [
      {
-      "text": "01 · Mini bar",
-      "size": 16,
-      "top": 584,
+      "text": "Weave, design 02",
+      "size": 24,
+      "top": 48,
       "firstScreen": true
      }
     ],
     "edgeText": [],
-    "edges": [],
-    "leftBlocks": 0,
-    "bodySize": 16,
+    "edges": [
+     {
+      "x": 192,
+      "n": 2
+     },
+     {
+      "x": 213,
+      "n": 2
+     },
+     {
+      "x": 240,
+      "n": 2
+     },
+     {
+      "x": 569,
+      "n": 2
+     },
+     {
+      "x": 925,
+      "n": 2
+     }
+    ],
+    "leftBlocks": 10,
+    "bodySize": 14,
     "stage": false,
     "explains": false,
     "slivers": [],
-    "voidShare": 0.65,
+    "voidShare": 0.11,
     "voidBox": {
-     "x": 360,
+     "x": 0,
      "y": 120,
-     "w": 1080,
+     "w": 180,
      "h": 780
     }
    },
@@ -260,26 +311,26 @@
      "w": 1440,
      "h": 900
     },
-    "dark": true,
-    "ground": "#1e1e1e",
+    "dark": false,
+    "ground": "#f5f5f3",
     "sidebar": null,
     "topbar": null,
     "canvas": {
-     "left": 13,
-     "right": 690
+     "left": 192,
+     "right": 194
     },
     "hero": {
-     "text": "01 · Mini bar",
-     "words": 4,
-     "chars": 13,
+     "text": "Weave, design 02",
+     "words": 3,
+     "chars": 16,
      "lines": 1,
-     "size": 16,
-     "vw": 1.1,
+     "size": 24,
+     "vw": 1.7,
      "font": "Geist",
      "weight": 500,
-     "tracking": 0,
-     "leading": 1.25,
-     "top": 584,
+     "tracking": -0.01,
+     "leading": 1.33,
+     "top": 48,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
@@ -287,18 +338,22 @@
     },
     "charts": 0,
     "layout": {
-     "panels": 2,
-     "firstScreen": 2,
+     "panels": 4,
+     "firstScreen": 4,
      "ragged": [],
      "voids": []
     },
     "tiles": 0,
     "panels": {
-     "count": 2,
+     "count": 4,
      "radii": [
       [
        8,
-       2
+       3
+      ],
+      [
+       0,
+       1
       ]
      ],
      "heavyBorders": 0,
@@ -316,30 +371,29 @@
     "numbers": {
      "cells": 0,
      "leftAligned": 0,
-     "figures": 2,
-     "tabularShare": 1,
-     "kpiMax": 12
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
     },
     "rows": null,
     "chartHues": 0,
     "placeholders": [],
     "type": {
-     "under13": 0.04,
+     "under13": 0,
      "tiny": 0,
      "tinySamples": [],
      "sizes": [
-      12,
-      13,
       14,
-      16
+      16,
+      24
      ]
     },
     "title": {
-     "text": "01 · Mini bar",
-     "size": 16,
-     "top": 584
+     "text": "Weave, design 02",
+     "size": 24,
+     "top": 48
     },
-    "colourShare": 0
+    "colourShare": 0.001
    },
    "consoleErrors": []
   },
@@ -347,9 +401,11 @@
    "width": 768,
    "height": 1024,
    "load": "load",
-   "screens": 1,
+   "screens": 3,
    "filled": [
-    0.21
+    0.85,
+    0.78,
+    0.63
    ],
    "motion": {
     "elements": 0,
@@ -365,19 +421,19 @@
      "h": 1024
     },
     "page": {
-     "height": 1024,
-     "screens": 1,
-     "words": 143,
+     "height": 2335,
+     "screens": 2.3,
+     "words": 253,
      "img": 0,
      "video": 0,
      "canvas": 0,
-     "svg": 16,
-     "sections": 0,
+     "svg": 1,
+     "sections": 1,
      "horizontalOverflow": 0,
      "overflowCulprits": [],
      "uiFragments": 0,
      "uiAbuse": false,
-     "realPictures": 0,
+     "realPictures": 3,
      "videoCount": 0,
      "uiPictures": 0,
      "pictureSamples": [],
@@ -388,27 +444,27 @@
      "videosNoPoster": 0
     },
     "hero": {
-     "text": "01 · Mini bar",
-     "words": 4,
-     "chars": 13,
+     "text": "Weave, design 02",
+     "words": 3,
+     "chars": 16,
      "lines": 1,
-     "size": 16,
-     "vw": 2.1,
+     "size": 24,
+     "vw": 3.1,
      "font": "Geist",
      "weight": 500,
-     "tracking": 0,
-     "leading": 1.25,
-     "top": 708,
+     "tracking": -0.01,
+     "leading": 1.33,
+     "top": 48,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
      "position": "left"
     },
     "h1": {
-     "text": "01 · Mini bar",
-     "words": 4,
+     "text": "Weave, design 02",
+     "words": 3,
      "lines": 1,
-     "size": 16,
+     "size": 24,
      "font": "Geist"
     },
     "headings": [],
@@ -431,27 +487,26 @@
      ],
      "familyCount": 1,
      "sizes": [
-      12,
-      13,
       14,
-      16
+      16,
+      24
      ],
-     "sizeCount": 4,
+     "sizeCount": 3,
      "notLoaded": [],
      "body": {
       "font": "Geist",
-      "size": 13,
-      "leading": 1.54,
+      "size": 14,
+      "leading": 1.43,
       "weight": 400,
       "tracking": 0,
-      "contrast": 12.7
+      "contrast": 5.9
      },
-     "measureChars": 45,
+     "measureChars": 91,
      "max": {
-      "size": 16,
-      "vw": 2.1,
+      "size": 24,
+      "vw": 3.1,
       "font": "Geist",
-      "text": "01 · Mini bar"
+      "text": "Weave, design 02"
      },
      "monoShare": 0,
      "monoProseShare": 0,
@@ -462,96 +517,104 @@
      "microSamples": [],
      "upperShare": 0,
      "centerShare": 0,
-     "smallText": 1
+     "smallText": 0
     },
     "eyebrows": [],
-    "numbered": [
-     {
-      "text": "07",
-      "size": 12,
-      "top": 69
-     }
-    ],
+    "numbered": [],
     "color": {
-     "bodyBg": "#1e1e1e",
+     "bodyBg": "#f5f5f3",
      "bodyBgHsl": {
-      "h": 0,
-      "s": 0,
-      "l": 0.12
+      "h": 60,
+      "s": 0.09,
+      "l": 0.96
      },
-     "dark": true,
-     "sectionBgs": [],
-     "textColors": [
+     "dark": false,
+     "sectionBgs": [
       {
-       "color": "#d7d7d6",
-       "share": 0.6
+       "color": "#fffefe",
+       "top": 156,
+       "hsl": {
+        "h": 0,
+        "s": 1,
+        "l": 1
+       }
       },
       {
+       "color": "#eeeeee",
+       "top": 157,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 0.93
+       }
+      }
+     ],
+     "textColors": [
+      {
        "color": "#5f5e5e",
-       "share": 0.17
+       "share": 0.63
       },
       {
        "color": "#0b0a0b",
-       "share": 0.16
-      },
-      {
-       "color": "#c4252b",
-       "share": 0.03
-      },
-      {
-       "color": "#e7e6e7",
-       "share": 0.03
+       "share": 0.37
       }
      ],
-     "button": {
-      "bg": "#ffffff",
-      "hsl": {
-       "h": 0,
-       "s": 0,
-       "l": 1
-      },
-      "fg": "#0b0a0b"
-     },
+     "button": null,
      "lowContrast": []
     },
     "buttons": {
-     "count": 1,
-     "inHero": 1,
-     "radius": 8,
-     "height": 40,
-     "withShadow": 1,
+     "count": 0,
+     "inHero": 0,
+     "withShadow": 0,
      "withGradient": 0,
      "mono": 0,
      "upper": 0,
-     "heroLabels": [
-      "Errands 4 left · 1 overdue"
-     ]
+     "heroLabels": []
     },
     "surfaces": {
      "shadowStatic": 0,
-     "shadowOverlay": 2,
+     "shadowOverlay": 0,
      "shadowSamples": [],
      "gradients": 0,
      "scrims": 0,
      "gradientSamples": [],
      "gradientText": 0,
-     "hairlines": 1,
+     "hairlines": 5,
      "hairlineSamples": [
-      "div.foot 337px"
+      "section.notes 704px",
+      "dd 544px",
+      "dd 544px",
+      "dd 544px",
+      "dd 544px"
      ],
-     "outlinedBoxes": 0,
+     "outlinedBoxes": 3,
      "dashed": 0,
      "blurred": 0,
      "roundedBoxes": 3,
      "boxRadius": 8,
      "squareMedia": 0,
-     "roundedMedia": 0,
-     "mediaRadius": 0,
+     "roundedMedia": 3,
+     "mediaRadius": 8,
      "textShadow": 0,
      "cardRows": []
     },
-    "heroMedia": [],
-    "nav": null,
+    "heroMedia": [
+     {
+      "type": "bg-image",
+      "ratio": 0.39
+     },
+     {
+      "type": "bg-image",
+      "ratio": 0.28
+     }
+    ],
+    "nav": {
+     "links": 0,
+     "fixed": false,
+     "height": 76,
+     "floatingPill": false,
+     "blur": false
+    },
     "fontsLoaded": [
      "geist"
     ]
@@ -561,25 +624,131 @@
      "w": 768,
      "h": 1024
     },
-    "pageH": 1024,
+    "pageH": 2335,
     "margins": {
-     "left": null,
-     "right": null
+     "left": 32,
+     "right": 33
     },
-    "sections": [],
+    "sections": [
+     {
+      "sel": "a.card",
+      "tag": "a",
+      "top": 156,
+      "height": 547,
+      "words": 37,
+      "media": 1,
+      "middle": 0,
+      "heading": {
+       "text": "01 · Mini bar and sheet",
+       "size": 16,
+       "tag": "h2"
+      },
+      "left": 33,
+      "right": 33,
+      "textLeft": 53,
+      "textRight": 68,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "a.card",
+      "tag": "a",
+      "top": 715,
+      "height": 547,
+      "words": 35,
+      "media": 1,
+      "middle": 0,
+      "heading": {
+       "text": "02 · Hide to tray",
+       "size": 16,
+       "tag": "h2"
+      },
+      "left": 33,
+      "right": 33,
+      "textLeft": 53,
+      "textRight": 81,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "a.card",
+      "tag": "a",
+      "top": 1274,
+      "height": 547,
+      "words": 32,
+      "media": 1,
+      "middle": 0,
+      "heading": {
+       "text": "03 · Weave app",
+       "size": 16,
+       "tag": "h2"
+      },
+      "left": 33,
+      "right": 33,
+      "textLeft": 53,
+      "textRight": 71,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": true,
+      "pinned": false
+     },
+     {
+      "sel": "section.notes",
+      "tag": "section",
+      "top": 1868,
+      "height": 403,
+      "words": 105,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Direction",
+       "size": 16,
+       "tag": "h2"
+      },
+      "left": 32,
+      "right": 35,
+      "textLeft": 32,
+      "textRight": 35,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
     "gaps": [],
     "h1s": [
      {
-      "text": "01 · Mini bar",
-      "size": 16,
-      "top": 708,
+      "text": "Weave, design 02",
+      "size": 24,
+      "top": 48,
       "firstScreen": true
      }
     ],
     "edgeText": [],
-    "edges": [],
-    "leftBlocks": 0,
-    "bodySize": 16,
+    "edges": [
+     {
+      "x": 53,
+      "n": 6
+     },
+     {
+      "x": 32,
+      "n": 2
+     },
+     {
+      "x": 80,
+      "n": 2
+     }
+    ],
+    "leftBlocks": 10,
+    "bodySize": 14,
     "stage": false,
     "explains": false,
     "slivers": [],
@@ -591,26 +760,26 @@
      "w": 768,
      "h": 1024
     },
-    "dark": true,
-    "ground": "#1e1e1e",
+    "dark": false,
+    "ground": "#f5f5f3",
     "sidebar": null,
     "topbar": null,
     "canvas": {
-     "left": 13,
-     "right": 354
+     "left": 32,
+     "right": 35
     },
     "hero": {
-     "text": "01 · Mini bar",
-     "words": 4,
-     "chars": 13,
+     "text": "Weave, design 02",
+     "words": 3,
+     "chars": 16,
      "lines": 1,
-     "size": 16,
-     "vw": 2.1,
+     "size": 24,
+     "vw": 3.1,
      "font": "Geist",
      "weight": 500,
-     "tracking": 0,
-     "leading": 1.25,
-     "top": 708,
+     "tracking": -0.01,
+     "leading": 1.33,
+     "top": 48,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
@@ -618,18 +787,28 @@
     },
     "charts": 0,
     "layout": {
-     "panels": 2,
+     "panels": 4,
      "firstScreen": 2,
      "ragged": [],
-     "voids": []
+     "voids": [
+      {
+       "gap": 44,
+       "at": 1974,
+       "panel": "Direction"
+      }
+     ]
     },
     "tiles": 0,
     "panels": {
-     "count": 2,
+     "count": 4,
      "radii": [
       [
        8,
-       2
+       3
+      ],
+      [
+       0,
+       1
       ]
      ],
      "heavyBorders": 0,
@@ -647,30 +826,29 @@
     "numbers": {
      "cells": 0,
      "leftAligned": 0,
-     "figures": 2,
-     "tabularShare": 1,
-     "kpiMax": 12
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
     },
     "rows": null,
     "chartHues": 0,
     "placeholders": [],
     "type": {
-     "under13": 0.04,
+     "under13": 0,
      "tiny": 0,
      "tinySamples": [],
      "sizes": [
-      12,
-      13,
       14,
-      16
+      16,
+      24
      ]
     },
     "title": {
-     "text": "01 · Mini bar",
-     "size": 16,
-     "top": 708
+     "text": "Weave, design 02",
+     "size": 24,
+     "top": 48
     },
-    "colourShare": 0
+    "colourShare": 0.002
    },
    "consoleErrors": []
   },
@@ -678,9 +856,11 @@
    "width": 390,
    "height": 844,
    "load": "load",
-   "screens": 1,
+   "screens": 3,
    "filled": [
-    0.5
+    0.87,
+    0.63,
+    0.41
    ],
    "motion": {
     "elements": 0,
@@ -696,19 +876,19 @@
      "h": 844
     },
     "page": {
-     "height": 844,
-     "screens": 1,
-     "words": 143,
+     "height": 2037,
+     "screens": 2.4,
+     "words": 253,
      "img": 0,
      "video": 0,
      "canvas": 0,
-     "svg": 16,
-     "sections": 0,
+     "svg": 1,
+     "sections": 1,
      "horizontalOverflow": 0,
      "overflowCulprits": [],
      "uiFragments": 0,
      "uiAbuse": false,
-     "realPictures": 0,
+     "realPictures": 3,
      "videoCount": 0,
      "uiPictures": 0,
      "pictureSamples": [],
@@ -719,33 +899,55 @@
      "videosNoPoster": 0
     },
     "hero": {
-     "text": "01 · Mini bar",
-     "words": 4,
-     "chars": 13,
+     "text": "Weave, design 02",
+     "words": 3,
+     "chars": 16,
      "lines": 1,
-     "size": 16,
-     "vw": 4.1,
+     "size": 24,
+     "vw": 6.2,
      "font": "Geist",
      "weight": 500,
-     "tracking": 0,
-     "leading": 1.25,
-     "top": 528,
+     "tracking": -0.01,
+     "leading": 1.33,
+     "top": 24,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
      "position": "left"
     },
     "h1": {
-     "text": "01 · Mini bar",
-     "words": 4,
+     "text": "Weave, design 02",
+     "words": 3,
      "lines": 1,
-     "size": 16,
+     "size": 24,
      "font": "Geist"
     },
-    "headings": [],
+    "headings": [
+     {
+      "text": "Weave, design 02",
+      "words": 3,
+      "chars": 16,
+      "lines": 1,
+      "size": 24,
+      "vw": 6.2,
+      "font": "Geist",
+      "weight": 500,
+      "tracking": -0.01,
+      "leading": 1.33,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.79,
+      "top": 24,
+      "tag": "h1",
+      "kind": "heading"
+     }
+    ],
     "headingSummary": {
-     "count": 0,
-     "maxLines": 0,
+     "count": 1,
+     "maxLines": 1,
      "over2Lines": 0,
      "statements": 0,
      "centered": 0,
@@ -762,27 +964,26 @@
      ],
      "familyCount": 1,
      "sizes": [
-      12,
-      13,
       14,
-      16
+      16,
+      24
      ],
-     "sizeCount": 4,
+     "sizeCount": 3,
      "notLoaded": [],
      "body": {
       "font": "Geist",
-      "size": 13,
-      "leading": 1.54,
+      "size": 14,
+      "leading": 1.43,
       "weight": 400,
       "tracking": 0,
-      "contrast": 12.7
+      "contrast": 5.9
      },
-     "measureChars": 45,
+     "measureChars": 44,
      "max": {
-      "size": 16,
-      "vw": 4.1,
+      "size": 24,
+      "vw": 6.2,
       "font": "Geist",
-      "text": "01 · Mini bar"
+      "text": "Weave, design 02"
      },
      "monoShare": 0,
      "monoProseShare": 0,
@@ -793,115 +994,95 @@
      "microSamples": [],
      "upperShare": 0,
      "centerShare": 0,
-     "smallText": 1
+     "smallText": 0
     },
     "eyebrows": [],
-    "numbered": [
-     {
-      "text": "07",
-      "size": 12,
-      "top": 69
-     }
-    ],
+    "numbered": [],
     "color": {
-     "bodyBg": "#1e1e1e",
+     "bodyBg": "#f5f5f3",
      "bodyBgHsl": {
-      "h": 0,
-      "s": 0,
-      "l": 0.12
+      "h": 60,
+      "s": 0.09,
+      "l": 0.96
      },
-     "dark": true,
+     "dark": false,
      "sectionBgs": [
       {
-       "color": "#151514",
-       "top": 512,
-       "hsl": {
-        "h": 60,
-        "s": 0.02,
-        "l": 0.08
-       }
-      },
-      {
-       "color": "#ffffff",
-       "top": 0,
+       "color": "#fffefe",
+       "top": 192,
        "hsl": {
         "h": 0,
-        "s": 0,
+        "s": 1,
         "l": 1
        }
       }
      ],
      "textColors": [
       {
-       "color": "#d7d7d6",
-       "share": 0.6
-      },
-      {
        "color": "#5f5e5e",
-       "share": 0.17
+       "share": 0.63
       },
       {
        "color": "#0b0a0b",
-       "share": 0.16
-      },
-      {
-       "color": "#c4252b",
-       "share": 0.03
-      },
-      {
-       "color": "#e7e6e7",
-       "share": 0.03
+       "share": 0.37
       }
      ],
-     "button": {
-      "bg": "#ffffff",
-      "hsl": {
-       "h": 0,
-       "s": 0,
-       "l": 1
-      },
-      "fg": "#0b0a0b"
-     },
+     "button": null,
      "lowContrast": []
     },
     "buttons": {
-     "count": 1,
-     "inHero": 1,
-     "radius": 8,
-     "height": 40,
-     "withShadow": 1,
+     "count": 0,
+     "inHero": 0,
+     "withShadow": 0,
      "withGradient": 0,
      "mono": 0,
      "upper": 0,
-     "heroLabels": [
-      "Errands 4 left · 1 overdue"
-     ]
+     "heroLabels": []
     },
     "surfaces": {
      "shadowStatic": 0,
-     "shadowOverlay": 2,
+     "shadowOverlay": 0,
      "shadowSamples": [],
      "gradients": 0,
      "scrims": 0,
      "gradientSamples": [],
      "gradientText": 0,
-     "hairlines": 1,
+     "hairlines": 5,
      "hairlineSamples": [
-      "div.foot 337px"
+      "section.notes 358px",
+      "dt 358px",
+      "dt 358px",
+      "dt 358px",
+      "dt 358px"
      ],
-     "outlinedBoxes": 0,
+     "outlinedBoxes": 3,
      "dashed": 0,
      "blurred": 0,
      "roundedBoxes": 3,
      "boxRadius": 8,
      "squareMedia": 0,
-     "roundedMedia": 0,
-     "mediaRadius": 0,
+     "roundedMedia": 3,
+     "mediaRadius": 8,
      "textShadow": 0,
      "cardRows": []
     },
-    "heroMedia": [],
-    "nav": null,
+    "heroMedia": [
+     {
+      "type": "bg-image",
+      "ratio": 0.24
+     },
+     {
+      "type": "bg-image",
+      "ratio": 0.24
+     }
+    ],
+    "nav": {
+     "links": 0,
+     "fixed": false,
+     "height": 136,
+     "floatingPill": false,
+     "blur": false
+    },
     "fontsLoaded": [
      "geist"
     ]
@@ -911,25 +1092,108 @@
      "w": 390,
      "h": 844
     },
-    "pageH": 844,
+    "pageH": 2037,
     "margins": {
-     "left": null,
-     "right": null
+     "left": 16,
+     "right": 17
     },
-    "sections": [],
+    "sections": [
+     {
+      "sel": "header",
+      "tag": "header",
+      "top": 24,
+      "height": 136,
+      "words": 41,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Weave, design 02",
+       "size": 24,
+       "tag": "h1"
+      },
+      "left": 64,
+      "right": 29,
+      "textLeft": 64,
+      "textRight": 29,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "div.grid",
+      "tag": "div",
+      "top": 192,
+      "height": 1136,
+      "words": 104,
+      "media": 3,
+      "middle": 0,
+      "heading": {
+       "text": "01 · Mini bar and sheet",
+       "size": 16,
+       "tag": "h2"
+      },
+      "left": 17,
+      "right": 17,
+      "textLeft": 37,
+      "textRight": 41,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "section.notes",
+      "tag": "section",
+      "top": 1376,
+      "height": 613,
+      "words": 105,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Direction",
+       "size": 16,
+       "tag": "h2"
+      },
+      "left": 16,
+      "right": 17,
+      "textLeft": 16,
+      "textRight": 17,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
     "gaps": [],
     "h1s": [
      {
-      "text": "01 · Mini bar",
-      "size": 16,
-      "top": 528,
+      "text": "Weave, design 02",
+      "size": 24,
+      "top": 24,
       "firstScreen": true
      }
     ],
     "edgeText": [],
-    "edges": [],
-    "leftBlocks": 0,
-    "bodySize": 16,
+    "edges": [
+     {
+      "x": 37,
+      "n": 6
+     },
+     {
+      "x": 16,
+      "n": 2
+     },
+     {
+      "x": 64,
+      "n": 2
+     }
+    ],
+    "leftBlocks": 10,
+    "bodySize": 14,
     "stage": false,
     "explains": false,
     "slivers": [],
@@ -941,28 +1205,26 @@
      "w": 390,
      "h": 844
     },
-    "dark": true,
-    "ground": "#1e1e1e",
+    "dark": false,
+    "ground": "#f5f5f3",
     "sidebar": null,
-    "topbar": {
-     "h": 42
-    },
+    "topbar": null,
     "canvas": {
-     "left": 13,
-     "right": 50
+     "left": 16,
+     "right": 17
     },
     "hero": {
-     "text": "01 · Mini bar",
-     "words": 4,
-     "chars": 13,
+     "text": "Weave, design 02",
+     "words": 3,
+     "chars": 16,
      "lines": 1,
-     "size": 16,
-     "vw": 4.1,
+     "size": 24,
+     "vw": 6.2,
      "font": "Geist",
      "weight": 500,
-     "tracking": 0,
-     "leading": 1.25,
-     "top": 528,
+     "tracking": -0.01,
+     "leading": 1.33,
+     "top": 24,
      "tag": "h1",
      "kind": "heading",
      "align": "left",
@@ -970,18 +1232,28 @@
     },
     "charts": 0,
     "layout": {
-     "panels": 2,
+     "panels": 4,
      "firstScreen": 2,
      "ragged": [],
-     "voids": []
+     "voids": [
+      {
+       "gap": 44,
+       "at": 1502,
+       "panel": "Direction"
+      }
+     ]
     },
     "tiles": 0,
     "panels": {
-     "count": 2,
+     "count": 4,
      "radii": [
       [
        8,
-       2
+       3
+      ],
+      [
+       0,
+       1
       ]
      ],
      "heavyBorders": 0,
@@ -999,30 +1271,29 @@
     "numbers": {
      "cells": 0,
      "leftAligned": 0,
-     "figures": 2,
-     "tabularShare": 1,
-     "kpiMax": 12
+     "figures": 0,
+     "tabularShare": null,
+     "kpiMax": null
     },
     "rows": null,
     "chartHues": 0,
     "placeholders": [],
     "type": {
-     "under13": 0.04,
+     "under13": 0,
      "tiny": 0,
      "tinySamples": [],
      "sizes": [
-      12,
-      13,
       14,
-      16
+      16,
+      24
      ]
     },
     "title": {
-     "text": "01 · Mini bar",
-     "size": 16,
-     "top": 528
+     "text": "Weave, design 02",
+     "size": 24,
+     "top": 24
     },
-    "colourShare": 0
+    "colourShare": 0.003
    },
    "consoleErrors": []
   }

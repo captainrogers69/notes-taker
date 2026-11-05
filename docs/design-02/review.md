@@ -207,6 +207,9 @@ The lens is a before/after of a to-do app: one summary line instead of a banner,
 - [x] E4 · Up next: the Today card's "4 open · 1 done" repeated the header's "4 left today". Removed (C1).
 - [x] E5 · Settings: the Mini bar intro line "Now: shown, 50% when idle, ⌥ Space to open." repeated the controls beside it. Removed (C1).
 - [x] E6 · Mini bar: with the sheet open, the bar repeated the sheet header's count. The count fades while open; the bar keeps its width (C1).
+- [x] E7 · Mini-bar and tray sheets: the line under the list name still said "1 overdue since 09:00" while the overdue row led the list in red. Now "4 left · next 17:00 Reply to design review", the same rule as the app (C1, C2). The closed bar keeps "1 overdue", since it shows no rows.
+- [x] E8 · The sheet's coloured header held an empty 24 px band (the reserved parse line, M8). It now shows the hint "Times work too: 6pm, tomorrow, in 2 h" while the field is empty and focused (C3), and the parsed date once you type. The height still never changes.
+- [x] E9 · Index page previews showed the pre-declutter app. Regenerated; the 01 guide's tick step now matches E6.
 - Passed as they are: Archive and trash, phone Lists, the Android notification, the tab bar, Search.
 
 Implementation: the `#lean` flag is gone; the lean version is the only version. `declutter.html` compares saved "before" screenshots (`assets/declutter/`) with the live app.

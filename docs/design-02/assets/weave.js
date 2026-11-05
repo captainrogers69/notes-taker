@@ -19,11 +19,10 @@
     return [...timed, ...untimed];
   }
 
-  // The finding line under the list name: overdue beats next-up.
+  // The line under the list name: what's left and what's next. Not the overdue count: the overdue row
+  // already leads the list in red (playbook C1, C2). The closed bar still says it, since it shows no rows.
   function subline(l) {
     const left = D.leftLabel(l);
-    const late = D.open(l).filter(D.isOverdue);
-    if (late.length) return `${left} · <span class="late">${late.length} overdue</span> since ${late[0].due.t}`;
     const n = D.nextUp(l);
     if (n) return `${left} · next ${D.dueLabel(n.due)} ${esc(n.t)}`;
     return left;
@@ -171,8 +170,11 @@
       const box = win.querySelector('.parse');
       const p = D.parseQuick(input.value);
       const label = input.value.trim() ? D.parsePreview(p) : '';
-      box.classList.toggle('on', !!label);
-      box.querySelector('span').textContent = label;
+      // The reserved line shows the hint while the field is empty (C3: hints on focus; the sheet opens focused),
+      // and the parsed date once you type.
+      box.classList.add('on');
+      box.classList.toggle('hint', !label);
+      box.querySelector('span').textContent = label || 'Times work too: 6pm, tomorrow, in 2 h';
     }
 
     const focusInput = () => {
