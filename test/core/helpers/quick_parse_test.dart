@@ -117,4 +117,38 @@ void main() {
       );
     });
   });
+
+  group('fixes', () {
+    test('tonight after 20:00 rolls to tomorrow', () {
+      final p = quickParse('buy milk tonight', DateTime(2026, 11, 5, 21, 15));
+      expect(p.text, 'buy milk');
+      expect(p.due?.at(), DateTime(2026, 11, 6, 20));
+    });
+    test('tonight at 19:59 is today, at 20:00 is tomorrow', () {
+      expect(
+        quickParse('x tonight', DateTime(2026, 11, 5, 19, 59)).due?.at(),
+        DateTime(2026, 11, 5, 20),
+      );
+      final n = DateTime(2026, 11, 5, 20);
+      final p = quickParse('x tonight', n);
+      expect(p.due?.at(), DateTime(2026, 11, 6, 20));
+      expect(parseReadBack(p, n), 'Due Tomorrow 20:00');
+    });
+    test('punctuation after tokens', () {
+      var p = quickParse('call mom tomorrow.', now);
+      expect(p.text, 'call mom');
+      expect(p.due, DueSpec(date: DateTime(2026, 11, 6)));
+      p = quickParse('call mom tomorrow 6pm!', now);
+      expect(p.text, 'call mom');
+      expect(p.due?.at(), DateTime(2026, 11, 6, 18));
+      p = quickParse('dentist fri, bring card', now);
+      expect(p.text, 'dentist bring card');
+      expect(p.due, DueSpec(date: DateTime(2026, 11, 6)));
+      expect(at('review at 18:00.'), DateTime(2026, 11, 5, 18));
+    });
+    test('punctuation does not enable in-word matches', () {
+      expect(quickParse('fix monitor.', now).due, isNull);
+      expect(quickParse('sunny!', now).due, isNull);
+    });
+  });
 }

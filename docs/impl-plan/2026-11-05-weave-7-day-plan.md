@@ -31,7 +31,7 @@
 | Checkpoint | Date | State |
 |---|---|---|
 | 1 | 2026-11-05 | **Tasks 1–3 done, reviewed and staged** (setup + flavors + Supabase migration; theme tokens + Geist; ids, HLC, fractional index). `flutter analyze` 0 issues, 23/23 tests. Supabase done by the user (migration live, email + password auth, test user, `config/dev.json`); verified by sign-in and reads of `changes` and `devices`. **Still waiting on the user:** a Windows build check. Next: Task 4. |
-| 2 | 2026-11-05 | **Tasks 4–8 done, reviewed and staged** (Day 2 complete): database + change log (clock saved across restarts), task and list data, quick-capture parsing, lists repository (undo of delete forever restores tasks), items repository + Up next + search (tie-safe reordering, conflict resolution in one transaction). `flutter analyze` 0 issues, 95/95 tests. Supabase verified live. **Still waiting on the user:** Windows build check. Next: Task 9 (sync transport). |
+| 2 | 2026-11-05 | **Tasks 4–8 done, reviewed and staged** (Day 2 complete): database + change log (clock saved across restarts), task and list data, quick-capture parsing, lists repository (undo of delete forever restores tasks), items repository + Up next + search (tie-safe reordering, conflict resolution in one transaction). `flutter analyze` 0 issues, 99/99 tests. Supabase verified live. Quick-capture fixes (user request): "tonight" after 20:00 → tomorrow 20:00; punctuation after a date or time no longer drops the due. **Still waiting on the user:** Windows build check. Next: Task 9 (sync transport). |
 
 Carried into later tasks from reviews:
 - Task 10: the merger takes `ChangeWriter`; applying a list purge also deletes its tasks; late changes never bring back a purged list or task.

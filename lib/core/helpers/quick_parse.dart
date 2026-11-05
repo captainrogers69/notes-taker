@@ -17,23 +17,22 @@ class ParsedCapture extends Equatable {
   List<Object?> get props => [text, due, timerMinutes];
 }
 
-final _tomorrow = RegExp(r'\s(tomorrow|tmrw)\s', caseSensitive: false);
-final _today = RegExp(r'\s(today)\s', caseSensitive: false);
-final _weekday = RegExp(
+// Trailing whitespace, optionally preceded by punctuation that is consumed.
+const _e = r'[.,;:!?]*\s';
+
+RegExp _re(String body, {bool ci = true}) =>
+    RegExp('$body$_e', caseSensitive: !ci);
+
+final _tomorrow = _re(r'\s(tomorrow|tmrw)');
+final _today = _re(r'\s(today)');
+final _weekday = _re(
   r'\s(?:on\s+)?(sun(?:day)?|mon(?:day)?|tue(?:s|sday)?|wed(?:nesday)?|'
-  r'thu(?:r|rs|rsday)?|fri(?:day)?|sat(?:urday)?)\s',
-  caseSensitive: false,
+  r'thu(?:r|rs|rsday)?|fri(?:day)?|sat(?:urday)?)',
 );
-final _tonight = RegExp(r'\s(tonight)\s', caseSensitive: false);
-final _timer = RegExp(
-  r'\sin\s+(\d{1,3})\s*(h|hr|hrs|hours?|m|min|mins|minutes?)\s',
-  caseSensitive: false,
-);
-final _ampm = RegExp(
-  r'\s(?:at\s+)?(1[0-2]|0?[1-9])(?::([0-5]\d))?\s*(am|pm)\s',
-  caseSensitive: false,
-);
-final _clock24 = RegExp(r'\s(?:at\s+)?([01]?\d|2[0-3]):([0-5]\d)\s');
+final _tonight = _re(r'\s(tonight)');
+final _timer = _re(r'\sin\s+(\d{1,3})\s*(h|hr|hrs|hours?|m|min|mins|minutes?)');
+final _ampm = _re(r'\s(?:at\s+)?(1[0-2]|0?[1-9])(?::([0-5]\d))?\s*(am|pm)');
+final _clock24 = _re(r'\s(?:at\s+)?([01]?\d|2[0-3]):([0-5]\d)', ci: false);
 
 const _dow = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
@@ -45,6 +44,7 @@ ParsedCapture quickParse(String raw, DateTime now) {
   int? d;
   int? t;
   int? timer;
+  var tonight = false;
   final nowMin = now.hour * 60 + now.minute;
 
   RegExpMatch? take(RegExp re) {
@@ -65,6 +65,7 @@ ParsedCapture quickParse(String raw, DateTime now) {
   if (take(_tonight) != null) {
     d = 0;
     t = 20 * 60;
+    tonight = true;
   }
   final tm = take(_timer);
   if (tm != null) {
@@ -88,6 +89,8 @@ ParsedCapture quickParse(String raw, DateTime now) {
 
   final text = s.replaceAll(RegExp(r'\s+'), ' ').trim();
   if (t != null && d == null) d = t <= nowMin ? 1 : 0;
+  // 'tonight' already past today means tomorrow.
+  if (tonight && d == 0 && t != null && t <= nowMin) d = 1;
   if (d == null || text.isEmpty) {
     return ParsedCapture(text: raw.trim());
   }
