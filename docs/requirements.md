@@ -242,7 +242,7 @@ Users may store sensitive data (password hints, health, finances), so synced dat
 | NFR7 | Security | End-to-end encryption (section 6); TLS in transit; per-user data isolation; audited, standard crypto libraries only (no home-made crypto) |
 | NFR8 | Privacy | No selling or ad-tracking of user data; minimal analytics, opt-out available |
 | NFR9 | Accessibility | Screen-reader labels, dynamic text size, WCAG AA contrast, full keyboard use on desktop |
-| NFR10 | Localization | English at launch; all strings externalized for later translation |
+| NFR10 | Localization | English only at launch. Externalizing strings for translation is **deferred to a later release** (2026-11-05) |
 
 ---
 

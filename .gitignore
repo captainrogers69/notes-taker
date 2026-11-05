@@ -78,3 +78,7 @@ lcov.info
 /windows/flutter/generated_plugin_registrant.h
 /windows/flutter/generated_plugins.cmake
 /macos/Flutter/GeneratedPluginRegistrant.swift
+
+# Weave runtime config (secrets stay local)
+config/*.json
+!config/*.example.json

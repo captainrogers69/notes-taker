@@ -1,17 +1,26 @@
-# weave
+# Weave
 
-A new Flutter project.
+A local-first task and list app (Flutter) with Supabase sync, for macOS, Windows, iOS and Android.
 
-## Getting Started
+## Run
 
-This project is a starting point for a Flutter application.
+1. Copy `config/dev.example.json` to `config/dev.json` and fill in `SUPABASE_URL` and `SUPABASE_ANON_KEY` (the publishable key; never the service-role key). `WEAVE_PROFILE` names the local DB folder, so two copies can run on one machine. `config/*.json` is git-ignored.
+2. Run a flavor:
 
-A few resources to get you started if this is your first Flutter project:
+```sh
+flutter run -t lib/main_dev.dart --flavor dev --dart-define-from-file=config/dev.json
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+Use `lib/main_prod.dart`, `--flavor prod` and `config/prod.json` for prod. On Windows omit `--flavor` (flavors apply to Android, iOS and macOS).
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+App IDs: `com.rogers.weave` (prod) and `com.rogers.weave.dev` (dev).
+
+## Generated code
+
+```sh
+dart run build_runner build --delete-conflicting-outputs
+```
+
+## Supabase
+
+The schema lives in `supabase/migrations/`. It deploys through the Supabase GitHub integration when merged to the production branch (working directory `.`).

@@ -17,7 +17,7 @@ Source: [requirements.md](../requirements.md) (Draft v0.2) + team principles.
 |---|---|
 | **App** | Weave (`com.rogers.weave`) |
 | **Platforms** | Android, iOS, macOS = P0 · Windows = P1 · Linux, web = P2. Min OS: iOS 17, Android 8 (API 26), macOS 12, Windows 10 |
-| **API type** | ⏳ Pending (backend undecided). App-facing contract: `SyncTransport` + `AuthGateway` interfaces |
+| **API type** | Supabase (Postgres `changes` table, Realtime, Auth). App-facing contract: `SyncTransport` + `AuthGateway` interfaces |
 | **Auth** | Optional. Local mode (no account) is a full app. Sign in with Apple, Google, email (magic link / password) turns on sync |
 | **Realtime** | Yes — changes reach other online devices in < 3 s p95 (NFR1). Transport ⏳ Pending |
 | **Offline** | Local-first. Everything works offline; local DB is the source of truth. Drift + SQLCipher |
@@ -25,7 +25,7 @@ Source: [requirements.md](../requirements.md) (Draft v0.2) + team principles.
 | **Native code** | Android overlay, iOS/Android home-screen widgets, desktop always-on-top windows, global hotkeys, tray/menu-bar |
 | **Flavors** | `dev`, `prod` |
 | **Typography** | Geist 400/500 (SIL OFL, bundled, works offline), tabular figures for times and counts. See design playbook §4 |
-| **Localization** | English at launch; all strings externalized (ARB) |
+| **Localization** | English only. Externalized strings (ARB) deferred to a later release (D9) |
 
 ---
 
@@ -108,7 +108,6 @@ lib/
     routing/                   # AppRoute enum, router config
     theme/                     # tokens (design-02 tokens.css), NoteColor palette, typography (Geist)
     responsive/                # context.res(...)
-    l10n/                      # ARB files + generated
     helpers/                   # static helper classes (§6)
     extensions/
     widgets/                   # shared widgets (§7)
@@ -213,7 +212,7 @@ Static, stateless classes in `core/helpers/`, one concern each:
 | `FractionalIndex` | Order keys for notes/items so reorders merge without conflicts |
 | `ReminderTimeHelper` | Wall-clock ↔ instant conversion, next occurrence, T-minus offset (F4.8) |
 | `NoteShareFormatter` | Note → plain text / Markdown (F11.1) |
-| `DateLabelHelper` | "Tomorrow 9:00", "in 2 hours" labels (localized) |
+| `DateLabelHelper` | "Tomorrow 9:00", "in 2 hours" labels |
 
 ### Enums
 
@@ -221,13 +220,13 @@ Convention for every enum that is persisted or synced:
 
 - `fromApi(String)` → enum (unknown → safe default, never throw).
 - `apiValue` → stable string stored in DB / payload. **Never** use `.name` or index for storage.
-- `label(BuildContext)` → localized display string.
+- `label` → English display string (localization deferred, D9).
 
 Project enums: `NoteColor`, `ReminderKind` (atTime, tMinus, timer), `RepeatRule` kind, `SyncStatus` (synced, syncing, offline, error), `NoteBlockType` (text, checklistItem), `Feature` (entitlements), `NoteMemberRole` (owner — editor/viewer later).
 
 ### Extensions
 
-In `core/extensions/`: `DateTime`, `BuildContext` (`theme`, `l10n`, `res`), `Iterable` helpers. No business logic in extensions.
+In `core/extensions/`: `DateTime`, `BuildContext` (`theme`, `res`), `Iterable` helpers. No business logic in extensions.
 
 ---
 
@@ -289,12 +288,12 @@ Known shared widgets from requirements:
 - All dialogs and bottom sheets go through `DialogWrapper`.
 - Destructive confirmations (sign out wipes data, delete account, empty trash) use one shared confirm dialog with explicit wording.
 
-### Accessibility & l10n
+### Accessibility
 
 - Every icon button and checkbox has a `Semantics` label / tooltip.
 - Support dynamic text size; no fixed-height text containers.
 - Full keyboard use on desktop: `Shortcuts` + `Actions` for new note, search, tick, hide floating notes.
-- No hard-coded user-facing strings — `context.l10n.*` only (NFR10).
+- User-facing strings are English literals for now; moving them to ARB is deferred (D9, NFR10).
 
 ---
 
@@ -419,7 +418,7 @@ Before every merge:
 
 - [ ] `flutter analyze` — zero issues; `dart format` clean.
 - [ ] Non-negotiables respected (no `_buildX` methods, `HookWidget` not `StatefulWidget`).
-- [ ] No hard-coded user-facing strings; semantics labels on interactive widgets.
+- [ ] Semantics labels on interactive widgets.
 - [ ] Repositories don't call the network; synced writes go through the outbox in one transaction.
 - [ ] No `as` casts in parsing; enums use `fromApi` / `apiValue`.
 - [ ] No content, keys, or recovery key in logs.
@@ -440,3 +439,11 @@ Before every merge:
 | ID | Principle | Project decision | Reason | Agreed on |
 |---|---|---|---|---|
 | D1 | Repository → remote DataSource via `ApiService` | **Local-first:** repositories read/write the local Drift DB only; a core `SyncEngine` owns all remote traffic (encrypt, push, pull, merge) | Offline-first, UI never waits on network (NFR2, NFR4), E2EE requires merging on device (F2.7) | 2026-10-29 |
+| D2 | Backend undecided (⏳ pending) | Backend is **Supabase** (Postgres `changes` table, Realtime, Auth) | 7-day build needs a hosted backend with auth and realtime out of the box | 2026-11-05 |
+| D3 | E2EE payloads | `PayloadCipher` pass-through (JSON → base64). Interface ready for libsodium. Back in: E2EE phase | Ship sync in 7 days; the seam keeps the E2EE swap local | 2026-11-05 |
+| D4 | SQLCipher | Plain SQLite via `sqlite3_flutter_libs`. Back in: E2EE phase | Encryption at rest is part of the E2EE phase | 2026-11-05 |
+| D5 | All auth providers | Email + password sign-in only. The Apple and Google buttons and the magic-link option are not shown. Back in: Auth phase | Smallest auth surface that turns on sync | 2026-11-05 |
+| D6 | FTS5 search | Search uses `LIKE` over task text and list names. Back in: Later | Enough for the working model; FTS5 needs extra setup per platform | 2026-11-05 |
+| D7 | Synced list field for mini bar | `showInMiniBar` and bar geometry are device-only (table `mini_bars`) | Each device decides its own bar; nothing to sync | 2026-11-05 |
+| D8 | E3/E4, F4.5 | Settings hides "Recovery key" and "Add a device"; notifications have no action buttons. Back in: E2EE / notifications phase | Those features depend on E2EE and richer notification support | 2026-11-05 |
+| D9 | All user-facing strings externalized (ARB, NFR10) | **No localization in v1 build:** English string literals; no ARB / gen-l10n | User deferred localization (2026-11-05) | 2026-11-05 |

@@ -326,7 +326,7 @@ Hiding flies the bar into its tray spot and the tray icon pops once (§4 Motion)
 - Times: 24-hour, tabular. "17:00" today, "Tomorrow 10:00", "Fri 6 Nov".
 - Empty list: "Nothing here yet. Type above and press Enter." (sheet) / "…Type below…" (app list, field at the end).
 - Toasts name the thing and offer Undo: “Checked "Buy milk"” + Undo, "Archived Errands  Undo".
-- All strings go through l10n (NFR10).
+- Strings are English literals for now; localization is deferred to a later release (NFR10, 2026-11-05).
 
 ---
 
