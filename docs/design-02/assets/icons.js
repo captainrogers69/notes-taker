@@ -38,10 +38,10 @@
     close: s('<path d="M4 4l8 8M12 4l-8 8"/>'),
     device: s('<rect x="4.5" y="2" width="7" height="12" rx="1.5"/><path d="M7.3 12h1.4"/>'),
     laptop: s('<rect x="3" y="3.5" width="10" height="7" rx="1"/><path d="M1.5 12.5h13"/>'),
-    // The Weave mark: a sticky note (folded corner) with the W drawn as one thread running in from its edge.
-    // markMono for OS tray / status bar (template image).
-    mark: `<svg class="mark" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 0h8a4 4 0 0 1 4 4v7l-5 5H4a4 4 0 0 1-4-4V4a4 4 0 0 1 4-4z" fill="#F5C84C"/><path d="M16 11h-3.6a1.4 1.4 0 0 0-1.4 1.4V16z" fill="#D4A11E"/><path d="M1.4 4.8h1.4l2.4 5.8L7.6 6l2.4 4.6 2.6-5.8" fill="none" stroke="#111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-    markMono: `<svg class="mark" viewBox="0 0 16 16" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 1.5h8A2.5 2.5 0 0 1 14.5 4v6.2l-4.3 4.3H4A2.5 2.5 0 0 1 1.5 12V4A2.5 2.5 0 0 1 4 1.5z"/><path d="M14.5 10.2h-3a1.2 1.2 0 0 0-1.2 1.2v3.1"/><path d="M4 5.6 5.6 9.6 7.6 6.6 9.4 9.4 11.6 5.6"/></g></svg>`,
+    // The Weave mark (locked 2026-11-05): logo 8a "Lifted corner" — a square note in --n0 whose top-right corner
+    // is lifted in ink. Masters and app icons: docs/logo/kit. markMono is the outline template (tray / status bar).
+    mark: `<svg class="mark" viewBox="24 24 208 208" aria-hidden="true"><rect x="24" y="24" width="208" height="208" rx="36" fill="#F5C84C"/><path d="M128 24H196A36 36 0 0 1 232 60V128A104 104 0 0 1 128 24Z" fill="#141414"/></svg>`,
+    markMono: `<svg class="mark" viewBox="24 24 208 208" aria-hidden="true"><path fill-rule="evenodd" fill="currentColor" d="M60 24H196A36 36 0 0 1 232 60V196A36 36 0 0 1 196 232H60A36 36 0 0 1 24 196V60A36 36 0 0 1 60 24ZM60 50A10 10 0 0 0 50 60V196A10 10 0 0 0 60 206H196A10 10 0 0 0 206 196V151.4A130 130 0 0 1 104.6 50Z"/></svg>`,
     key: s('<circle cx="5.5" cy="10.5" r="3"/><path d="m7.6 8.4 5.4-5.4M11 5l1.5 1.5"/>'),
   };
 })();

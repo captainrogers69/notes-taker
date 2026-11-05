@@ -46,6 +46,7 @@ Carried into later tasks from reviews:
 - Known limit: after a pull fails at a row, push still runs; a stuck remote text change without `b` (old format) is then treated as sequential because the outbox is empty. No such payloads exist yet.
 - Task 13: the device id is captured by the clock, writer, `DeviceNames`, `ChangeMerger` and `SyncEngine`. On sign-out: `unregisterSync(sl)` (disposes the engine, unregisters the transport, cipher, `DeviceNames` and `ChangeMerger`; detaches the `SyncStatusCubit`), then wipe, then re-register `DeviceId`, `HlcClock` and `ChangeWriter` with the new id, then `registerSync` again. The global `SyncStatusCubit` is kept (widgets hold one instance) and `registerSync` re-attaches it to the new engine's status.
 - Tasks 14 and 15 refresh list and Up next streams every minute and on app resume (overdue is computed when a stream starts).
+- Logo locked 2026-11-05 (`docs/logo/kit`): Task 14 uses the mark in the sidebar brand and Windows title bar; Task 24 uses the tray template; Task 26 generates platform app icons from `app-icon-light.svg` / `png/app-icon-light-1024.png` (Android adaptive: `app-icon-android-fg.svg` on paper #F5F5F3).
 - Task 14 wires `weaveTheme` into `WeaveApp`. Add a `tick` colour token before Task 15.
 
 ## Phases
@@ -1065,7 +1066,7 @@ General rule for every UI task:
 
 - Consumes: `MiniBarHost`, `Prefs`
 - Produces:
-  - Tray / menu-bar icon (the W mark). Menu: Open Weave · Show bars / Hide bars · Pause reminders 1 h · Quit.
+  - Tray / menu-bar icon: the Weave mark outline template (`docs/logo/kit/png/weaveTemplate.png` + `@2x`, set as a template image on macOS). Menu: Open Weave · Show bars / Hide bars · Pause reminders 1 h · Quit.
   - Global hotkey: ⌥Space on macOS, Ctrl+Space on Windows. It opens the sheet of the last-used bar, or the main window's add field if there is no bar.
   - Closing the main window hides it, so bars and sync keep running; Quit is in the tray menu.
   - "Hide in full-screen apps": macOS window collection behavior `fullScreenAuxiliary` off; on Windows, skipped (log it).

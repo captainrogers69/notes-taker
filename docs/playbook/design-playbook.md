@@ -290,7 +290,7 @@ Respect reduce-motion: all durations → 0. The day's-last-tick stroke and the f
 
 | Platform | Mini bar | Sheet | When hidden (`⌄`) |
 |---|---|---|---|
-| **macOS** | Borderless always-on-top window sized to the bar | Second borderless window, positioned by §3 | **Menu-bar item**: the W mark and the open count. Click → the sheet drops down under it, right-aligned |
+| **macOS** | Borderless always-on-top window sized to the bar | Second borderless window, positioned by §3 | **Menu-bar item**: the Weave mark (outline template) and the open count. Click → the sheet drops down under it, right-aligned |
 | **Windows** | Same | Same | **System-tray icon** with the count. Click → the sheet rises above the taskbar, right-aligned. Ask once to keep it out of the `^` overflow |
 | **Linux** | Same as macOS | Same | **Tray icon** (StatusNotifier/AppIndicator), behaves as macOS. GNOME needs the AppIndicator extension; without it, hotkey + app only. Not prototyped |
 | **Android** | Overlay mini bar ("display over other apps"). If permission denied → notification + home widget | Overlay window | **Ongoing notification, only while hidden:** list name, "4 left · 1 overdue", the next two timed tasks with tick buttons and times, actions **Add task** (inline reply field that parses times) · **Show bar** · **Pause 1 h**. Plus a **"Weave bar" quick-settings tile** |
@@ -380,7 +380,7 @@ Desktop                                                       Phone
 
 ### Sidebar (desktop)
 
-Brand (W mark + "Weave") · **sync line** (Synced · 3 devices / Syncing… / Offline · changes saved here / Sync error · retrying, F2.5) · **Search** `⌘K` · **Up next** with today's open count · **Pinned** · **Lists** · **New list** `⌘N` · footer: **Archive and trash** (count), **Settings**, account row ("End-to-end encrypted").
+Brand (Weave mark + "Weave") · **sync line** (Synced · 3 devices / Syncing… / Offline · changes saved here / Sync error · retrying, F2.5) · **Search** `⌘K` · **Up next** with today's open count · **Pinned** · **Lists** · **New list** `⌘N` · footer: **Archive and trash** (count), **Settings**, account row ("End-to-end encrypted").
 List rows: colour dot · name · screen icon if in the mini bar · open count. **Counts only, no progress bars** (C7). The list in the mini bar sits on its note paper.
 
 ### Up next (the app opens here)
@@ -445,7 +445,7 @@ Toast with **Undo** after check, delete task, uncheck all, archive list, delete 
 | Platform | Chrome |
 |---|---|
 | macOS | Traffic lights, sidebar runs full height, `⌘` shortcuts |
-| Windows | Title bar with W mark + "Weave", min / max / close on the right, `Ctrl+` shortcuts |
+| Windows | Title bar with the Weave mark + "Weave", min / max / close on the right, `Ctrl+` shortcuts |
 | Linux | ⏳ Not prototyped. Use the desktop layout with the system's own title bar, `Ctrl+` shortcuts |
 | iOS | Dynamic Island safe area, iOS tab bar (filled icon for the current tab), back = "‹ Lists", home indicator |
 | Android | Status bar, Material tab bar (pill behind the current icon), back = ← and the system back gesture, gesture bar |
@@ -482,7 +482,7 @@ Clickable prototypes over a real desktop screenshot. Open [`docs/design-02/index
 | [declutter](../design-02/declutter.html) | Declutter study | Before / after for D1–D13, with markers | Reference |
 | [review.md](../design-02/review.md) | Review log | Round 1 findings, motion audit M1–M12, declutter D1–D13, E1–E9 | Reference |
 
-Shared code: `assets/tokens.css` (all tokens), `assets/data.js` (sample data, quick-capture parser, checks), `assets/icons.js` (one outline icon set + the W mark), `assets/weave.{css,js}` (bar + sheet, shared by 01 and 02). Throwaway prototype code, not app code.
+Shared code: `assets/tokens.css` (all tokens), `assets/data.js` (sample data, quick-capture parser, checks), `assets/icons.js` (one outline icon set + the Weave mark, `mark` / `markMono`). Logo masters, app icons and usage guide: [`docs/logo/kit`](../logo/kit/index.html) (**locked** 2026-11-05), `assets/weave.{css,js}` (bar + sheet, shared by 01 and 02). Throwaway prototype code, not app code.
 
 Design 01 ([`docs/design/`](../design/index.html): 003 mini bar, 004 bubble, 005 app, 006 tray; Woven theme) is **superseded** by design 02 and kept for history.
 
@@ -518,3 +518,4 @@ Open design work is tracked in [`docs/design/design-checklist.md`](../design/des
 | 2026-11-03 | **Clutter rules C1–C12** added to §0 and made mandatory for every screen, with a clutter check before review | Declutter study against a before/after reference (design-02 `declutter.html`, D1–D13). User: "these are very critical" |
 | 2026-11-05 | **Design 02 locked** and this playbook synced to it: achromatic ledger style, **Geist** (400/500, tabular figures) replaces Inter, light default, radius 8 / 6, no colour strip (list colour as note paper), sheet in time order with quick-capture parsing, lists menu instead of a sideways slide, app opens on Up next with the day thread, phone tab bar + bottom add bar instead of cards home + FAB, archive and trash on one screen. Design 01 superseded | User: "we are locking the design-02" |
 | 2026-11-05 | **Design checklist v1 gaps drawn** in design-02: several bars + collapse + sheet resize + sync states (01); list due date, several reminders, custom date / time / repeat, Hide done, sync conflict, account and encryption dialogs, default capture list (03); notifications (04); widgets and share (05); first run (06). Same style and clutter rules; no change to locked screens | User: "let's make the missing things that are mentioned in design checklist in design-02" |
+| 2026-11-05 | **Logo locked: "Lifted corner" (8a)** — a square note in `--n0` whose top-right corner is lifted in ink; one-colour versions separate the corner with a gap; the tray / menu-bar template is the outline note with the corner cut out; the app icon is the note itself, full bleed. Replaces the placeholder folded-note W mark everywhere (`icons.js` `mark` / `markMono`). Kit in `docs/logo/kit`. Proposed behind `?mark=corner`, compared in `design-02/logo-compare.html`; clutter check: no element or colour added | User picked 8a from the logo exploration (`docs/logo`): "its good. lets make it default and lock it" |

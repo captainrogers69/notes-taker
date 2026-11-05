@@ -64,4 +64,4 @@ Everything comes from [`assets/data.js`](assets/data.js): six lists, three devic
 
 ## Files
 
-`assets/tokens.css` (all tokens, light + dark) · `assets/data.js` (data, parsing, checks) · `assets/icons.js` (one outline set + the W mark) · `assets/weave.css` / `weave.js` (bar + sheet, shared by 01 and 02) · `03-app/` (app). Throwaway prototype code, not app code.
+`assets/tokens.css` (all tokens, light + dark) · `assets/data.js` (data, parsing, checks) · `assets/icons.js` (one outline set + the Weave mark, logo locked 2026-11-05: [`docs/logo/kit`](../logo/kit/index.html)) · `assets/weave.css` / `weave.js` (bar + sheet, shared by 01 and 02) · `03-app/` (app). Throwaway prototype code, not app code.
