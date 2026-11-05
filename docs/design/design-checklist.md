@@ -1,9 +1,10 @@
 # Weave — Design Checklist
 
-Design gaps found by checking [requirements.md](../requirements.md) and the [design playbook](../playbook/design-playbook.md) against the prototypes (003–006).
-Tick an item when it has a prototype in `docs/design/NNN-*` and a rule in the design playbook.
+Design gaps found by checking [requirements.md](../requirements.md) and the [design playbook](../playbook/design-playbook.md) against the prototypes.
+Prototypes are now the locked **design 02** ([`docs/design-02/`](../design-02/index.html)); design 01 (003–006 in this folder) is superseded.
+Tick an item when it has a prototype in `docs/design-02/` (built in the design 02 style, passing the clutter check) and a rule in the design playbook.
 
-Last reviewed: 2026-10-30
+Last reviewed: 2026-11-05 (re-checked against design 02)
 
 ---
 
@@ -27,11 +28,11 @@ Last reviewed: 2026-10-30
   - [ ] Recovery key screen: shown once, with a clear warning
   - [ ] Periodic prompt to save the recovery key
   - [ ] New-device approval: QR from an existing device, or enter the recovery key
-- [ ] **7. Account** (S1)
+- [ ] **7. Account** (S1) — partly in 03 Settings → Account and sync
   - [ ] Email sign-in (magic link or password)
   - [ ] First sign-in: uploading local notes
-  - [ ] Sign out, with confirmation (removes local data)
-  - [ ] Delete account and all data (store requirement)
+  - [x] Sign out (03 Settings: "Removes your notes from this Mac") — ⏳ confirmation dialog not drawn
+  - [x] Delete account and all data (03 Settings danger zone, type your email to confirm)
 - [ ] **8. Mobile quick capture** (F6.2, F6.3)
   - [ ] "Share to Weave" target from the OS share sheet
   - [ ] Widget `+` button
@@ -48,10 +49,10 @@ Last reviewed: 2026-10-30
 - [ ] More than one reminder per task (F4.1)
 - [ ] Due date / reminder on a whole list, not only a task (F4.1)
 - [ ] Option to hide checked items, not only collapse into "Done" (F3.4)
-- [ ] Sync status in the sheet, not only in the full app (F2.5)
-- [ ] Sheet shows a list's text lines, not only its tasks (F3.1)
-- [ ] Arrow-key navigation in the sheet's lists view (NFR9; playbook §6)
-- [ ] Sheet empty, error and offline states
+- [x] Sync status in the sheet, not only in the full app (F2.5) — sheet footer
+- [x] Sheet shows a list's text lines, not only its tasks (F3.1)
+- [x] Arrow-key navigation in the sheet's lists menu (NFR9; playbook §6)
+- [ ] Sheet error and offline states (empty and all-done states are drawn)
 
 ## Later releases (not needed for v1)
 
@@ -67,4 +68,5 @@ Last reviewed: 2026-10-30
 
 ## Docs
 
-- [ ] Architecture playbook §7: add the mini bar and sheet widgets
+- [x] Architecture playbook §7: add the mini bar and sheet widgets (plus `QuickCaptureField`, `DayThread`, tab bar, sidebar)
+- [x] Design playbook synced to design 02 (2026-11-05)

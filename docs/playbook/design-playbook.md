@@ -1,9 +1,10 @@
 # Weave — Design Playbook
 
 How Weave looks and behaves. Follow this for every screen, widget and floating surface.
-Source: [requirements.md](../requirements.md) + [architecture-playbook.md](architecture-playbook.md) + design variations in [`docs/design/`](../design/index.html).
+Source: [requirements.md](../requirements.md) + [architecture-playbook.md](architecture-playbook.md) + the locked prototypes in [`docs/design-02/`](../design-02/index.html).
 
-> **Status: chosen — [003 Mini bar](../design/003-mini-bar/index.html).** A faded mini bar that opens the Weave sheet.
+> **Status: locked — [design 02](../design-02/index.html) (2026-11-05).** Mini bar + sheet, hide to tray, and the full app, in the "achromatic ledger" style. Build from design 02; when this playbook and the prototype disagree, the prototype wins and this file gets fixed.
+> Design 01 ([`docs/design/`](../design/index.html), Woven theme, Inter) is superseded and kept for history only.
 > Rules marked **⏳** still need a decision.
 
 ---
@@ -18,8 +19,10 @@ Weave is **always within reach and never in the way**. It's a quick launcher for
 | **Quiet when idle** | The bar is faded and small. It shows up fully only on hover, touch or when open. |
 | **Never block, never nag** | Draggable, collapsible, hideable in one action. No unasked popups (requirements anti-goals). |
 | **Small and obvious** | If a control needs explaining, it doesn't belong. New users get it in < 2 minutes. |
-| **One family** | The bar is the sheet's collapsed form: same surface, line, shadow, type and accent. |
-| **Same everywhere** | Same sheet, words and colors on every platform. Only how the bar floats adapts to the OS. |
+| **One family** | The bar is the sheet's collapsed form: same surface, shadow, type and list colour. |
+| **Same everywhere** | Same sheet, words and colours on every platform. Only how the bar floats and the window chrome adapt to the OS. |
+| **The chrome holds no colour** | The only hue on a screen is the list's own colour, on that list's things: its note paper, check fills and marks on the day thread. |
+
 
 ### Clutter rules (critical: apply to every screen)
 
@@ -54,55 +57,66 @@ Weave is glanced at dozens of times a day, so every extra word, label and contro
 
 | User-facing word | Meaning in requirements / code | Notes |
 |---|---|---|
-| **List** | **Note** (requirements glossary): title + text blocks and/or checklist items + color | UI says "List"; code and requirements keep `Note`. Never "project" — project management is a non-goal |
-| **Item** | Checklist item | UI may say "task" in placeholders ("Add a task…") |
-| **Lists** (view) | The main list of notes (F8) | |
+| **List** | **Note** (requirements glossary): title + text blocks and/or checklist items + colour | UI says "List"; code and requirements keep `Note`. Never "project" — project management is a non-goal |
+| **Task** | Checklist item | Placeholders say "Add a task…" |
+| **Lists** | The main list of notes (F8) | A phone tab; the sidebar on desktop |
+| **Up next** | Everything due today across lists, plus later this week | The screen the app opens on |
+| **Day thread** | Today 07:00–23:00 drawn as one line with each due task as a mark | Design term; Weave's signature element |
 | **Mini bar** | The floating trigger | Design term; users just see "Weave" |
-| **Sheet** | The window the mini bar opens | |
-| **Pin to screen** | Note shown floating (F1) | Never just "pin" — "pin to top" is different (F8) |
+| **Sheet** | The window the mini bar (or tray) opens | |
+| **Show in mini bar** | Note shown floating (F1) | iOS: "Add to widget". Never just "pin" — "Pin to top" is different (F8) |
 
 ---
 
 ## 2. Anatomy
 
 ```
- Mini bar (idle 50%, drag anywhere)
- ┌▔▔▔▔▔▔▔▔▔▔▔▔ list color ▔▔▔▔▔▔▔▔▔▔▔▔┐
- │ ⠿  ● Today   2 left   [⌥ Space]      │  ← 40 px tall, width follows the name
+ Mini bar (idle 50%, drag anywhere; list colour as paper)
+ ┌──────────────────────────────────────┐
+ │ ⠿  ● Errands   4 left · 1 overdue    │  ← 40 px tall, width follows the text
  └──────────────────────────────────────┘
    8 px gap; sheet left-aligned to the bar (opens above if no room below)
- ┌──────────────────────────────┐   ┌──────────────────────────────┐
- │▔▔▔▔▔▔▔ list color ▔▔▔▔▔▔▔▔│   │▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔│
- │ ‹  ● Today ▾         2 left  │   │ ‹  Lists                  │
- │ ┌──────────────────────────┐ │   │ ● Today                 2  ✓ │
- │ │ + Add a task…          ↵ │ │   │ ● Weave                 1    │
- │ └──────────────────────────┘ │   │ ● Groceries             2    │
- │ ○ Buy milk        ← newest   │   │ ┌──────────────────────────┐ │
- │ ○ Reply to design review     │   │ │ + New list…         ↵ │ │
- │ ▸ Done · 1                   │   │ └──────────────────────────┘ │
- └──────────────────────────────┘   └──────────────────────────────┘
-   Sheet — note view (320 × 380)      Sheet — lists view
-            ◀── slides sideways between the two views ──▶
+ ┌──────────────────────────────────┐
+ │ ● Errands ▾                ⌄  ⤢  │ ┐
+ │ 4 left · next 17:00 Reply to…    │ │ header on the list's note paper
+ │ 07 ━━━━━━━━│──●────○────── 23    │ │ one-line day thread (only if due today)
+ │ ┌──────────────────────────────┐ │ │
+ │ │ Add a task…                ↵ │ │ │
+ │ └──────────────────────────────┘ │ │
+ │ Times work too: 6pm, tomorrow…   │ ┘ parse line (height always reserved)
+ │ ○ Pay electricity bill  ⚠ 09:00  │  overdue first, red + icon
+ │ ○ Reply to design review   17:00 │  then by time
+ │ ○ Buy milk                       │  then untimed, newest first
+ │ › Done · 2                       │
+ ├──────────────────────────────────┤
+ │ ☁ Synced · 3 devices   ⌥ Space   │  footer
+ └──────────────────────────────────┘
+   Sheet 340 wide, up to 460 tall
 ```
 
 ### Mini bar
 
-- **Grip** `⠿` (muted dots) · **color dot** · **list name** (15/600, ellipsis after 160 px) · **"N left" / "All done"** (muted) · **hotkey chip** `⌥ Space`.
-- 3 px list-color strip across the top, like the sheet.
+- **Grip** `⠿` (faint) · **colour dot** · **list name** (500, ellipsis after 150 px) · **meta** (muted).
+- Meta is the one thing to know: "4 left · **1 overdue**" (red) → otherwise "4 left · next **17:00**" (next time today) → otherwise "4 left" → "All done". No hotkey chip, no colour strip.
+- The bar's surface is the list's **note paper** (its colour mixed into the surface).
 - Whole bar is the drag handle and the tap target. No buttons inside it.
-- Name, count and color update live as the user ticks, adds or switches list.
+- While the sheet is open the meta fades out (the sheet header says it, C1); the bar keeps its width.
+- Name, count and colour update live as the user ticks, adds or switches list.
 
 ### Sheet
 
-- **Color strip:** 3 px of the list color across the top.
-- **Header (note view):** back `‹` · list name with `▾` (both open lists) · "N left" / "All done" · **hide** `⌄` · **open-app** `⤢`.
-- **Footer (only when opened from the menu bar / tray / notification):** **Show bar** · **Pause reminders 1 h** (→ "Paused till 17:20 · Resume").
-- **Input at the top**, focused on open. Enter adds; the new item appears right under it with a short highlight, focus stays for the next one.
-- **Open items**, newest first. Round check circles.
-- **Done section:** ticked items show the tick for ~0.3 s, then move into a collapsed "Done · N" (F3.4). Tap to expand; tap a done item to untick.
-- **Lists view:** `‹` returns to the current list. Rows: dot · name · open count · ✓ on current.
-- **New list:** input at the bottom. Enter creates it, **switches to it** and focuses "Add a task…".
+- **Header on note paper:** list switch (dot · name 16/500 · `▾`, opens the lists menu) · **hide** `⌄` · **open in app** `⤢`.
+- **Subline:** one fact — "4 left · next 17:00 Reply to design review". Never the overdue count: the overdue row already leads the list in red (C1).
+- **Day strip:** today 07–23 on one line, lived part in ink, this list's tasks due today as marks (filled = to do, red ring = overdue, hollow = done). Hidden when nothing on the list is due today.
+- **Add field** (40 px), focused on open. Enter adds; no Add button. Under it a **parse line** whose height is always reserved: the hint "Times work too: 6pm, tomorrow, in 2 h" while empty and focused, the read-back ("Due Tomorrow 18:00") once you type.
+- **Body:** the list's text lines, then open tasks in **time order** (overdue → by time → untimed newest first), times right-aligned, then a collapsed **Done · N**.
+- **Lists menu** (from the name or Backspace in an empty field): dot · name · open count · ✓ on current, and a "New list…" field at the bottom. Enter creates the list and switches to it.
+- **Footer:** opened from the bar → sync status ("Synced · 3 devices") + `⌥ Space`. Opened from the tray → **Show bar** (if hidden) + **Pause reminders 1 h** (→ "Paused till 17:20 · Resume").
 - **No close button.** Close by tapping the bar, Esc, or clicking outside.
+
+### Quick capture (sheet, app, Android notification)
+
+The add field reads dates and times as you type: today, tonight (20:00), tomorrow, weekday names, 18:00, 6pm, 6:30pm, in 2 h, in 30 min. A time already past today means tomorrow. The read-back appears under the field before Enter.
 
 ---
 
@@ -110,103 +124,116 @@ Weave is glanced at dozens of times a day, so every extra word, label and contro
 
 | Action | Behavior |
 |---|---|
-| **Tap / click bar** | Toggle sheet. Opens in the **note view of the current list** with input focused |
+| **Tap / click bar** | Toggle sheet. Opens on the current list with the field focused |
 | **Drag bar** | Moves it freely. Movement under **5 px** counts as a tap. Dragging closes an open sheet |
 | **Drop bar** | Stays where dropped, clamped 12 px inside the screen. No snapping |
-| **Sheet position** | 8 px below the bar, left edges aligned (clamped to the screen); above the bar when there's no room below |
-| **Enter in input** | Add item / create list. Empty input does nothing |
-| **`‹` / list name** | Lists view; `‹` there returns to the current list |
-| **Backspace on empty input** | Switches between note and lists view (keyboard only) |
-| **`⤢` / `⌘O` (Ctrl+O)** | Closes the sheet and opens the full app on the same list (§9) |
-| **`⌄` / `⌘H` (Ctrl+H)** | **Hides the bar** into the menu bar / tray / notification (§5). Reminders keep ringing |
-| **Click tray icon** | Opens the **same sheet** from there, with the tray footer. Click again / Esc / outside closes |
+| **Arrow keys on focused bar** | Move it 16 px (Shift: 64 px). Keyboard alternative to dragging (WCAG 2.5.7) |
+| **Move to corner** (sheet footer) | One-click alternative to dragging: next corner, clockwise |
+| **Sheet position** | 8 px below the bar, left edges aligned (clamped); above the bar when there's no room below |
+| **Enter in field** | Add task / create list. Empty field does nothing |
+| **List name / Backspace on empty field** | Opens the lists menu; ↑ ↓ move through it; Esc closes it |
+| **`⤢` / `⌘O` (Ctrl+O)** | Closes the sheet and opens the app on the same list |
+| **`⌄` / `⌘H` (Ctrl+H)** | **Hides the bar** to the menu bar / tray / notification (§5). Reminders keep ringing |
+| **Click tray icon** | Opens the **same sheet** under / above it, with the tray footer. Click again / Esc / outside closes |
 | **Show bar** (tray footer, notification action, Android tile) | Bar flies back to where it was |
-| **Pause reminders** | Separate from hiding. 1 h, then resumes on its own. Tray icon dims with a slash while paused |
-| **Esc** | Close sheet |
-| **Click / tap outside** | Close sheet (user went back to their other app) |
+| **Pause reminders** | Separate from hiding. 1 h, then resumes on its own. Tray icon dims while paused |
+| **Esc / click outside** | Close sheet |
 | **Global hotkey** (`⌥ Space` default, S4) | Toggle sheet from anywhere (desktop) |
-| **Hide all** | One action hides bar + sheet (F1.5); tray / menu-bar item restores |
+| **Tick** | Fill, fade, rows close up (§4). Ticking a done item unticks it |
 
 Rules:
 
 - **Focus (F1.6):** the bar never takes keyboard focus on its own. The sheet takes focus only when the user opens it.
 - **Position is per device** (F1.3): bar position is saved locally, never synced.
-- Reopening always lands in the current list's note view, not wherever it was left.
-- Every action is undoable via snackbar in the main app (F10); in the sheet, unticking is the undo for ticks.
+- Reopening always lands on the current list, not wherever it was left.
+- In the app every destructive or bulk action shows an **Undo** toast (F10); in the sheet, unticking is the undo for ticks.
 
 ---
 
 ## 4. Visual Language
 
-Bar and sheet share **one set of tokens**. Never style the bar separately.
+Bar, sheet, tray and app share **one token file**: [`docs/design-02/assets/tokens.css`](../design-02/assets/tokens.css). Never hard-code a colour in a component.
 
-### Theme — Woven (chosen 2026-10-30)
+### Style — achromatic ledger (locked 2026-11-05)
 
-Crisp cool neutrals, **solid surfaces, no blur** (looks the same on every OS, cheap in Flutter), Inter throughout, plain color strip, solid strike on done items. Light and dark. Mode is stored as `weave-mode` (prototype only).
+Dealt by the taste skill's app draw (seed `686191426`) and adopted whole.
 
-All tokens live in one file: [`docs/design/assets/tokens.css`](../design/assets/tokens.css). Every prototype (bar, sheet, tray, app) reads it; never hard-code a color in a page.
+- Neutral, low-chroma chrome; **solid surfaces, no blur**.
+- **One near-black primary button per screen** (white label). Everything else is secondary (grey fill), ghost or danger.
+- **Light and dark are both complete.** The app follows the system unless the user picks one (S4); light is the reference mode the screens are designed in first.
+- **1 px borders**; **shadows only on what floats** (bar, sheet, menus, toast, phone sheet). Cards never get a shadow.
+- **Note paper:** a list's colour mixed into the surface (22% light, 16% dark) marks "this is the note". Used on the bar, the sheet header, a list's task card, list tiles, and the sidebar row of the list in the mini bar. Nowhere else.
 
-### Color — note palette (F7)
+### Colour — note palette (F7)
 
-| Token | Fill (all modes) | Use |
-|---|---|---|
-| `n0` yellow | `#F5C84C` | Default list, Weave brand |
-| `n1` blue | `#6AA6F8` | |
-| `n2` green | `#5DC48A` | |
-| `n3` pink | `#EE7FA8` | |
-| `n4` purple | `#A88BEB` | |
-| `n5` orange | `#F29A5B` | |
+| Token | Fill (all modes) | Ink, light mode | Name |
+|---|---|---|---|
+| `n0` | `#F5C84C` | `#876508` | Yellow (default list, Weave brand) |
+| `n1` | `#6AA6F8` | `#0B65E0` | Blue |
+| `n2` | `#5DC48A` | `#2C784D` | Green |
+| `n3` | `#EE7FA8` | `#CD1B5D` | Pink |
+| `n4` | `#A88BEB` | `#794CE0` | Purple |
+| `n5` | `#F29A5B` | `#AC4F0E` | Orange |
 
-- **Fill vs ink.** `--nX` is the fill: strip, dots, check fill. `--nX-ink` is the text-safe shade for anything read as text or a thin line: `+`, due chips, focus ring, active icons. In dark mode ink = fill; in light mode ink is darkened to reach ≥ 4.5:1: `#876508 #0B65E0 #2C784D #CD1B5D #794CE0 #AC4F0E`.
-- An element sets `--accent` / `--accent-ink` to one pair; children only use those two.
-- Note color appears as **accent only**. New lists cycle through the palette in order.
-- Text on a fill (check mark) is `#1B1B1B`. Never white on yellow/green.
+- **Fill vs ink.** `--nX` is the fill: dots, check fill, thread marks, paper. `--nX-ink` is the edge and text-safe shade (≥ 3:1 for marks, ≥ 4.5:1 as text). In dark mode ink = fill.
+- A component sets `--accent` / `--accent-ink` (or `--c` / `--ci`) to one pair; children use only those.
+- App-level screens (Up next, Settings, Archive) use yellow; a list screen uses its list's colour.
+- The tick mark on a fill is `#111`. Never white on yellow or green.
+- New lists cycle through the palette in order. Purple stays: it is a user-chosen list colour, not a UI accent.
 
-### Surface tokens
+### Neutral tokens
 
-Each mode defines the same names. Values in `tokens.css`:
+| Token | Light | Dark | Use |
+|---|---|---|---|
+| `ground` | `#f5f5f3` | `#0f0f0f` | Page / canvas |
+| `surface` | `#ffffff` | `#171717` | Cards, bar, sheet |
+| `raised` | `#eeeeee` | `#262626` | Secondary button, active nav row, selected row |
+| `hover` | `#f3f3f2` | `#1f1f1f` | Row hover |
+| `border` / `rule` | `#e6e6e6` / `#f0f0f0` | `#2a2a2a` / `#212121` | Card edge / row divider |
+| `control` | `#d4d4d4` | `#444444` | Field and check outlines, thread axis |
+| `text` | `#0a0a0a` | `#f2f2f2` | |
+| `muted` | `#5f5f5f` | `#b4b4b4` | Meta, times (6.4:1 on white) |
+| `faint` | `#6b6b6b` | `#949494` | Placeholders, grip, kbd hints |
+| `primary` / `on-primary` | `#141414` / `#fff` | `#f2f2f2` / `#0a0a0a` | The one filled button, toast |
+| `negative` | `#c4242a` | `#ef6b6b` | Overdue, delete |
+| `float-shadow` | `0 12 32 rgba(0,0,0,.14)` + 1 px ring | `0 16 40 rgba(0,0,0,.6)` + 1 px ring | Only on what floats |
 
-| Token | Light | Dark |
-|---|---|---|
-| `canvas` | `#F4F6F9` | `#121418` |
-| `side` | `#ECEFF3` | `#171A1F` |
-| `surface` (bar, sheet) | `#FFFFFF` | `#1B1F25` |
-| `card` | `#FFFFFF` | `#1F242B` |
-| `text` | `#161A20` | `#EEF1F5` |
-| `muted` | `#5B6471` | `#97A0AC` |
-| `line` | `rgba(20,40,70,.11)` | `rgba(200,220,255,.09)` |
-| `hover` / `field` / `sel` | same tint at 4.5% / 5.5% / 8% | same tint at 5% / 6.5% / 9% |
-| `shadow` | `0 20 50 rgba(20,30,50,.18)` | `0 24 60 rgba(0,0,0,.55)` |
+`text`, `muted` and `faint` meet 4.5:1 on ground and surface in both modes.
 
-- `text` and `muted` are ≥ 4.5:1 on canvas, side, surface and card in both modes (checked by script). Muted is a solid color, not a % of black/white.
-- Follows the system light/dark setting (S4 can override).
+### Typography — Geist
 
-### Typography (Inter)
+**Geist**, weights **400 and 500** only (no bold), bundled with the app. Fallback: Inter, then the system UI font. **Tabular figures on every time and count.** No monospace face: hotkeys are set in Geist.
 
 | Role | Size / weight |
 |---|---|
-| List name (bar + sheet header) | 15 / 600 |
-| Item, input | 14 / 400 |
-| Meta ("2 left", counts, "Done · N") | 12.5 / 400, muted |
-| Hotkey chip, hints | 11 / 400, muted |
+| Screen title (h1) | 24 / 500, −0.01em |
+| Card title, sheet list name | 16 / 500 |
+| Body, tasks, fields | 14 / 400 |
+| Meta, times, sublines, buttons | 13 / 400 (buttons 500) |
+| Kbd hints, day-strip hours, fine print | 12 / 400 |
+| Phone tab labels | 11 (iOS) / 12 (Android), 500 |
 
-Respect the OS text scale; sheet grows in height, never clips text (NFR9).
+Respect the OS text scale; the sheet grows in height, never clips text (NFR9).
 
 ### Shape & spacing
 
-- 4 px grid. Sheet side padding 10, row padding 8, gap 11 between check and text. Bar gap 10, padding 10 left / 6 right.
-- Radius: sheet 12 · bar 10 · input 10 · rows 9 · icon buttons & hotkey chip 8 · check circle 50%.
-- Bar **40 px** tall, width follows content. Sheet **320 × 380** fixed (sticky-note feel); list scrolls, header and input stay fixed.
+- Radius: **cards, bar, sheet, menus 8** · **controls (buttons, fields, rows) 6** · chips 4 · checks 50% · phone sheet 16 (top corners).
+- 4 px grid. Card padding 20, grid gap 12, page padding 24–32.
+- Heights: row **44** · control 36 (small 30) · field 40 (phone add bar 44) · bar **40**.
+- Sheet **340 wide, up to 460 tall**; header and footer fixed, the list scrolls.
+- Sidebar 256 (224 under 1100 px).
+- **Tick:** an 18 px circle inside a 24 px target on desktop (WCAG 2.5.8), 44 px on phones and in the Android notification.
+- **Overdue** is always red **plus** an alert icon, never colour alone.
 
 ### Opacity (the "faded" look)
 
 | Bar state | Opacity |
 |---|---|
 | Idle | **50%** |
-| Hover / touch / dragging / sheet open | 100% |
+| Hover / focus / dragging / sheet open | 100% |
 | Full-screen app in front (desktop, S4) | hidden |
 
-User setting "floating opacity" (S4) scales the idle value.
+User setting "Opacity when idle" (S4, 20–100%) replaces the idle value; Settings shows a live preview of the bar.
 
 ### Motion
 
@@ -252,40 +279,49 @@ Rules:
 
 Respect reduce-motion: all durations → 0. The day's-last-tick stroke and the first-run unroll are skipped entirely.
 
+
 ---
 
 ## 5. Platform Mapping
 
 | Platform | Mini bar | Sheet | When hidden (`⌄`) |
 |---|---|---|---|
-| **macOS** | Borderless always-on-top window sized to the bar | Second borderless window, positioned by §3 | **Menu-bar item** `W 2` (always present). Click → sheet drops down under it |
-| **Windows** | Same | Same | **System-tray icon** `W 2` (always present). Click → sheet opens above the taskbar, right-aligned. Ask once to keep it out of the `^` overflow |
-| **Linux** | Same | Same | **Tray icon** in the top bar (StatusNotifier/AppIndicator). GNOME needs the AppIndicator extension; without it, hotkey + app only |
-| **Android** | Overlay mini bar ("display over other apps"). If permission denied → notification + home widget | Overlay window | **Ongoing notification** (only while hidden): "Today · 2 left", next 2 tasks, actions **Add task · Show bar · Pause 1 h**; W in the status bar. Plus a **"Weave bar" quick-settings tile** |
-| **iOS** | None (not allowed). Home / lock-screen widget styled like the bar | Main app opens straight to the note view | **Out of scope for now** (user, 2026-10-30) |
-| **Web** | In-page bar, top-center by default | In-page sheet | — |
+| **macOS** | Borderless always-on-top window sized to the bar | Second borderless window, positioned by §3 | **Menu-bar item**: the W mark and the open count. Click → the sheet drops down under it, right-aligned |
+| **Windows** | Same | Same | **System-tray icon** with the count. Click → the sheet rises above the taskbar, right-aligned. Ask once to keep it out of the `^` overflow |
+| **Linux** | Same as macOS | Same | **Tray icon** (StatusNotifier/AppIndicator), behaves as macOS. GNOME needs the AppIndicator extension; without it, hotkey + app only. Not prototyped |
+| **Android** | Overlay mini bar ("display over other apps"). If permission denied → notification + home widget | Overlay window | **Ongoing notification, only while hidden:** list name, "4 left · 1 overdue", the next two timed tasks with tick buttons and times, actions **Add task** (inline reply field that parses times) · **Show bar** · **Pause 1 h**. Plus a **"Weave bar" quick-settings tile** |
+| **iOS** | None (not allowed). Home / lock-screen widget styled like the bar | The app's list screen | **Out of scope for now** (user, 2026-10-30) |
+| **Web** | In-page bar, top-centre by default | In-page sheet | — |
 
 Desktop bar windows must be click-through outside the bar's shape.
-The hide animation flies the bar into its tray spot (260 ms, transform + opacity only) and the tray icon gives one small pop (1.12, 240 ms) — no repeated attention-grabbing.
+Hiding flies the bar into its tray spot and the tray icon pops once (§4 Motion). No repeated attention-grabbing.
 
 ---
 
 ## 6. Accessibility
 
-- Bar: `role=button`, label "Open Weave", `aria-expanded`. Enter/Space toggles when focused.
-- Every icon button has a label + tooltip (`‹` "Switch list", list name "Switch list").
-- Check boxes say what they do: "Check Buy milk" / "Uncheck Buy milk".
-- WCAG AA contrast for text in both themes; accent used for shapes, not for body text.
-- Full keyboard flow: hotkey → type → Enter → Backspace/‹ → arrows (⏳ add arrow nav in lists list) → Esc.
+- Bar: `role=button`, label "Open Weave. Arrow keys move the bar.", `aria-expanded`. Enter/Space toggles when focused; arrow keys move it; **Move to corner** in the sheet is the one-click alternative to dragging (WCAG 2.5.7).
+- Sheet: `role=dialog`, labelled "Weave: *list name*". Lists menu is `role=menu` with `menuitemradio` rows.
+- Every icon button has a label and tooltip with its shortcut ("Hide to menu bar (⌘H)", "Open in Weave (⌘O)").
+- Checks say what they do: "Check Buy milk" / "Uncheck Buy milk". Targets 24 px desktop, 44 px touch.
+- Overdue = red **and** an alert icon. Colour swatches are named (Yellow, Blue…), not numbered.
+- The day thread and strip carry a full text label ("Today: 09:00 Pay electricity bill (overdue), …. Now 16:20.").
+- The parse line is `aria-live="polite"`; the toast is `role=status`.
+- WCAG AA contrast in both modes, checked by script. Visible focus ring: 2 px in `text` colour.
+- Reorder rows without dragging: Alt+↑ / Alt+↓, or Move up / Move down in task details.
+- Reduce motion: see §4 Motion.
+- ⏸ The idle bar at 50% opacity can fall below 4.5:1 over busy wallpapers. Accepted: the opacity setting goes to 100% (review B6).
 
 ---
 
 ## 7. Copy
 
-- Short, lowercase-feeling, no exclamation marks.
-- Placeholders say what happens: "Add a task…", "New list…".
-- Empty list: "Nothing here yet. Type above and press Enter."
-- Counts: "2 left"; zero: "All done".
+- Short, plain, no exclamation marks. Say the fact, not the feature.
+- Placeholders say what happens: "Add a task…", "New list…". Up next's field: "Add a task… try “dentist fri 10am”".
+- Counts: "4 left"; zero: "All done". Next: "next 17:00" (bar), "next Reply to design review at 17:00" (screens).
+- Times: 24-hour, tabular. "17:00" today, "Tomorrow 10:00", "Fri 6 Nov".
+- Empty list: "Nothing here yet. Type above and press Enter." (sheet) / "…Type below…" (app list, field at the end).
+- Toasts name the thing and offer Undo: “Checked "Buy milk"” + Undo, "Archived Errands  Undo".
 - All strings go through l10n (NFR10).
 
 ---
@@ -296,113 +332,134 @@ The hide animation flies the bar into its tray spot (260 ms, transform + opacity
 |---|---|
 | Keep the bar faded and small when idle | Pulse, bounce or animate the bar to get attention |
 | Open straight into typing | Show a menu or home screen first |
-| Let the user drop the bar anywhere they want | Force a fixed corner or snap it |
-| Style bar and sheet from the same tokens | Give the bar its own colors or radius family |
-| Use note color as an accent | Use more than one accent color at once |
+| Let the user drop the bar anywhere | Force a fixed corner or snap it |
+| Style bar, sheet and app from the same tokens | Give the bar its own colours or radius family |
+| Put colour only on the list's own things (paper, checks, marks) | Colour the chrome, or use two list colours as accents at once |
+| Order rows to group them (overdue → time → done) | Add group headings and legends the order already says (C5, C6) |
 | Reuse the same sheet on every platform | Design a different sheet per OS |
+| Use one primary button per screen | Add shadows to cards, gradients or tinted icon squares |
 
 ---
 
 ## 9. Full App
 
-The full app is where lists are managed and edited at length. The mini bar + sheet stay the fast path; the app is the home.
-Prototype: [`005-app`](../design/005-app/index.html) — switch platform (macOS, Windows, Linux, Android, iOS) and theme at the top.
+The app is where lists are managed and edited at length. The mini bar + sheet stay the fast path.
+Prototype: [`03-app`](../design-02/03-app/index.html) — switch platform (macOS, Windows, iOS, Android) and theme at the top.
 
-Same tokens, type, palette, check circles, Done section and copy as the sheet. Only layout and window chrome change per platform.
+Same tokens, type, palette, checks, Done section, quick capture and copy as the sheet. Only layout and window chrome change per platform.
 
 ### Layouts
 
 | Width / platform | Layout |
 |---|---|
-| **Desktop** (macOS, Windows, Linux) and tablets ≥ 720 px | **Sidebar 252** · **list 680 max, centered** · **details panel 320** (slides in when a task is selected) |
-| **Phone** (Android, iOS) | **Home** (cards) → **List** screen → **bottom sheets** for task details, share, more, color, menu |
+| **Desktop** (macOS, Windows, Linux) and tablets ≥ 720 px | **Sidebar 256** · **canvas** (12-column grid, gap 12). A list keeps a **760 px reading width**; task details open beside it (8 + 4 columns) when a task is selected |
+| **Phone** (Android, iOS) and < 720 px | **Bottom tab bar** (Up next · Lists · Search · Settings) · screen · **add bar pinned above the tabs** (Up next and list screens) · **bottom sheets** for task details, share and more |
 
 ```
-Desktop                                                     Phone
-┌──────────┬──────────────────────────────┬──────────┐      ┌─────────────────┐
-│ W Weave ●Synced                         │ Task     │      │ ●Synced    🔍 ☰ │
-│ [Search ⌘K]│ ● Today          📌 ▭ ⇪ ⋯ │ details  │      │ Weave           │
-│ PINNED   │   4 left · On screen         │ Due      │      │ PINNED          │
-│ ● Today 4│ [+ Add a task…          T ]  │ Remind me│      │ ┌─────┐┌─────┐  │
-│ ● Weave 4│ ○ Pick up parcel             │ Repeat   │      │ │card ││card │  │
-│ LISTS    │ │ Errands before 6pm         │          │      │ └─────┘└─────┘  │
-│ ● Groc. 3│ ○ Reply to design review 🔔  │          │      │ LISTS ...       │
-│ + New ⌘N │   📅 Tomorrow 17:00 · 1 h    │          │      │            (+)  │
-│ Archive  │ ▸ Done · 1      Uncheck all  │          │      └─────────────────┘
-│ Trash    │                              │          │      List screen: ‹ … title, tasks,
-│ Settings │                              │ Delete   │      "Add a task…" pinned to the bottom
-│ Local mode│                             │          │      (near the thumb / keyboard)
-└──────────┴──────────────────────────────┴──────────┘
+Desktop                                                       Phone
+┌────────────┬────────────────────────────────────────────┐   ┌───────────────────┐
+│ W Weave    │ Tue 3 Nov                                  │   │ Tue 3 Nov         │
+│ Synced     │ Up next                                    │   │ Up next           │
+│ Search  K  │ 4 left today · next Reply… at 17:00        │   │ 4 left today · …  │
+│ Up next  4 │ ┌ Today's thread ───── 07:00 to 23:00 ┐    │   │ ┌ Today ─────────┐│
+│ PINNED     │ │ labels over marks on the day line   │    │   │ │ 07 ━━│─●──○ 23 ││
+│ Errands  4 │ │ ━━━━━━━━━━━━━│──●────●──────○──   │    │   │ │ o Pay bill ! 09││
+│ LISTS      │ └─────────────────────────────────────┘    │   │ │ o Reply…  17:00││
+│ Grocery  3 │ ┌ Today ───────────────┐ ┌ Later ───────┐  │   │ └────────────────┘│
+│ + New list │ │ [Add a task… Errands]│ │ o Dentist Fri│  │   │ ┌ Later this week┐│
+│            │ │ o Pay bill   ! 09:00 │ │ o Rent   Mon │  │   │ └────────────────┘│
+│ Archive    │ │ o Reply…       17:00 │ └──────────────┘  │   │                   │
+│ Settings   │ │ x Buy milk           │                   │   │ [Add a task…    ] │
+│ MY Mayank  │ └──────────────────────┘                   │   │ Up Lists Find Set │
+└────────────┴────────────────────────────────────────────┘   └───────────────────┘
 ```
 
 ### Sidebar (desktop)
 
-Brand + **sync status** (Synced · Syncing · Offline · Sync error, F2.5) · **Search** `⌘K` · **Pinned** lists · **Lists** · **New list** `⌘N` · footer: **Archive**, **Trash**, **Settings**, **account** card ("Local mode — Sign in to sync devices").
-Rows: color dot · name · `▭` if on screen · open count. Drag to reorder (F8).
+Brand (W mark + "Weave") · **sync line** (Synced · 3 devices / Syncing… / Offline · changes saved here / Sync error · retrying, F2.5) · **Search** `⌘K` · **Up next** with today's open count · **Pinned** · **Lists** · **New list** `⌘N` · footer: **Archive and trash** (count), **Settings**, account row ("End-to-end encrypted").
+List rows: colour dot · name · screen icon if in the mini bar · open count. **Counts only, no progress bars** (C7). The list in the mini bar sits on its note paper.
+
+### Up next (the app opens here)
+
+- **Header (C2):** date small above, **Up next**, then one fact: "4 left today · next Reply to design review at 17:00".
+- **Desktop:** the **day thread** card full width (07:00 to 23:00; lived part in ink; the rest of today shaded; each due task a mark in its list's colour with its label above; overdue = red ring + "!" label; done = hollow; close marks share a label "+1"). Below it, **Today** (8 columns) and **Later this week** (4 columns, count in its header). The two cards end at different heights on purpose (C12).
+- **Today card:** the one add field first (list as a chip inside it; hint on focus), then one list: overdue, upcoming, done (struck through). No group labels (C5). A row shows its list name only when today spans more than one list.
+- **Phone:** title, then the Today card with the one-line day strip in place of the thread (C9), then Later this week. The add field is the add bar at the bottom.
 
 ### List screen
 
-- **Header:** color dot (opens palette) · **editable title** · actions: **Pin to top** · **Show on screen** (puts it in the mini bar; iOS: "Add to widget") · **Share** (text / Markdown / image, F11.1) · **More** (pin, show on screen, uncheck all, archive, delete).
-- **Meta line:** "N left · On screen · edited just now".
-- **Add row** at the top (desktop) / bottom (phone). `T` adds a **text line** (notes can mix text and tasks, F3.1).
-- **Tasks are edited inline:** Enter = new task below · Backspace on empty = delete and go up · Tab / Shift+Tab = indent one level (F3.3) · drag grip to reorder (desktop) / long-press (phone).
-- **Chips** under a task: 📅 due · 🔔 reminder · ↻ repeat. Tap a chip or the bell to open details.
-- **Done section** with **Uncheck all** (reusable lists, F3.5).
+- **Title row:** colour dot (opens the colour menu) · **editable title** · subline "4 left · next Reply to design review at 17:00" (C2; no overdue count, no "edited"). Actions: **Show in mini bar** (pressed: "In mini bar"; iOS: "Add to widget") · **Share** (Copy as text · Copy as Markdown · Share as image…, F11.1) · **•••** (Pin to top · Archive · Delete list… · "Edited …" note).
+- **Task card on note paper**, 760 px reading width. Rows: grip (hover) · check · inline-editable text · chips (🔔 reminder, ↻ repeat, due time) · details chevron on hover/focus only (C8). Text lines (F3.1) sit between tasks.
+- **Add row at the end of the list** ("Add a task…", Enter adds and stays for the next one). Phone: the add bar at the bottom instead.
+- **Inline editing:** Enter = new task below · Backspace on empty = delete and go up · Tab / Shift+Tab = indent one level (F3.3) · Alt+↑ / ↓ or drag the grip = reorder (phone: long-press).
+- **Done · N** footer with **Uncheck all** (reusable lists, F3.5). Uncheck all lives only here.
+- **Phone:** back (iOS: "‹ Lists"; Android: ← arrow) · Share · •••; ••• opens a sheet with Show in the bar, Pin to top, Colour swatches, Archive, Delete and "Edited …".
 
 ### Task details (panel on desktop, bottom sheet on phone)
 
-- Editable task text.
-- **Due:** Today · Tomorrow · Next week · None; then time 9:00 · 13:00 · 17:00 · 20:00 (⏳ custom date/time picker).
-- **Remind me:** with a due → At due time · 15 min / 1 h / 1 day before (move with the due, F4.2); always → in 1 h · in 2 h · Tomorrow 9:00 (timer / at-time); None.
+- Header "Task · in *list*" with close (desktop). Editable task text.
+- **Due:** Today · Tomorrow · Next Mon · None; then 09:00 · 13:00 · 17:00 · 20:00 (⏳ custom date/time picker).
+- **Remind me:** with a due → At due time · 15 min / 1 h / 1 day before ("Before" reminders move with the due time, F4.2); always → In 1 h · Tomorrow 09:00 · None.
 - **Repeat:** Daily · Weekdays · Weekly · Monthly · Never (⏳ custom interval).
-- Footer: **Delete task**.
+- **Order:** Move up · Move down. Footer: **Delete task** (Undo toast).
 
-### Phone home
+### Archive and trash
 
-Large "Weave" title · sync status · search · menu (Archive, Trash, Settings) · **Pinned** and **Lists** as **cards** (2 columns): color strip, name, first 3 open tasks, "N left · +N more", pin / on-screen icons · **FAB `+`** = new list (round on iOS, rounded-square on Android).
+One screen, two cards. "Archived lists are hidden, not deleted. Trash empties itself after 30 days."
+Archive rows: dot · name · "7 items · Archived 28 Oct" · Restore. Trash rows: "Deleted 2 days ago · empties in 28 days" · Restore · **Delete forever** (Undo toast).
 
-### Archive, Trash, Settings
+### Search
 
-- **Archive:** cards with Restore. "Hidden from your lists, not deleted."
-- **Trash:** cards with "Deleted N days ago · empties in N days", Restore, Delete forever (F10).
-- **Settings:** Appearance (theme) · Floating (desktop: mini bar on/off, idle opacity, hotkey, hide in full-screen; Android: overlay permission note, notification action; iOS: widgets, Live Activity) · Notifications (on/off, default snooze) · Account & sync (local mode, Continue with Apple / Google / email).
-- App-level screens use Weave yellow as the accent; list screens use the list's color.
+Desktop: the sidebar field (`⌘K`) turns the canvas into results: matches highlighted, each with its list. “N results for "x" across 6 lists. Works offline.” Phone: the Search tab.
+
+### Settings
+
+Saved as you change them. One row per section: heading + one-line description on the left, controls on the right.
+- **Appearance:** System · Light · Dark.
+- **Mini bar** (iOS: **Widgets**): Show the mini bar (Android: needs "Display over other apps", else notification + widget) · Opacity when idle (20–100%, live bar preview) · Quick-capture hotkey `⌥ Space` · Hide in full-screen apps.
+- **Notifications:** Reminders on/off · Default snooze 10 min / 1 hour / Tomorrow.
+- **Account and sync:** devices table (device, last seen) · Recovery key (Show again) · Add a device (Show code) · Sign out.
+- **Delete account** (danger zone; type your email to confirm).
 
 ### Undo
 
-Snackbar with **Undo** after check, delete task, uncheck all, archive and delete list (F10). 4 s, bottom center (above the add bar on phone).
+Toast with **Undo** after check, delete task, uncheck all, archive list, delete list and delete forever (F10). 4 s, bottom centre (above the add bar on phone), on the primary colour.
 
 ### Platform chrome
 
 | Platform | Chrome |
 |---|---|
 | macOS | Traffic lights, sidebar runs full height, `⌘` shortcuts |
-| Windows | Title bar with logo + "Weave", min / max / close on the right, `Ctrl+` shortcuts |
-| Linux (GNOME) | Header bar, centered title, round close button, `Ctrl+` shortcuts |
-| iOS | Dynamic Island safe area, large title, home indicator, round FAB |
-| Android | Status bar + punch-hole, gesture bar, rounded-square FAB, system back = `‹` |
+| Windows | Title bar with W mark + "Weave", min / max / close on the right, `Ctrl+` shortcuts |
+| Linux | ⏳ Not prototyped. Use the desktop layout with the system's own title bar, `Ctrl+` shortcuts |
+| iOS | Dynamic Island safe area, iOS tab bar (filled icon for the current tab), back = "‹ Lists", home indicator |
+| Android | Status bar, Material tab bar (pill behind the current icon), back = ← and the system back gesture, gesture bar |
+
+No floating action button on any platform: the add bar is always at the thumb.
 
 ### Keyboard (desktop)
 
-`⌘K` search · `⌘N` new list · `Enter` / `Backspace` / `Tab` inline editing · `Esc` closes menus and details · `⌥Space` mini bar sheet · `⌘O` from the sheet opens the app.
+`⌘K` search · `⌘N` new list · `Enter` / `Backspace` / `Tab` / `Alt+↑↓` inline editing · `Esc` closes menus, details and phone sheets · `⌥ Space` mini bar sheet · `⌘O` from the sheet opens the app · `⌘H` from the sheet hides the bar.
 
 ---
 
-## 10. Design Variations
+## 10. Prototypes
 
-Clickable mockups over a real desktop screenshot. Open [`docs/design/index.html`](../design/index.html) in a browser.
+Clickable prototypes over a real desktop screenshot. Open [`docs/design-02/index.html`](../design-02/index.html) in a browser.
 
-| ID | Name | Trigger | Status |
+| ID | Name | What it shows | Status |
 |---|---|---|---|
-| [005](../design/005-app/index.html) | **Full app** | Desktop + phone layouts, all five platforms (§9) | **Draft** — awaiting review |
-| [006](../design/006-tray/index.html) | **Hide to tray** | `⌄` sends the bar to menu bar / tray / notification; same sheet opens from there (macOS, Windows, Linux, Android) | **Draft** — awaiting review |
-| [003](../design/003-mini-bar/index.html) | **Mini bar** | 40 px bar: grip · dot · name · "N left" · `⌥ Space`; same tokens as the sheet; free placement | **Chosen** 2026-10-30 |
-| [004](../design/004-weave-bubble/index.html) | Weave bubble | 56 px W bubble, snaps to a side, half-tucks when idle | Not chosen — kept for reference (its sheet is the shared sheet) |
-| 001 Bubble · 002 Edge tab | — | — | Removed 2026-10-30 (user) |
+| [01](../design-02/01-mini-bar/index.html) | **Mini bar and sheet** | Bar, sheet, quick capture, lists menu, move, first-run unroll (`#first`) | **Locked** 2026-11-05 |
+| [02](../design-02/02-tray/index.html) | **Hide to tray** | macOS menu bar, Windows tray, Android notification + tile | **Locked** 2026-11-05 |
+| [03](../design-02/03-app/index.html) | **Weave app** | Up next, list, details, archive and trash, search, settings; desktop + phone, 4 platforms | **Locked** 2026-11-05 |
+| [declutter](../design-02/declutter.html) | Declutter study | Before / after for D1–D13, with markers | Reference |
+| [review.md](../design-02/review.md) | Review log | Round 1 findings, motion audit M1–M12, declutter D1–D13, E1–E9 | Reference |
 
-Shared code: `docs/design/assets/tokens.css` (all tokens) and `docs/design/assets/weave-sheet.{css,js}` = the sheet + drag/tap + keyboard; each page only adds its trigger (throwaway prototype, not app code).
+Shared code: `assets/tokens.css` (all tokens), `assets/data.js` (sample data, quick-capture parser, checks), `assets/icons.js` (one outline icon set + the W mark), `assets/weave.{css,js}` (bar + sheet, shared by 01 and 02). Throwaway prototype code, not app code.
 
-**Naming:** new variations go in `docs/design/NNN-short-name/` with the next free number; never renumber.
+Design 01 ([`docs/design/`](../design/index.html): 003 mini bar, 004 bubble, 005 app, 006 tray; Woven theme) is **superseded** by design 02 and kept for history.
+
+**Changing a locked design:** propose the change behind a URL flag in the prototype, compare it side by side with the current screen (as the declutter study did), run the clutter check (§0), and log the decision below before editing this playbook.
 
 Open design work is tracked in [`docs/design/design-checklist.md`](../design/design-checklist.md). Resolve every ⏳ above.
 
@@ -430,5 +487,6 @@ Open design work is tracked in [`docs/design/design-checklist.md`](../design/des
 | 2026-10-30 | **Woven chosen**: Woven colors, Inter, plain strip, solid strike, solid surfaces (no blur), radius sheet 12 / bar 10. Light and dark | User choice after comparing Glass, Paper, Woven |
 | 2026-10-30 | Glass and Paper themes and the 007 comparison page removed; one theme only | User direction |
 | 2026-11-03 | **Clutter rules applied to the whole UI** (design-02, D1–D13 and E1–E6). List screen has no side panel: colour on the title dot, Pin in ••• (C4, C12). Sidebar shows counts only (C7). The list keeps a 760 px reading width | User: "let's follow this updated design playbook on the whole UI"; D12 and D13 decided by the rules |
-| 2026-11-03 | **Motion table rewritten** to the audited values: `--dur-fast` 120 / `--dur` 180 / `--ease-out` tokens, instant keyboard UI, fade-only exits, FLIP tick, 260 ms tray flight, two once-only delights | Motion audit M1–M12 (2026-11-03) fixed and verified in design-02; the old table (280 ms tick, 1 s highlight, `cubic-bezier(.2,.8,.2,1)`) no longer matched
+| 2026-11-03 | **Motion table rewritten** to the audited values: `--dur-fast` 120 / `--dur` 180 / `--ease-out` tokens, instant keyboard UI, fade-only exits, FLIP tick, 260 ms tray flight, two once-only delights | Motion audit M1–M12 (2026-11-03) fixed and verified in design-02; the old table (280 ms tick, 1 s highlight, `cubic-bezier(.2,.8,.2,1)`) no longer matched |
 | 2026-11-03 | **Clutter rules C1–C12** added to §0 and made mandatory for every screen, with a clutter check before review | Declutter study against a before/after reference (design-02 `declutter.html`, D1–D13). User: "these are very critical" |
+| 2026-11-05 | **Design 02 locked** and this playbook synced to it: achromatic ledger style, **Geist** (400/500, tabular figures) replaces Inter, light default, radius 8 / 6, no colour strip (list colour as note paper), sheet in time order with quick-capture parsing, lists menu instead of a sideways slide, app opens on Up next with the day thread, phone tab bar + bottom add bar instead of cards home + FAB, archive and trash on one screen. Design 01 superseded | User: "we are locking the design-02" |

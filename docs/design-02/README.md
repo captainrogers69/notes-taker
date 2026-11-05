@@ -2,7 +2,7 @@
 
 A redesign of the prototypes in [`docs/design/`](../design/index.html): mini bar + sheet, hide to tray, and the full app. Layouts were rethought, not only restyled. Open [`index.html`](index.html) in a browser.
 
-**Status: proposal.** The [design playbook](../playbook/design-playbook.md) still describes design 01 (Woven). Nothing in it changes until this direction is chosen.
+**Status: locked (2026-11-05).** This is the design Weave is built from. The [design playbook](../playbook/design-playbook.md) describes it; when the two disagree, fix the playbook. Design 01 ([`docs/design/`](../design/index.html)) is superseded. To change anything here, follow the playbook's "Changing a locked design" rule (§10).
 
 | ID | Prototype | What changed from design 01 |
 |---|---|---|
@@ -35,7 +35,7 @@ Dealt by the `design-taste-frontend` skill (app run, `draw.mjs --app --kind work
 | Task details | When is it due and when will it remind me? | Due, Remind me, Repeat options |
 | Settings | Is Weave set up the way I want? | Each control saves itself |
 
-## Differences from the playbook to decide on
+## Changes from design 01 (all adopted when design 02 was locked)
 
 - **Font:** Inter → Geist. **Radius:** sheet 12 / bar 10 → 8 / 6. **Light mode is now the default**; dark is still complete.
 - **Colour strip** at the top of the bar and sheet removed. The list dot carries identity.

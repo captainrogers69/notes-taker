@@ -24,7 +24,7 @@ Source: [requirements.md](../requirements.md) (Draft v0.2) + team principles.
 | **Encryption** | End-to-end. Per-note keys wrapped by account key; server sees opaque blobs only |
 | **Native code** | Android overlay, iOS/Android home-screen widgets, desktop always-on-top windows, global hotkeys, tray/menu-bar |
 | **Flavors** | `dev`, `prod` |
-| **Typography** | Inter (bundled, works offline) |
+| **Typography** | Geist 400/500 (SIL OFL, bundled, works offline), tabular figures for times and counts. See design playbook §4 |
 | **Localization** | English at launch; all strings externalized (ARB) |
 
 ---
@@ -35,15 +35,16 @@ Release: **v1** = MVP, **v1.1**, **later** (requirements §9).
 
 | Feature | Release | State tool | Why | API | Shared parts |
 |---|---|---|---|---|---|
-| `notes` — list, pin to top, order, color (F3 list, F7, F8) | v1 | `Cubit` | Streams from DB + a few intents (reorder, pin, color); no event history needed | Sync | `NoteCard`, `NoteColor` enum, `NotesRepository` |
+| `notes` — list, pin to top, order, color (F3 list, F7, F8) | v1 | `Cubit` | Streams from DB + a few intents (reorder, pin, color); no event history needed | Sync | `NoteTile`, `NoteColor` enum, `NotesRepository` |
 | `note_editor` — blocks, checklist, indent, reorder, collapse, uncheck all (F3) | v1 | `Bloc` | Many distinct events, undo stack, debounced persistence → event transformers | Sync | `ChecklistItemTile`, `StrikeText` |
 | `floating_notes` — pin to screen, drag/resize/collapse, hide all (F1) | v1 (macOS, Android) · v1.1 Windows · later Linux | `Cubit` per window | Each window shows one note stream + tick/add; geometry is local-only | Sync (via notes) | Reuses `ChecklistItemTile` |
 | `glance_widgets` — iOS/Android home & lock-screen widgets, Live Activity (F1-iOS) | v1 · Live Activity v1.1 | none (core `WidgetBridge`) | No Flutter UI; native widget reads a snapshot | none | — |
 | `sync` — status indicator (F2) | v1 | `Cubit` (`SyncStatusCubit`, global) | Single enum-like status from `SyncEngine` stream | Sync | `SyncStatusBadge` |
 | `reminders` — due, at-time / T-minus / timer, repeat, snooze (F4) | v1 | `Cubit` | Reminder editor form with derived preview text | Sync | `ReminderChip`, `DueDateText`, `RepeatRule` |
-| `search` (F9) | v1 | `Cubit` | Query → FTS results; debounce in hook on the field | none (local FTS) | Reuses `NoteCard` |
+| `up_next` — today across all lists, later this week, day thread (the app's home) | v1 | `Cubit` | One derived stream (open items by due date across notes); tick and add go through `note_editor` use cases | none (local query) | `DayThread`, `DayStrip`, `ChecklistItemTile`, `QuickCaptureField` |
+| `search` (F9) | v1 | `Cubit` | Query → FTS results; debounce in hook on the field | none (local FTS) | Reuses `ChecklistItemTile` |
 | `archive_trash` (F10) | v1 | `Cubit` | List + restore/delete intents | Sync | `UndoSnackBar` |
-| `quick_capture` — hotkey box, share-in, notification action (F6) | v1 | hooks | One text field + one use case call; must be < 2 s | Sync (via notes) | — |
+| `quick_capture` — hotkey box, share-in, notification action (F6) | v1 | hooks | One text field + one use case call; must be < 2 s | Sync (via notes) | `QuickCaptureField`, `QuickParse` (today, tonight, tomorrow, weekdays, 6pm, 18:30, in 2 h) |
 | `share_out` — text / Markdown / image (F11.1) | v1 | hooks | Format + hand to OS share sheet, no lasting state | none | `NoteShareFormatter` helper |
 | `account` — sign in/out, device approval (QR), recovery key, delete account (S1, E3, E4) | v1 | `Bloc` | Multi-step flows with branching (new account / add device / recover) | Auth | — |
 | `session` — signed-in vs local mode (S1) | v1 | `Cubit` (global) | App-wide read-only state consumed by router and sync | Auth | — |
@@ -105,7 +106,7 @@ lib/
     platform/                  # native bridges: overlay, desktop_windows, hotkey, tray, widget_bridge (§10.5)
     logging/                   # AppLogger
     routing/                   # AppRoute enum, router config
-    theme/                     # colors, NoteColor palette, typography (Inter)
+    theme/                     # tokens (design-02 tokens.css), NoteColor palette, typography (Geist)
     responsive/                # context.res(...)
     l10n/                      # ARB files + generated
     helpers/                   # static helper classes (§6)
@@ -238,11 +239,14 @@ Known shared widgets from requirements:
 
 | Widget | Used by |
 |---|---|
-| One shared app bar (`WeaveAppBar`) | all main-app pages |
-| `NoteCard` | notes list, search, archive/trash |
-| `ChecklistItemTile` | note editor, floating notes |
-| `NoteColorPicker` + `NoteColor` swatches (light/dark aware) | editor, list |
-| `SyncStatusBadge` | app bar, floating note handle |
+| `WeaveSidebar` (desktop) / `WeaveTabBar` (phone: Up next · Lists · Search · Settings) | all main-app pages |
+| `MiniBar` + `WeaveSheet` | floating bar and the sheet it opens (also opened from tray / menu bar) |
+| `QuickCaptureField` (parses "tomorrow 6pm" as you type, shows the read-back line) | sheet, Up next, list screen, Android notification reply |
+| `DayThread` / `DayStrip` (today 07:00–23:00, tasks as marks) | Up next (desktop / phone), sheet |
+| `NoteTile` (list on its note paper) | Lists tab, archive/trash |
+| `ChecklistItemTile` | list screen, Up next, sheet, search results |
+| `NoteColorPicker` + `NoteColor` swatches (light/dark aware) | list title dot, list ••• sheet |
+| `SyncStatusBadge` | sidebar, sheet footer |
 | `UndoSnackBar` (via helper `showUndo(...)`) | delete, archive, check (F10) |
 | `ReminderChip` / `DueDateText` | editor, list, floating notes |
 | `EntitlementGate` | any limited feature |
@@ -275,7 +279,8 @@ Known shared widgets from requirements:
 
 ### Typography & theme
 
-- Inter, bundled as an asset (no runtime font download — offline first).
+- Geist (400 and 500 only), bundled as an asset (no runtime font download — offline first). Tabular figures (`FontFeature.tabularFigures()`) on every time and count.
+- Colours, radii, sizes and motion tokens come from the locked design ([design playbook §4](design-playbook.md#4-visual-language), source `docs/design-02/assets/tokens.css`); no raw hex in widgets.
 - Text styles only from `Theme.of(context).textTheme`; no inline `TextStyle(fontSize: …)`.
 - Theme modes: light, dark, system (S4). Note colors come from `NoteColor` with light/dark variants meeting WCAG AA (NFR9).
 
