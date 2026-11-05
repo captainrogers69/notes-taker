@@ -13,6 +13,6 @@ Future<void> bootstrap(AppConfig config) async {
     publishableKey: config.supabaseAnonKey,
   );
   tz.initializeTimeZones();
-  registerCore(sl, config);
+  await registerCore(sl, config);
   runApp(const WeaveApp());
 }

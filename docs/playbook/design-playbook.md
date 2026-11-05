@@ -120,7 +120,7 @@ Weave is glanced at dozens of times a day, so every extra word, label and contro
 
 ### Quick capture (sheet, app, Android notification)
 
-The add field reads dates and times as you type: today, tonight (20:00), tomorrow, weekday names, 18:00, 6pm, 6:30pm, in 2 h, in 30 min. A time already past today means tomorrow. The read-back appears under the field before Enter.
+The add field reads dates and times as you type: today, tonight (20:00), tomorrow, weekday names, 18:00, 6pm, 6:30pm, in 2 h, in 30 min. A time already past today means tomorrow. The read-back appears under the field before Enter. Read-backs: "Due Tomorrow 18:00"; a timer ("in 30 min") reads "Reminder in 30 min · Today 15:30" (as in the 03 prototype).
 
 ---
 

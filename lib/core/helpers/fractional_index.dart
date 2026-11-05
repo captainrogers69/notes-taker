@@ -13,6 +13,16 @@ String keyBetween(String? before, String? after) {
   return _midpoint(before ?? '', after);
 }
 
+/// [k] when it is a valid key for [keyBetween], otherwise null (empty keys
+/// and keys with foreign characters or a trailing '0' are unusable).
+String? usableKeyOrNull(String? k) {
+  if (k == null || k.isEmpty || k.endsWith('0')) return null;
+  for (var i = 0; i < k.length; i++) {
+    if (!_digits.contains(k[i])) return null;
+  }
+  return k;
+}
+
 void _validate(String k) {
   if (k.isEmpty || k.endsWith('0')) {
     throw ArgumentError('Invalid key');

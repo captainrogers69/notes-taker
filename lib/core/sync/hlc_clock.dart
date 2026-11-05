@@ -2,13 +2,18 @@ import 'hlc.dart';
 
 /// Local hybrid logical clock for one device (node).
 class HlcClock {
-  HlcClock(this.node, {int Function()? now})
+  /// [seed] is the last stamp persisted before a restart; the clock never
+  /// issues anything at or below it, even if the wall clock went back.
+  HlcClock(this.node, {int Function()? now, Hlc? seed})
     : _now = now ?? (() => DateTime.now().millisecondsSinceEpoch),
-      _last = Hlc(0, 0, node);
+      _last = seed ?? Hlc(0, 0, node);
 
   final String node;
   final int Function() _now;
   Hlc _last;
+
+  /// The most recent stamp issued (or the seed), for persisting.
+  Hlc get last => _last;
 
   /// Returns a new timestamp strictly greater than every previous one.
   Hlc tick() {

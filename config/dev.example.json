@@ -1,5 +1,7 @@
 {
   "SUPABASE_URL": "",
   "SUPABASE_ANON_KEY": "",
-  "WEAVE_PROFILE": "default"
+  "WEAVE_PROFILE": "default",
+  "TEST_EMAIL": "",
+  "TEST_PASSWORD": ""
 }

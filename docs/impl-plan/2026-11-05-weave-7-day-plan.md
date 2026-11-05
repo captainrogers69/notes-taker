@@ -30,12 +30,14 @@
 
 | Checkpoint | Date | State |
 |---|---|---|
-| 1 | 2026-11-05 | **Tasks 1–3 done, reviewed and staged** (setup + flavors + Supabase migration; theme tokens + Geist; ids, HLC, fractional index). `flutter analyze` 0 issues, 23/23 tests. **Waiting on the user:** Task 1 Step 4 (link the Supabase project, check the migration with a dry run, turn on email + password, turn off Confirm email, `config/dev.json` with the URL, anon key and a test user) and a Windows build check. Next: Task 4. |
+| 1 | 2026-11-05 | **Tasks 1–3 done, reviewed and staged** (setup + flavors + Supabase migration; theme tokens + Geist; ids, HLC, fractional index). `flutter analyze` 0 issues, 23/23 tests. Supabase done by the user (migration live, email + password auth, test user, `config/dev.json`); verified by sign-in and reads of `changes` and `devices`. **Still waiting on the user:** a Windows build check. Next: Task 4. |
+| 2 | 2026-11-05 | **Tasks 4–8 done, reviewed and staged** (Day 2 complete): database + change log (clock saved across restarts), task and list data, quick-capture parsing, lists repository (undo of delete forever restores tasks), items repository + Up next + search (tie-safe reordering, conflict resolution in one transaction). `flutter analyze` 0 issues, 95/95 tests. Supabase verified live. **Still waiting on the user:** Windows build check. Next: Task 9 (sync transport). |
 
 Carried into later tasks from reviews:
-- Task 4 persists the clock's high-water mark (`Kv('hlc.last')`) so stamps never go backwards after a restart.
-- Tasks 7 and 8 order by `sortKey, id`, so equal keys from two devices sort the same everywhere.
+- Task 10: the merger takes `ChangeWriter`; applying a list purge also deletes its tasks; late changes never bring back a purged list or task.
 - Task 11 logs remote clocks more than 24 h ahead.
+- Task 13: after sign-out wipes the database, re-create the clock and writer so the new device id is used.
+- Tasks 14 and 15 refresh list and Up next streams every minute and on app resume (overdue is computed when a stream starts).
 - Task 14 wires `weaveTheme` into `WeaveApp`. Add a `tick` colour token before Task 15.
 
 ## Phases
@@ -226,7 +228,7 @@ revoke all on function public.delete_account() from public, anon;
 grant execute on function public.delete_account() to authenticated;
 ```
 
-- [ ] **Step 4 (user, pending):** The migration deploys through the GitHub integration when it is merged to the production branch. **That deploy is the user's push.** Before pushing, run `supabase link --project-ref <ref>` and then `supabase db push --dry-run` to see the SQL that would apply. Under Auth, the user turns email + password on and sets "Confirm email" off for development. The user copies the project URL and the anon (publishable) key into `config/dev.json`. Never commit the service-role key or put it in the app.
+- [x] **Step 4 (user, done 2026-11-05):** The migration deploys through the GitHub integration when it is merged to the production branch. **That deploy is the user's push.** Before pushing, run `supabase link --project-ref <ref>` and then `supabase db push --dry-run` to see the SQL that would apply. Under Auth, the user turns email + password on and sets "Confirm email" off for development. The user copies the project URL and the anon (publishable) key into `config/dev.json`. Never commit the service-role key or put it in the app.
   - Verify: `select count(*) from public.changes;` returns 0. `select * from pg_publication_tables where tablename='changes';` returns 1 row.
 - [x] **Step 5:** In `bootstrap`:
   1. Call `WidgetsFlutterBinding.ensureInitialized()`.
@@ -331,15 +333,15 @@ grant execute on function public.delete_account() to authenticated;
     - `Future<void> writeLocalOnly(...)` for fields that are never synced (`conflictText`, `conflictFrom`).
   - `HlcClock` node = device id. On first launch the device id is a `newId()` stored in `Kv('device.id')`.
 
-- [ ] **Step 1: Write the failing tests.**
+- [x] **Step 1: Write the failing tests.**
   - `write inserts row, field hlcs and one outbox entry`: write `{'name': 'Errands', 'color': 'sun', 'sortKey': 'a0'}`. Then the list row exists, `fieldHlcs` has those 3 keys, and there is 1 outbox row whose `fields` JSON has `name.v == 'Errands'`.
   - `second write to one field updates only that field's hlc`.
   - `failed write rolls back row and outbox`: pass a field that does not exist, expect `ArgumentError`, and then 0 rows in both tables.
   - `wipe empties every table`.
-- [ ] **Step 2:** Run `dart run build_runner build -d && flutter test test/core/sync/change_writer_test.dart`. Expected: FAIL.
-- [ ] **Step 3:** Implement. A per-type field→column map converts the `fields` map into a companion; an unknown key throws `ArgumentError` inside the transaction. Register `WeaveDatabase`, `HlcClock` and `ChangeWriter` as lazy singletons in `registerCore`.
-- [ ] **Step 4:** Run the tests. Expected: PASS.
-- [ ] **Step 5: Checkpoint.**
+- [x] **Step 2:** Run `dart run build_runner build -d && flutter test test/core/sync/change_writer_test.dart`. Expected: FAIL.
+- [x] **Step 3:** Implement. A per-type field→column map converts the `fields` map into a companion; an unknown key throws `ArgumentError` inside the transaction. Register `WeaveDatabase`, `HlcClock` and `ChangeWriter` as lazy singletons in `registerCore`.
+- [x] **Step 4:** Run the tests. Expected: PASS.
+- [x] **Step 5: Checkpoint.**
 
 ---
 
@@ -367,16 +369,16 @@ grant execute on function public.delete_account() to authenticated;
     - has `DueSpec next(DueSpec from)`
   - `ItemConflict { String otherText, String fromDevice }`
 
-- [ ] **Step 1: Write the failing tests.**
+- [x] **Step 1: Write the failing tests.**
   - Encode/decode round-trip for every spec variant.
   - `decode('garbage') == null`.
   - `RepeatRule(weekdays).next(Fri 2026-11-06) == Mon 2026-11-09`, with the time kept.
   - `RepeatRule(month,1).next(2026-01-31) == 2026-02-28`, clamped to the month's last day.
   - `RepeatRule(day,3).next(d) == d + 3 days`.
-- [ ] **Step 2:** Run the tests. Expected: FAIL.
-- [ ] **Step 3:** Implement. Domain imports nothing from Flutter or Drift.
-- [ ] **Step 4:** Run the tests. Expected: PASS.
-- [ ] **Step 5: Checkpoint.**
+- [x] **Step 2:** Run the tests. Expected: FAIL.
+- [x] **Step 3:** Implement. Domain imports nothing from Flutter or Drift.
+- [x] **Step 4:** Run the tests. Expected: PASS.
+- [x] **Step 5: Checkpoint.**
 
 ### Task 6: QuickParse and labels
 
@@ -394,7 +396,7 @@ grant execute on function public.delete_account() to authenticated;
   - `String dueLabel(DueSpec due, DateTime now)`: "Today 17:00", "Tomorrow 18:00", "Fri 10:00", "Thu 12 Nov"; any date more than 6 days away uses the `dateLabel` form.
   - `String parseReadBack(ParsedCapture p, DateTime now)` gives "Due Tomorrow 18:00".
 
-- [ ] **Step 1: Write the failing tests.** Use `now = 2026-11-05 15:00` (a Thursday).
+- [x] **Step 1: Write the failing tests.** Use `now = 2026-11-05 15:00` (a Thursday).
   - `'call mom tomorrow 6pm'` → text `'call mom'`, due 2026-11-06 18:00.
   - `'dentist fri 10am'` → `'dentist'`, 2026-11-06 10:00.
   - `'buy milk tonight'` → 20:00 today.
@@ -404,10 +406,10 @@ grant execute on function public.delete_account() to authenticated;
   - `'tea in 30 min'` → 15:30.
   - `'plain task'` → due null.
   - `dueLabel(2026-11-12)` → `'Thu 12 Nov'`.
-- [ ] **Step 2:** Run the tests. Expected: FAIL.
-- [ ] **Step 3:** Implement by porting the regex set from data.js; keep its token list (today, tonight, tomorrow, weekday names and 3-letter forms, `h:mm`, `ham/pm`, `in N h|min`).
-- [ ] **Step 4:** Run the tests. Expected: PASS.
-- [ ] **Step 5: Checkpoint.**
+- [x] **Step 2:** Run the tests. Expected: FAIL.
+- [x] **Step 3:** Implement by porting the regex set from data.js; keep its token list (today, tonight, tomorrow, weekday names and 3-letter forms, `h:mm`, `ham/pm`, `in N h|min`).
+- [x] **Step 4:** Run the tests. Expected: PASS.
+- [x] **Step 5: Checkpoint.**
 
 ### Task 7: Lists repository and use cases
 
@@ -430,7 +432,7 @@ grant execute on function public.delete_account() to authenticated;
     - `Future<void> purgeTrash(DateTime now)`: hard-deletes lists and their items whose `deletedAt` is more than 30 days old. A tombstone already synced is enough.
   - Use cases are `call(...)` wrappers, one per file. `TrashList` sets `deletedAt` to now; `RestoreList` sets `deletedAt` and `archivedAt` to null; `DeleteListForever` writes `deletedAt = 0`, the purge marker, and removes the rows locally. Each returns what Undo needs, the previous field values as `Map<String, Object?>`.
 
-- [ ] **Step 1: Write the failing tests** (in-memory DB).
+- [x] **Step 1: Write the failing tests** (in-memory DB).
   - `create then watchActive emits list with openCount 0`.
   - `archive hides from active and shows in archived`.
   - `trash then restore returns list to active`.
@@ -438,10 +440,10 @@ grant execute on function public.delete_account() to authenticated;
   - `overdueCount counts open tasks due before now`.
   - `purgeTrash removes lists trashed > 30 days ago and their items`.
   - `undo map from TrashList restores exact previous fields`.
-- [ ] **Step 2:** Run the tests. Expected: FAIL.
-- [ ] **Step 3:** Implement. Counts come from one grouped Drift query joined to the list stream, with no query per list (NFR5).
-- [ ] **Step 4:** Run the tests. Expected: PASS.
-- [ ] **Step 5: Checkpoint.**
+- [x] **Step 2:** Run the tests. Expected: FAIL.
+- [x] **Step 3:** Implement. Counts come from one grouped Drift query joined to the list stream, with no query per list (NFR5).
+- [x] **Step 4:** Run the tests. Expected: PASS.
+- [x] **Step 5: Checkpoint.**
 
 ### Task 8: Items repository, task rules, Up next query
 
@@ -473,7 +475,7 @@ grant execute on function public.delete_account() to authenticated;
       - Every choice clears `conflictText` and `conflictFrom` through `writeLocalOnly`.
     - Each mutating use case returns the previous field map for Undo.
 
-- [ ] **Step 1: Write the failing tests.**
+- [x] **Step 1: Write the failing tests.**
   - `add parses due from raw text`
   - `watchList orders overdue, timed, untimed, then done`
   - `ticking repeating weekly task moves due +7 days and stays open`
@@ -483,10 +485,10 @@ grant execute on function public.delete_account() to authenticated;
   - `laterThisWeek includes day +6, excludes day +7`
   - `resolve keepBoth inserts new task after original and clears conflict`
   - `search matches case-insensitively across lists`
-- [ ] **Step 2:** Run the tests. Expected: FAIL.
-- [ ] **Step 3:** Implement. Orders are done in SQL (`ORDER BY` with CASE), not in Dart.
-- [ ] **Step 4:** Run the tests. Expected: PASS.
-- [ ] **Step 5: Checkpoint.** End of Day 2.
+- [x] **Step 2:** Run the tests. Expected: FAIL.
+- [x] **Step 3:** Implement. Orders are done in SQL (`ORDER BY` with CASE), not in Dart.
+- [x] **Step 4:** Run the tests. Expected: PASS.
+- [x] **Step 5: Checkpoint.** End of Day 2.
 
 ---
 
