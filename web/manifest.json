@@ -3,9 +3,9 @@
     "short_name": "Weave",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#F5F5F3",
+    "theme_color": "#F5F5F3",
+    "description": "Notes and tasks that stay in reach, the same on every device.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

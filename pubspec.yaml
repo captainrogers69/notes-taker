@@ -77,6 +77,10 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
+  # Weave mark, locked 2026-11-05 (docs/logo/kit). app_icon: Linux window icon; tray_template: Task 24.
+  assets:
+    - assets/brand/
+
   fonts:
     - family: Geist
       fonts:
