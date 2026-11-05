@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:weave/core/sync/conflict_losers.dart';
+import 'package:weave/features/items/domain/entities/item_conflict.dart';
 import 'package:weave/core/database/weave_database.dart';
 import 'package:weave/core/sync/change_writer.dart';
 import 'package:weave/core/sync/entity_type.dart';
@@ -214,7 +216,7 @@ void main() {
       final items = await repo.watchList('L').first;
       final byKey = [...items]..sort((a, b) => a.sortKey.compareTo(b.sortKey));
       expect(byKey.map((i) => i.text), ['mine', 'theirs', 'next']);
-      expect((await repo.get('o'))!.conflict, isNull);
+      expect((await repo.get('o'))!.conflicts, isEmpty);
       // Missing item: no ghost row.
       expect(await ResolveConflict(repo)('nope', ConflictChoice.keepMine), {});
       expect(await repo.get('nope'), isNull);
@@ -231,7 +233,49 @@ void main() {
     await ResolveConflict(repo)('o', ConflictChoice.keepTheirs);
     final it = (await repo.get('o'))!;
     expect(it.text, 'theirs');
-    expect(it.conflict, isNull);
+    expect(it.conflicts, isEmpty);
+  });
+
+  test('resolve keepTheirs takes the chosen loser and clears all', () async {
+    await list('L');
+    await item('o', 'L', text: 'mine');
+    await writer.writeLocalOnly(
+      EntityType.item,
+      'o',
+      encodeLosers([
+        (text: 'first', from: 'Pixel 8', hlc: ''),
+        (text: 'second\nline', from: 'Tablet', hlc: ''),
+      ]),
+    );
+    final before = (await repo.get('o'))!;
+    expect(before.conflicts, [
+      const ItemConflict(otherText: 'first', fromDevice: 'Pixel 8'),
+      const ItemConflict(otherText: 'second\nline', fromDevice: 'Tablet'),
+    ]);
+    await ResolveConflict(repo)('o', ConflictChoice.keepTheirs, index: 1);
+    final it = (await repo.get('o'))!;
+    expect(it.text, 'second\nline');
+    expect(it.conflicts, isEmpty);
+  });
+
+  test('resolve keepMine keeps text and clears every loser', () async {
+    await list('L');
+    await item('o', 'L', text: 'mine');
+    await writer.writeLocalOnly(
+      EntityType.item,
+      'o',
+      encodeLosers([
+        (text: 'first', from: 'Pixel 8', hlc: ''),
+        (text: 'second', from: 'Tablet', hlc: ''),
+      ]),
+    );
+    await ResolveConflict(repo)('o', ConflictChoice.keepMine);
+    final row = await (db.select(
+      db.items,
+    )..where((t) => t.id.equals('o'))).getSingle();
+    expect(row.body, 'mine');
+    expect(row.conflictText, isNull);
+    expect(row.conflictFrom, isNull);
   });
 
   test('search matches case-insensitively across lists', () async {
@@ -294,7 +338,7 @@ void main() {
       throwsStateError,
     );
     expect(await order('L'), ['o']);
-    expect((await repo.get('o'))!.conflict, isNotNull);
+    expect((await repo.get('o'))!.conflicts, isNotEmpty);
   });
 
   test('keepBoth copies the kind of the conflicted item', () async {

@@ -44,10 +44,12 @@ class HlcClock {
     return _advance(millis, counter);
   }
 
+  /// A counter reaching [Hlc.maxCounter] carries into millis, so the clock
+  /// stays strictly increasing and never throws (even after a far-future
+  /// remote). The clock never issues counter [Hlc.maxCounter] itself, which
+  /// the merger treats as malformed.
   Hlc _advance(int millis, int counter) {
-    if (counter > Hlc.maxCounter) {
-      throw StateError('HLC counter overflow');
-    }
+    if (counter >= Hlc.maxCounter) return _last = Hlc(millis + 1, 0, node);
     return _last = Hlc(millis, counter, node);
   }
 }

@@ -19,7 +19,7 @@ class Item extends Equatable {
     this.due,
     this.reminders = const [],
     this.repeat,
-    this.conflict,
+    this.conflicts = const [],
     this.deletedAt,
   });
 
@@ -34,7 +34,10 @@ class Item extends Equatable {
   final DueSpec? due;
   final List<ReminderSpec> reminders;
   final RepeatRule? repeat;
-  final ItemConflict? conflict;
+
+  /// Losing concurrent text edits, in arrival order (may differ between
+  /// devices); empty when none. Local only: each device resolves its own.
+  final List<ItemConflict> conflicts;
   final DateTime? deletedAt;
 
   @override
@@ -50,7 +53,7 @@ class Item extends Equatable {
     due,
     reminders,
     repeat,
-    conflict,
+    conflicts,
     deletedAt,
   ];
 }

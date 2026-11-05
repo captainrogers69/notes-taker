@@ -1,27 +1,18 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/database/weave_database.dart';
+import '../../../core/helpers/json_map.dart';
 import '../../../core/domain/note_color_id.dart';
 import '../../../core/ids/new_id.dart';
 import '../../../core/sync/change_writer.dart';
 import '../../../core/sync/entity_type.dart';
+import '../../../core/sync/purge_log.dart';
+import '../../../core/sync/synced_fields.dart';
 import '../../../core/helpers/fractional_index.dart';
 import '../../items/domain/entities/due_spec.dart';
 import '../domain/entities/deleted_list_snapshot.dart';
 import '../domain/entities/task_list.dart';
 import '../domain/repositories/lists_repository.dart';
-
-const _syncedFields = [
-  'name',
-  'color',
-  'sortKey',
-  'pinnedToTop',
-  'hideDone',
-  'dueDate',
-  'dueMinutes',
-  'archivedAt',
-  'deletedAt',
-];
 
 const _order = 'ORDER BY l.pinned_to_top DESC, l.sort_key ASC, l.id ASC';
 
@@ -165,7 +156,7 @@ $_order
   @override
   Future<DeletedListSnapshot> deleteForever(String id) {
     return _db.transaction(() async {
-      final list = await fieldsOf(id, _syncedFields);
+      final list = await fieldsOf(id, listFields.keys);
       final rows = await (_db.select(
         _db.items,
       )..where((t) => t.listId.equals(id))).get();
@@ -187,11 +178,13 @@ $_order
               'repeat': r.repeat,
               'deletedAt': r.deletedAt,
             },
+            local: <String, Object?>{
+              'conflictText': r.conflictText,
+              'conflictFrom': r.conflictFrom,
+            },
           ),
       ];
-      await _writer.write(EntityType.list, id, {'deletedAt': 0});
-      await (_db.delete(_db.items)..where((t) => t.listId.equals(id))).go();
-      await (_db.delete(_db.lists)..where((t) => t.id.equals(id))).go();
+      await _purgeList(id, [for (final r in rows) r.id]);
       return DeletedListSnapshot(list: list, items: items);
     });
   }
@@ -199,9 +192,17 @@ $_order
   @override
   Future<void> restoreSnapshot(String id, DeletedListSnapshot s) {
     return _db.transaction(() async {
+      // Undo is local: once the purge marker was pushed, other devices have
+      // purged too and are not brought back (known limit).
+      final ids = [id, for (final item in s.items) item.id];
+      await unmarkPurged(_db, ids);
+      await _dropPurgeMarkers(ids);
       await _writer.write(EntityType.list, id, s.list);
       for (final item in s.items) {
         await _writer.write(EntityType.item, item.id, item.fields);
+        if (item.local.values.any((v) => v != null)) {
+          await _writer.writeLocalOnly(EntityType.item, item.id, item.local);
+        }
       }
     });
   }
@@ -211,19 +212,44 @@ $_order
     final cutoff =
         now.millisecondsSinceEpoch - const Duration(days: 30).inMilliseconds;
     await _db.transaction(() async {
-      final old = _db.selectOnly(_db.lists)
-        ..addColumns([_db.lists.id])
-        ..where(
-          _db.lists.deletedAt.isBiggerThanValue(0) &
-              _db.lists.deletedAt.isSmallerThanValue(cutoff),
-        );
-      await (_db.delete(_db.items)..where((t) => t.listId.isInQuery(old))).go();
-      await (_db.delete(_db.lists)..where(
-            (t) =>
-                t.deletedAt.isBiggerThanValue(0) &
-                t.deletedAt.isSmallerThanValue(cutoff),
-          ))
-          .go();
+      final old =
+          await (_db.select(_db.lists)..where(
+                (t) =>
+                    t.deletedAt.isBiggerThanValue(0) &
+                    t.deletedAt.isSmallerThanValue(cutoff),
+              ))
+              .get();
+      for (final list in old) {
+        final items = await (_db.select(
+          _db.items,
+        )..where((t) => t.listId.equals(list.id))).get();
+        await _purgeList(list.id, [for (final i in items) i.id]);
+      }
     });
+  }
+
+  /// Delete forever, locally: drops pending outbox rows for the list and its
+  /// items, sends the purge marker (`deletedAt = 0`), hard-deletes the rows
+  /// and mini bar, and remembers every id as purged.
+  Future<void> _purgeList(String id, List<String> itemIds) async {
+    await dropPending(_db, [id, ...itemIds]);
+    await _writer.write(EntityType.list, id, {'deletedAt': 0});
+    await deletePurgedRows(_db, listId: id);
+    await markPurged(_db, [id, ...itemIds]);
+  }
+
+  /// Deletes not-yet-pushed purge markers (`deletedAt = 0`) for [ids].
+  Future<void> _dropPurgeMarkers(List<String> ids) async {
+    final rows = await (_db.select(
+      _db.outbox,
+    )..where((t) => t.entityId.isIn(ids))).get();
+    for (final r in rows) {
+      final deleted = decodeJsonMap(r.fields)['deletedAt'];
+      if (deleted is Map && deleted['v'] == 0) {
+        await (_db.delete(
+          _db.outbox,
+        )..where((t) => t.changeId.equals(r.changeId))).go();
+      }
+    }
   }
 }

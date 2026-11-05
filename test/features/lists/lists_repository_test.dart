@@ -31,6 +31,10 @@ void main() {
   });
   tearDown(() => db.close());
 
+  Future<String?> kv(String key) async => (await (db.select(
+    db.kv,
+  )..where((t) => t.key.equals(key))).getSingleOrNull())?.value;
+
   Future<void> addItem(
     String id,
     String listId, {
@@ -164,12 +168,22 @@ void main() {
       await UpdateList(repo)(old, {'deletedAt': n - 31 * day});
       await UpdateList(repo)(recent, {'deletedAt': n - 29 * day});
       await writer.write(EntityType.list, 'marker', {'deletedAt': 0});
-      final outboxBefore = (await db.select(db.outbox).get()).length;
+      await db.into(db.miniBars).insert(MiniBarsCompanion.insert(listId: old));
       await repo.purgeTrash(now);
       final lists = await db.select(db.lists).get();
       expect(lists.map((l) => l.id).toSet(), {recent, 'marker'});
       expect((await db.select(db.items).get()).map((i) => i.id), ['ir']);
-      expect((await db.select(db.outbox).get()).length, outboxBefore);
+      expect(await db.select(db.miniBars).get(), isEmpty);
+      // Pending rows for the purged ids are dropped; a purge marker is sent.
+      final out = await db.select(db.outbox).get();
+      final forOld = out.where((o) => o.entityId == old || o.entityId == 'io');
+      expect(forOld, hasLength(1));
+      final sent = jsonDecode(forOld.single.fields) as Map<String, dynamic>;
+      expect(sent.keys, {'deletedAt'});
+      expect((sent['deletedAt'] as Map)['v'], 0);
+      expect(await kv('purged.$old'), '1');
+      expect(await kv('purged.io'), '1');
+      expect(await kv('purged.$recent'), isNull);
     },
   );
 
@@ -199,6 +213,35 @@ void main() {
     );
     final fields = jsonDecode(marker.last.fields) as Map<String, dynamic>;
     expect((fields['deletedAt'] as Map)['v'], 0);
+  });
+
+  test('deleteForever remembers purged ids and drops pending rows', () async {
+    final id = await CreateList(repo)('A', NoteColor.green);
+    await addItem('i1', id);
+    await addItem('i2', id);
+    await db.into(db.miniBars).insert(MiniBarsCompanion.insert(listId: id));
+    await DeleteListForever(repo)(id);
+    expect(await kv('purged.$id'), '1');
+    expect(await kv('purged.i1'), '1');
+    expect(await kv('purged.i2'), '1');
+    expect(await db.select(db.miniBars).get(), isEmpty);
+    final out = await db.select(db.outbox).get();
+    expect(out.map((o) => o.entityId), [id]);
+  });
+
+  test('undo of deleteForever forgets purged ids and the marker', () async {
+    final id = await CreateList(repo)('A', NoteColor.green);
+    await addItem('i1', id);
+    final snap = await DeleteListForever(repo)(id);
+    await RestoreDeletedList(repo)(id, snap);
+    expect(await kv('purged.$id'), isNull);
+    expect(await kv('purged.i1'), isNull);
+    final out = await db.select(db.outbox).get();
+    for (final o in out) {
+      final f = jsonDecode(o.fields) as Map<String, dynamic>;
+      expect((f['deletedAt'] as Map?)?['v'], isNot(0), reason: o.entityId);
+    }
+    expect(out.map((o) => o.entityId).toSet(), {id, 'i1'});
   });
 
   test('undo of deleteForever restores list and all items', () async {
@@ -239,6 +282,21 @@ void main() {
       expect(after[k]!.deletedAt, before[k]!.deletedAt);
       expect(after[k]!.listId, id);
     }
+  });
+
+  test('undo of deleteForever keeps an unresolved conflict', () async {
+    final id = await CreateList(repo)('A', NoteColor.green);
+    await writer.write(EntityType.item, 'i1', {'listId': id, 'text': 'one'});
+    await writer.writeLocalOnly(EntityType.item, 'i1', {
+      'conflictText': 'uno',
+      'conflictFrom': 'Pixel 8',
+    });
+    final snap = await DeleteListForever(repo)(id);
+    await RestoreDeletedList(repo)(id, snap);
+    final row = await db.select(db.items).getSingle();
+    expect(row.body, 'one');
+    expect(row.conflictText, 'uno');
+    expect(row.conflictFrom, 'Pixel 8');
   });
 
   test('update with an empty map is a no-op', () async {

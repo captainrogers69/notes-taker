@@ -42,6 +42,6 @@ abstract class ItemsRepository {
   /// Ids of done, non-deleted tasks in [listId].
   Future<List<String>> doneTaskIds(String listId);
 
-  /// Clears conflictText/conflictFrom (local only). No-op if [id] is missing.
+  /// Clears every conflict loser (local only). No-op if [id] is missing.
   Future<void> clearConflict(String id);
 }

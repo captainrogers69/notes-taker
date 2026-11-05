@@ -3,49 +3,19 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 
 import '../database/weave_database.dart';
+import '../helpers/json_map.dart';
 import '../ids/new_id.dart';
 import 'entity_type.dart';
 import 'hlc_clock.dart';
-
-enum _T { text, int, bool }
-
-/// Field -> (column, type) maps. The field name is the Dart column name;
-/// `id`, `fieldHlcs`, `conflictText` and `conflictFrom` are never synced.
-/// Defaults for columns omitted on create live in `tables.dart`.
-const _listFields = <String, (String, _T)>{
-  'name': ('name', _T.text),
-  'color': ('color', _T.text),
-  'sortKey': ('sort_key', _T.text),
-  'pinnedToTop': ('pinned_to_top', _T.bool),
-  'hideDone': ('hide_done', _T.bool),
-  'dueDate': ('due_date', _T.text),
-  'dueMinutes': ('due_minutes', _T.int),
-  'archivedAt': ('archived_at', _T.int),
-  'deletedAt': ('deleted_at', _T.int),
-};
-
-const _itemFields = <String, (String, _T)>{
-  'listId': ('list_id', _T.text),
-  'kind': ('kind', _T.text),
-  'text': ('text', _T.text),
-  'done': ('done', _T.bool),
-  'doneAt': ('done_at', _T.int),
-  'indent': ('indent', _T.int),
-  'sortKey': ('sort_key', _T.text),
-  'dueDate': ('due_date', _T.text),
-  'dueMinutes': ('due_minutes', _T.int),
-  'reminders': ('reminders', _T.text),
-  'repeat': ('repeat', _T.text),
-  'deletedAt': ('deleted_at', _T.int),
-};
-
-const _itemLocalFields = <String, (String, _T)>{
-  'conflictText': ('conflict_text', _T.text),
-  'conflictFrom': ('conflict_from', _T.text),
-};
+import 'synced_fields.dart';
 
 /// Applies synced writes: row, per-field HLCs and outbox entry in one
-/// transaction.
+/// transaction. Field maps live in `synced_fields.dart`; `id`, `fieldHlcs`,
+/// `conflictText` and `conflictFrom` are never synced.
+///
+/// A write that includes item `text` also records the text HLC it replaced
+/// (the base): as `b` on the outbox `text` entry and locally under
+/// [textBaseKey]. The merger uses it to tell sequential from concurrent edits.
 class ChangeWriter {
   ChangeWriter(this._db, this._clock, {int Function()? now})
     : _now = now ?? (() => DateTime.now().millisecondsSinceEpoch);
@@ -54,8 +24,8 @@ class ChangeWriter {
   final HlcClock _clock;
   final int Function() _now;
 
-  Map<String, (String, _T)> _map(EntityType t) =>
-      t == EntityType.list ? _listFields : _itemFields;
+  Map<String, FieldSpec> _map(EntityType t) =>
+      t == EntityType.list ? listFields : itemFields;
 
   String _table(EntityType t) => t == EntityType.list ? 'lists' : 'items';
 
@@ -73,9 +43,21 @@ class ChangeWriter {
             variables: [Variable<String>(id)],
           )
           .getSingleOrNull();
-      final hlcs = _decodeMap(existing?.read<String>('field_hlcs'));
+      final hlcs = decodeJsonMap(existing?.read<String>('field_hlcs'));
+      // The text version this edit is made on top of (see `textBaseKey`).
+      final previousText = hlcs['text'];
+      final textBase = type == EntityType.item && fields.containsKey('text')
+          ? (previousText is String ? previousText : null)
+          : null;
       for (final f in fields.keys) {
         hlcs[f] = hlc;
+      }
+      if (type == EntityType.item && fields.containsKey('text')) {
+        if (textBase == null) {
+          hlcs.remove(textBaseKey);
+        } else {
+          hlcs[textBaseKey] = textBase;
+        }
       }
       await _upsert(type, {
         'id': Variable<String>(id),
@@ -90,7 +72,12 @@ class ChangeWriter {
               entityType: type.apiValue,
               entityId: id,
               fields: jsonEncode({
-                for (final e in fields.entries) e.key: {'v': e.value, 'h': hlc},
+                for (final e in fields.entries)
+                  e.key: {
+                    'v': e.value,
+                    'h': hlc,
+                    if (e.key == 'text') 'b': ?textBase,
+                  },
               }),
               createdAt: _now(),
             ),
@@ -114,7 +101,7 @@ class ChangeWriter {
       throw ArgumentError('No local-only fields on ${type.apiValue}');
     }
     return _db.transaction(() async {
-      final values = _values(_itemLocalFields, fields);
+      final values = _values(itemLocalFields, fields);
       await _upsert(type, {'id': Variable<String>(id), ...values});
     });
   }
@@ -132,7 +119,7 @@ class ChangeWriter {
   }
 
   Map<String, Expression> _values(
-    Map<String, (String, _T)> map,
+    Map<String, FieldSpec> map,
     Map<String, Object?> fields,
   ) {
     final out = <String, Expression>{};
@@ -141,22 +128,15 @@ class ChangeWriter {
       if (spec == null) {
         throw ArgumentError.value(e.key, 'fields', 'Unknown field');
       }
-      final (column, kind) = spec;
       final v = e.value;
-      out[column] = switch ((kind, v)) {
+      out[spec.column] = switch ((spec.type, v)) {
         (_, null) => const Constant<Object>(null),
-        (_T.text, final String s) => Variable<String>(s),
-        (_T.int, final int n) => Variable<int>(n),
-        (_T.bool, final bool b) => Variable<bool>(b),
+        (FieldType.text, final String s) => Variable<String>(s),
+        (FieldType.int, final int n) => Variable<int>(n),
+        (FieldType.bool, final bool b) => Variable<bool>(b),
         _ => throw ArgumentError.value(e.key, 'fields', 'Wrong value type'),
       };
     }
     return out;
-  }
-
-  Map<String, Object?> _decodeMap(String? json) {
-    if (json == null) return {};
-    final decoded = jsonDecode(json);
-    return decoded is Map ? Map<String, Object?>.from(decoded) : {};
   }
 }

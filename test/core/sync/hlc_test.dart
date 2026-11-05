@@ -104,9 +104,27 @@ void main() {
     expect(Hlc(1, 1, 'a').compareTo(Hlc(1, 1, 'a')), 0);
   });
 
-  test('counter overflow throws StateError', () {
+  test('counter overflow in tick carries into millis', () {
     final clock = HlcClock('n', now: () => 1000);
-    expect(clock.receive(Hlc(1000, 99998, 'r')).counter, 99999);
-    expect(clock.tick, throwsStateError);
+    expect(clock.receive(Hlc(1000, 99997, 'r')).counter, 99998);
+    final next = clock.tick();
+    expect((next.millis, next.counter), (1001, 0));
+  });
+
+  test('counter overflow in receive carries into millis', () {
+    final clock = HlcClock('n', now: () => 1000);
+    final got = clock.receive(Hlc(1000, 99998, 'r'));
+    expect((got.millis, got.counter), (1001, 0));
+  });
+
+  test('a far-future remote clock never makes tick throw', () {
+    final clock = HlcClock('n', now: () => 1000);
+    var prev = clock.receive(Hlc.parse('999999999999999-99998-x'));
+    for (var i = 0; i < 200000; i++) {
+      final next = clock.tick();
+      expect(next.compareTo(prev), greaterThan(0));
+      expect(next.counter, lessThan(Hlc.maxCounter));
+      prev = next;
+    }
   });
 }

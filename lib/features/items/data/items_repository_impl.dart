@@ -8,6 +8,7 @@ import '../../../core/sync/entity_type.dart';
 import '../domain/entities/due_spec.dart';
 import '../domain/entities/item.dart';
 import '../domain/entities/item_conflict.dart';
+import '../../../core/sync/conflict_losers.dart';
 import '../domain/entities/reminder_spec.dart';
 import '../domain/entities/repeat_rule.dart';
 import '../domain/repositories/items_repository.dart';
@@ -84,7 +85,6 @@ class ItemsRepositoryImpl implements ItemsRepository {
       final spec = ReminderSpec.decode(s);
       if (spec != null) reminders.add(spec);
     }
-    final other = row.conflictText;
     final rep = row.repeat;
     return Item(
       id: row.id,
@@ -98,9 +98,10 @@ class ItemsRepositoryImpl implements ItemsRepository {
       due: DueSpec.decode(row.dueDate, row.dueMinutes),
       reminders: reminders,
       repeat: rep == null ? null : RepeatRule.decode(rep),
-      conflict: other == null
-          ? null
-          : ItemConflict(otherText: other, fromDevice: row.conflictFrom ?? ''),
+      conflicts: [
+        for (final l in decodeLosers(row.conflictText, row.conflictFrom))
+          ItemConflict(otherText: l.text, fromDevice: l.from),
+      ],
       deletedAt: _ms(row.deletedAt),
     );
   }
@@ -285,9 +286,6 @@ class ItemsRepositoryImpl implements ItemsRepository {
       _db.items,
     )..where((t) => t.id.equals(id))).getSingleOrNull();
     if (existing == null) return;
-    await _writer.writeLocalOnly(EntityType.item, id, {
-      'conflictText': null,
-      'conflictFrom': null,
-    });
+    await _writer.writeLocalOnly(EntityType.item, id, encodeLosers(const []));
   }
 }

@@ -134,6 +134,39 @@ void main() {
     );
   });
 
+  test('text write carries the base hlc it was made on', () async {
+    await writer.write(EntityType.item, 'i1', {'listId': 'l1', 'text': 'a'});
+    final first = _obj((await db.select(db.items).getSingle()).fieldHlcs);
+    final created = _obj((await db.select(db.outbox).get()).single.fields);
+    expect((created['text']! as Map).containsKey('b'), isFalse);
+    expect((created['listId']! as Map).containsKey('b'), isFalse);
+    expect(first.containsKey('text.b'), isFalse);
+
+    wall = 2000;
+    await writer.write(EntityType.item, 'i1', {'text': 'b', 'done': true});
+    final row = await db.select(db.items).getSingle();
+    final hlcs = _obj(row.fieldHlcs);
+    expect(hlcs['text.b'], first['text']);
+    final edit = _obj((await db.select(db.outbox).get()).last.fields);
+    expect((edit['text']! as Map)['b'], first['text']);
+    expect((edit['text']! as Map)['h'], hlcs['text']);
+    expect((edit['done']! as Map).containsKey('b'), isFalse);
+
+    // A write without text leaves the base alone.
+    await writer.write(EntityType.item, 'i1', {'done': false});
+    final after = _obj((await db.select(db.items).getSingle()).fieldHlcs);
+    expect(after['text.b'], first['text']);
+  });
+
+  test('corrupt field hlcs are treated as empty', () async {
+    await writer.write(EntityType.item, 'i1', {'text': 'a'});
+    await db.customStatement("UPDATE items SET field_hlcs = 'not json'");
+    await writer.write(EntityType.item, 'i1', {'text': 'b'});
+    final row = await db.select(db.items).getSingle();
+    expect(row.body, 'b');
+    expect(_obj(row.fieldHlcs).keys, {'text'});
+  });
+
   test('write persists last hlc in Kv', () async {
     await writer.write(EntityType.list, 'l1', {'name': 'A'});
     final kv = await (db.select(

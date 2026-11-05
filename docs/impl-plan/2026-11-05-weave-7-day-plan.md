@@ -32,10 +32,15 @@
 |---|---|---|
 | 1 | 2026-11-05 | **Tasks 1–3 done, reviewed and staged** (setup + flavors + Supabase migration; theme tokens + Geist; ids, HLC, fractional index). `flutter analyze` 0 issues, 23/23 tests. Supabase done by the user (migration live, email + password auth, test user, `config/dev.json`); verified by sign-in and reads of `changes` and `devices`. **Still waiting on the user:** a Windows build check. Next: Task 4. |
 | 2 | 2026-11-05 | **Tasks 4–8 done, reviewed and staged** (Day 2 complete): database + change log (clock saved across restarts), task and list data, quick-capture parsing, lists repository (undo of delete forever restores tasks), items repository + Up next + search (tie-safe reordering, conflict resolution in one transaction). `flutter analyze` 0 issues, 99/99 tests. Supabase verified live. Quick-capture fixes (user request): "tonight" after 20:00 → tomorrow 20:00; punctuation after a date or time no longer drops the due. **Still waiting on the user:** Windows build check. Next: Task 9 (sync transport). |
+| 3 | 2026-11-05 | **Tasks 9–10 done, reviewed and staged.** Transport interface + in-memory transport + cipher seam (reproduces the late-commit skip). ChangeMerger after 4 fix rounds and 3 reviews: text conflicts detected by base HLC (`b`), greater HLC wins on every device, every loser kept (JSON arrays with device name + HLC, same set on all devices), same-device chains don't conflict; delete forever remembered on the deleting device (`purged.<id>`, incl. purgeTrash, mini bar removed, undo unmarks); trash older than a local edit is undone; malformed HLCs ignored; clock overflow carries instead of throwing; one synced-field map. Two- and three-device convergence tests, no ping-pong. `flutter analyze` 0 issues, 184/184 tests. **Still waiting on the user:** Windows build check. Next: Task 11 (sync engine) — read the Task 11 items in "Carried into" first. |
 
 Carried into later tasks from reviews:
 - Task 10: the merger takes `ChangeWriter`; applying a list purge also deletes its tasks; late changes never bring back a purged list or task.
 - Task 11 logs remote clocks more than 24 h ahead.
+- Task 11: the engine records applied change ids and skips ones already applied (each sync re-reads recent changes as a safety net; without this, an out-of-order redelivery could raise a stale conflict). Save the pull cursor in the same transaction as the apply.
+- Task 11: `deviceName` must be a local lookup (cache), never network, since it runs inside the merge transaction. The cache includes this device.
+- Task 11: apply pulled rows strictly in ascending `seq` order, across pages too. Record a change id as applied even when the result is `ignored`. Rule 6 relies on a create preceding its edits in `seq` order. If a change is quarantined, also quarantine later changes for that entity id (do not mark them applied), so a fixed cipher can replay them. Malformed HLCs are not errors: the merger skips the field or returns `ignored`.
+- Known limit: cross-device undo of delete forever after the marker was pushed is not supported.
 - Task 13: after sign-out wipes the database, re-create the clock and writer so the new device id is used.
 - Tasks 14 and 15 refresh list and Up next streams every minute and on app resume (overdue is computed when a stream starts).
 - Task 14 wires `weaveTheme` into `WeaveApp`. Add a `tick` colour token before Task 15.
@@ -111,7 +116,7 @@ Task 1 logs these as deviations D2–D9 in the architecture playbook.
 ## Review Focus
 
 1. **Rows committed out of sequence order.** Postgres identity values can commit out of order, so a pull that saves `max(seq)` can skip a row that becomes visible later with a lower `seq`. Each pull re-reads the last 100 sequence numbers (`seq > cursor - 100`); applying a change is idempotent. _Test in Task 11:_ `late commit with lower seq is still applied`.
-2. **The same task text edited offline on two devices.** Neither edit may be lost silently. The local text stays, and the remote text becomes `conflictText` with the device name. _Test in Task 10:_ `concurrent text edits keep both`.
+2. **The same task text edited offline on two devices.** Neither edit may be lost silently. The greater HLC wins on every device; the other text becomes `conflictText` with the name of the device that wrote it. Several concurrent losers are all kept. _Test in Task 10:_ `concurrent text edits keep both`.
 3. **A device clock that is an hour fast or slow.** HLC `receive` must move the local clock past any remote HLC it has seen, so a later edit on the slow device still wins. _Test in Task 3:_ `receive moves clock past a remote clock that is ahead`.
 4. **The app is killed or the network fails mid-push.** Outbox rows are deleted only after the server acknowledges them, and the next start pushes them again. _Test in Task 11:_ `push failure keeps outbox rows`.
 5. **Signing out, then into a different account.** No data or cursor from the first account may leak. Sign-out wipes every table and resets `sync.cursor`. _Test in Task 13:_ `sign out wipes lists, items, outbox and cursor`.
@@ -282,7 +287,7 @@ grant execute on function public.delete_account() to authenticated;
 - Produces:
   - `String newId()`: UUID v7.
   - `class Hlc implements Comparable<Hlc> { final int millis; final int counter; final String node; String pack(); static Hlc parse(String s); }`. The packed form is `'${millis:15 digits}-${counter:5 digits}-$node'`, so string order equals HLC order.
-  - `class HlcClock { HlcClock(String node, {int Function()? now}); Hlc tick(); Hlc receive(Hlc remote); }`
+  - `class HlcClock { HlcClock(String node, {int Function()? now}); Hlc tick(); Hlc receive(Hlc remote); }`. Counter overflow carries into millis (the clock never issues counter `Hlc.maxCounter`); it never throws.
   - `String keyBetween(String? before, String? after)`: base-62 fractional key. `null` means open-ended.
 
 - [x] **Step 1: Write the failing tests.**
@@ -359,7 +364,7 @@ grant execute on function public.delete_account() to authenticated;
 - Produces (all `Equatable`):
   - `TaskList { id, name, NoteColor color, sortKey, pinnedToTop, hideDone, DueSpec? due, DateTime? archivedAt, DateTime? deletedAt, int openCount, int overdueCount }`. The counts are filled in by queries.
   - `enum ItemKind { task, text }`
-  - `Item { id, listId, ItemKind kind, text, done, DateTime? doneAt, int indent, sortKey, DueSpec? due, List<ReminderSpec> reminders, RepeatRule? repeat, ItemConflict? conflict, DateTime? deletedAt }`
+  - `Item { id, listId, ItemKind kind, text, done, DateTime? doneAt, int indent, sortKey, DueSpec? due, List<ReminderSpec> reminders, RepeatRule? repeat, List<ItemConflict> conflicts, DateTime? deletedAt }`. `conflicts` is in arrival order (may differ between devices).
   - `DueSpec { DateTime date /* local midnight */, int? minutes; DateTime? at() /* local DateTime or null if no time */; String encodeDate(); static DueSpec? decode(String? date, int? minutes); }`
   - `sealed class ReminderSpec`, with `AtDue()`, `Before(Duration offset)` and `AtTime(DateTime local)`:
     - `String encode()` gives `'due' | 'before:<minutes>' | 'at:<yyyy-MM-ddTHH:mm>'`
@@ -429,8 +434,8 @@ grant execute on function public.delete_account() to authenticated;
     - `Stream<TaskList?> watch(String id)`
     - `Future<String> create(String name, NoteColor color)`: `sortKey` goes after the last list.
     - `Future<void> update(String id, Map<String, Object?> fields)`
-    - `Future<void> purgeTrash(DateTime now)`: hard-deletes lists and their items whose `deletedAt` is more than 30 days old. A tombstone already synced is enough.
-  - Use cases are `call(...)` wrappers, one per file. `TrashList` sets `deletedAt` to now; `RestoreList` sets `deletedAt` and `archivedAt` to null; `DeleteListForever` writes `deletedAt = 0`, the purge marker, and removes the rows locally. Each returns what Undo needs, the previous field values as `Map<String, Object?>`.
+    - `Future<void> purgeTrash(DateTime now)`: hard-deletes lists and their items whose `deletedAt` is more than 30 days old. Each such list is purged like delete forever: pending outbox rows for the list and its items are dropped, the purge marker (`deletedAt = 0`) is sent, the rows and `mini_bars` row are removed, and every id is recorded as `purged.<id>`.
+  - Use cases are `call(...)` wrappers, one per file. `TrashList` sets `deletedAt` to now; `RestoreList` sets `deletedAt` and `archivedAt` to null; `DeleteListForever` writes `deletedAt = 0`, the purge marker, removes the rows locally and records purged ids; undo (`restoreSnapshot`) unmarks them and drops a not-yet-pushed marker. Cross-device undo after the marker was pushed is not supported. Each returns what Undo needs, the previous field values as `Map<String, Object?>`.
 
 - [x] **Step 1: Write the failing tests** (in-memory DB).
   - `create then watchActive emits list with openCount 0`.
@@ -469,9 +474,10 @@ grant execute on function public.delete_account() to authenticated;
     - `UncheckAll.call(listId)`: one `write` per done item.
     - `MoveItem.call(id, {String? afterId, String? beforeId})`
     - `IndentItem.call(id, int indent)`: 0 or 1.
-    - `ResolveConflict.call(id, ConflictChoice c)`, with `enum ConflictChoice { keepBoth, keepMine, keepTheirs }`:
-      - `keepBoth` adds `conflictText` as a new task right after the item.
-      - `keepTheirs` writes the text as `conflictText`.
+    - `ResolveConflict.call(id, ConflictChoice c, {int index = 0})`, with `enum ConflictChoice { keepBoth, keepMine, keepTheirs }`. `Item.conflicts` lists the losers, each `(otherText, fromDevice)`:
+      - `keepMine` keeps the current `text`.
+      - `keepTheirs` takes the loser at `index` as the text.
+      - `keepBoth` adds the loser at `index` as a new task right after the item.
       - Every choice clears `conflictText` and `conflictFrom` through `writeLocalOnly`.
     - Each mutating use case returns the previous field map for Undo.
 
@@ -521,17 +527,17 @@ grant execute on function public.delete_account() to authenticated;
     - `bool offline`: when true, push and pull throw `SyncOfflineException`
     - `void commitOutOfOrder()`: a test hook that makes the next push's rows visible only after a later push
 
-- [ ] **Step 1: Write the failing tests.**
+- [x] **Step 1: Write the failing tests.**
   - `pushing same changeId twice stores once`
   - `pull afterSeq returns only newer rows in order`
   - `hints fire for other clients, not the pusher`
   - `offline throws SyncOfflineException`
   - `cipher round-trip`
   - `cipher open on garbage throws FormatException`
-- [ ] **Step 2:** Run the tests. Expected: FAIL.
-- [ ] **Step 3:** Implement.
-- [ ] **Step 4:** Run the tests. Expected: PASS.
-- [ ] **Step 5: Checkpoint.**
+- [x] **Step 2:** Run the tests. Expected: FAIL.
+- [x] **Step 3:** Implement.
+- [x] **Step 4:** Run the tests. Expected: PASS.
+- [x] **Step 5: Checkpoint.**
 
 ### Task 10: ChangeMerger (applying remote changes)
 
@@ -543,30 +549,41 @@ grant execute on function public.delete_account() to authenticated;
 **Interfaces:**
 
 - Consumes: `WeaveDatabase`, `HlcClock.receive`, `FieldValue`, `EntityType`
-- Produces: `class ChangeMerger { ChangeMerger(WeaveDatabase db, HlcClock clock, Future<String> Function(String deviceId) deviceName); Future<MergeResult> apply(RemoteChange meta, Map<String, FieldValue> fields); }` with `enum MergeResult { applied, ignored, conflict, resurrected }`.
+- Produces: `class ChangeMerger { ChangeMerger(WeaveDatabase db, HlcClock clock, ChangeWriter writer, Future<String> Function(String deviceId) deviceName); Future<MergeResult> apply(RemoteChange meta, Map<String, FieldValue> fields); }` with `enum MergeResult { applied, ignored, conflict, resurrected }`.
 
 **Rules, in order, inside one transaction:**
 
-1. Call `clock.receive(Hlc.parse(meta.hlc))`.
+1. Call `clock.receive` with the newest of `meta.hlc` and every field's `h` (counter overflow carries into millis; never throws). An HLC (`meta.hlc`, a field `h`, or `b`) that does not parse, whose counter is at or above `Hlc.maxCounter`, or whose millis are at or above 10^14 (no real clock; it would push the clock past the 15-digit packed form) is malformed; a malformed `b` counts as absent; such a field is skipped, and a malformed `meta.hlc` makes the change `ignored` with nothing touched.
 2. For each field, if the remote `h` is greater than the local `fieldHlcs[f]` (or there is none), set the column and the field's HLC. Otherwise skip it.
-3. **Text conflict:** the field is `text`; the outbox holds an unpushed change to this item's `text`; the remote `h` is greater; and the values differ. Then **keep the local text**, set `conflictText` to the remote value and `conflictFrom` to `deviceName(meta.deviceId)`, and record the remote HLC as the field's HLC. The local outbox change then still wins on other devices, because a new local tick is issued for `text` (re-`write` the local text), so every device ends with the same text plus a conflict here.
-4. **Edit vs delete:** if the row has `deletedAt != null` and the incoming change touches any field other than `deletedAt`, with an HLC greater than `fieldHlcs['deletedAt']`, set `deletedAt = null` and return `resurrected`.
-5. Missing row plus a remote change: insert it, with default values for absent fields.
-6. `deletedAt == 0` (purge marker): hard-delete locally.
+3. **Text conflict (base version):** every `text` write carries `b`, the text HLC it was made on top of. The device also keeps the base of its current text in `fieldHlcs['text.b']` (local only, never synced, never a field). For an incoming `text` (`h`, `b`, value) against local text HLC `L`, base `Lb`:
+   - no `L` → apply (rule 2);
+   - `h == L` or `h == Lb` → already seen, skip;
+   - same device (node) as `L`: older → skip (ancestor or a loser already kept), newer → apply, no conflict. Relies on node = device id and a device id never being reused with a reset clock;
+   - `b == L` → made on top of ours: rule 2, no conflict;
+   - otherwise the edits are concurrent. Same value → rule 2, no conflict. Different values → the greater HLC wins on every device (no re-write, no new outbox entry) and the loser becomes `conflictText`, with `conflictFrom` = the device that wrote the loser. Result `conflict`. An unresolved conflict is never overwritten: a new loser is appended, in arrival order (may differ between devices). Each loser keeps its text, device name and HLC: `conflictText` is a JSON array of texts and `conflictFrom` is `{"from": [...], "hlc": [...]}`, read and written only through `lib/core/sync/conflict_losers.dart`; a legacy plain string reads as one loser.
+   - **Loser set rules (same set on every device):** an edit made on top of a kept loser (`b` equals its HLC), or on top of a later edit by that loser's device, replaces it (as a loser if it loses, or by becoming the text). An incoming loser older than a kept loser from the same device is ignored. A loser already kept (exact text) is not added again, so redelivery is ignored. Whenever the merger sets the text, a loser equal to it is dropped. The result is `conflict` only when a new loser is stored; otherwise `applied` (text changed or losers dropped) or `ignored`.
+   - Conflict columns are never synced: Resolving on one device doesn't clear the other's conflict rows, except that a loser identical to the current text is dropped automatically.
+   - A payload without `b` (older format), or with a `b` not older than its `h`, counts as concurrent only while a local text edit is pending in the outbox; otherwise as sequential.
+4. **Edit vs delete:** if the row has `deletedAt != null` and the incoming change touches any field other than `deletedAt`, with an HLC greater than `fieldHlcs['deletedAt']`, set `deletedAt = null` (written through the writer so other devices follow) and return `resurrected`.
+5. **Trash vs newer edit:** an incoming trash (`deletedAt` > 0) is not applied when the row has any synced field newer than it; instead `deletedAt = null` is written through the writer and the result is `resurrected`.
+6. Missing row plus a remote change: insert it, with default values for absent fields. An item insert with no `listId`, or whose list is purged, is ignored (no orphans).
+7. `deletedAt == 0` (purge marker): hard-delete locally (a list takes its items and its `mini_bars` row), drop pending outbox rows for those ids, and record `purged.<id>` for each. Late changes for a purged id or a purged list are ignored. Delete forever and trash purge on the deleting device do the same.
 
-- [ ] **Step 1: Write the failing tests.**
+Field maps live once in `lib/core/sync/synced_fields.dart`; purge keys and clean-up in `lib/core/sync/purge_log.dart`.
+
+- [x] **Step 1: Write the failing tests.**
   - `newer remote field wins, older ignored`
   - `different fields from two devices both survive`
-  - `concurrent text edits keep both`: local edit is pending in the outbox; remote edits text → local text kept, `conflictText` is the remote text, `conflictFrom` is `'Pixel 8'`, result `conflict`
+  - `concurrent text edits keep both`: newer HLC wins, loser in `conflictText` (with `conflictFrom`), result `conflict`
   - `remote text edit without pending local edit just applies`
   - `edit after delete resurrects`
   - `purge marker deletes row`
   - `unknown field in payload is ignored, not thrown`: forward compatibility
   - `apply is idempotent`: the same change twice leaves the same row
-- [ ] **Step 2:** Run the tests. Expected: FAIL.
-- [ ] **Step 3:** Implement.
-- [ ] **Step 4:** Run the tests. Expected: PASS.
-- [ ] **Step 5: Checkpoint.**
+- [x] **Step 2:** Run the tests. Expected: FAIL.
+- [x] **Step 3:** Implement.
+- [x] **Step 4:** Run the tests. Expected: PASS.
+- [x] **Step 5: Checkpoint.**
 
 ### Task 11: SyncEngine and status
 
@@ -587,7 +604,7 @@ grant execute on function public.delete_account() to authenticated;
     - `Future<void> syncNow()`
     - `void start()`: subscribes to outbox inserts (debounced 300 ms), `transport.hints()`, connectivity regained, and a 60 s fallback timer
     - `Future<void> stop()`
-  - `syncNow` does, **pull first, then push**. The order matters: the merger detects a text conflict only while the local edit is still in the outbox, so pushing first would let one edit be lost silently.
+  - `syncNow` does, **pull first, then push**. Conflicts are detected by base HLC (`b`), not by the outbox. Pull first is kept so old-format payloads without `b` still see the pending local edit, and so one pass converges.
     1. **Pull:** loop `pull(afterSeq: max(0, cursor - 100))` until there are fewer than 500 rows. Skip rows where `deviceId == self`. `open`, then `merger.apply`. Store `Kv('sync.cursor') = max seq seen`.
     2. **Push:** read the outbox oldest first, in batches of 200. `seal` each, `push`, and **delete only the acked batch**.
     3. A single `FormatException` from `open` → log the id, put the change in `Kv('sync.quarantine.<changeId>')`, and continue.
@@ -602,7 +619,7 @@ grant execute on function public.delete_account() to authenticated;
     3. B goes online.
     4. Sync both twice.
     5. Both are equal.
-  - `concurrent text edits keep both across devices`: both edit the same item while offline, then sync. Both devices end with the same `text`, and the device that pulled second has `conflictText`.
+  - `concurrent text edits keep both across devices`: both edit the same item while offline, then sync. Both devices end with the same `text` (the greater HLC) and the same set of losers (order may differ), each with the device that wrote it.
   - `push failure keeps outbox rows`: the transport throws on push → outbox count is unchanged and status is `error`.
   - `late commit with lower seq is still applied`: use `commitOutOfOrder()`; after two syncs B has both changes.
   - `delete on A trashes on B`
@@ -836,10 +853,11 @@ General rule for every UI task:
 
 **Interfaces:**
 
-- Consumes: `Item.conflict`, `ResolveConflict`, `SyncEngine.events`
+- Consumes: `Item.conflicts`, `ResolveConflict`, `SyncEngine.events`
 - Produces:
-  - An `ItemTile` with a conflict shows both versions, each labelled with its source ("This Mac" / "This PC" / "This phone" for local, `conflictFrom` for remote), with **Keep both** and a **Keep only this** button per version, as in the 03 Groceries sample.
+  - An `ItemTile` with a conflict shows both versions. Label `text` by the node of `fieldHlcs['text']` ("This Mac" / "This PC" / "This phone" when it is this device) and each loser by its own device name ("This Mac" etc. when it equals this device). Several losers show one row each (from `Item.conflicts`), and the resolve buttons pass that loser's `index`. Each version has **Keep both** and a **Keep only this** button per version, as in the 03 Groceries sample.
   - Undo restores the conflict.
+  - Resolving on one device doesn't clear the other's conflict rows, except that a loser identical to the current text is dropped automatically.
   - The sidebar sync line reads "1 conflict in Groceries" and links to the list.
   - A `resurrected` event shows a toast: "A task you deleted was edited on another device, so it's back".
 
@@ -867,6 +885,7 @@ General rule for every UI task:
     - Archive rows: dot · name · "7 items · Archived 28 Oct" · Restore.
     - Trash rows: "Deleted 2 days ago · empties in 28 days" · Restore · Delete forever, with Undo.
     - `purgeTrash(now)` runs on app start.
+    - An item added or edited in a list that was concurrently trashed stays inside the trashed list; the trash view must show it and warn before purge.
   - **Search:** `restartable()` with a 150 ms debounce. Results are grouped by list, with matches highlighted, and the copy "N results for "x" across M lists. Works offline."
     - Desktop: the sidebar field turns the canvas into results.
     - Phone: the Search tab.
@@ -1061,7 +1080,7 @@ General rule for every UI task:
   1. Add on X → visible on Y in under 3 s.
   2. Tick on X → reminder cancelled on Y.
   3. Both offline, edit different tasks, reconnect → both kept.
-  4. Both offline, edit the same task text → conflict row on one device, nothing lost.
+  4. Both offline, edit the same task text → conflict row on both devices, nothing lost.
   5. Delete a list on X → in trash on Y; restore on Y → back on X.
   6. Sign out on X → X is empty, Y is unaffected.
   7. Local mode with 10 tasks → sign in → tasks reach Y.
