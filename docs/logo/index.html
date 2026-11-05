@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en" class="t-light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weave — logo exploration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../design-02/assets/tokens.css">
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: var(--font); background: var(--ground); color: var(--text); font-size: 14px; line-height: 1.45; padding: 40px 24px 80px; }
+  .wrap { max-width: 1240px; margin: 0 auto; }
+  header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
+  h1 { font-size: 24px; font-weight: 500; letter-spacing: -0.01em; }
+  header p { color: var(--muted); margin-top: 4px; max-width: 640px; }
+  .toggle { font: inherit; border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: 6px; height: 32px; padding: 0 12px; cursor: pointer; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
+  .hero { height: 220px; display: grid; place-items: center; background: var(--ground); border-bottom: 1px solid var(--rule); font-size: 120px; color: var(--text); }
+  .body { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 14px; }
+  .title { display: flex; gap: 8px; align-items: baseline; }
+  .title b { font-weight: 500; font-size: 16px; }
+  .title span { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .idea { color: var(--muted); }
+
+  .row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .lbl { color: var(--faint); font-size: 12px; }
+  .cell { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+
+  /* App icon tiles (macOS-ish squircle via radius) */
+  .tile { width: 64px; height: 64px; border-radius: 15px; display: grid; place-items: center; font-size: 40px; box-shadow: 0 1px 2px rgba(0,0,0,.12), inset 0 0 0 1px rgba(0,0,0,.06); }
+  .tile.tp { background: #F5F5F3; color: #0A0A0A; }
+  .tile.ti { background: #141414; color: #F5F5F3; }
+  .tile.tn { background: var(--n0); color: #0A0A0A; }
+
+  /* Menu bar strip */
+  .menubar { height: 26px; border-radius: 6px; background: #E9E9E7; color: #111; display: flex; align-items: center; gap: 14px; padding: 0 10px; font-size: 13px; }
+  .menubar .m { font-size: 16px; }
+  .t-dark .menubar { background: #2A2A2A; color: #F2F2F2; }
+  .tab { height: 30px; border-radius: 8px 8px 0 0; background: var(--raised); display: inline-flex; align-items: center; gap: 8px; padding: 0 12px; font-size: 13px; }
+  .tab .m { font-size: 16px; }
+  .lockup { display: flex; align-items: center; gap: .32em; font-size: 30px; font-weight: 500; letter-spacing: -0.035em; }
+  .lockup .m { font-size: 1em; }
+
+  /* ===== Marks. Every mark is a 1em box; colours come from --ink / --acc / --bg2 so .mono can flatten them. ===== */
+  .m { position: relative; display: inline-block; width: 1em; height: 1em; --ink: currentColor; --acc: var(--n0); --acc2: var(--n1); --acc3: var(--n2); --soft: color-mix(in srgb, currentColor 22%, transparent); }
+  .mono .m, .m.mono { --acc: currentColor; --acc2: currentColor; --acc3: currentColor; }
+  .m > i { position: absolute; display: block; }
+
+  /* 1 · Day thread: today on one line — lived part in ink, the next task as a colour dot */
+  .m-thread > .l1 { left: .06em; top: .47em; width: .5em; height: .085em; background: var(--ink); border-radius: .05em; }
+  .m-thread > .l2 { left: .56em; top: .47em; width: .38em; height: .085em; background: var(--soft); border-radius: .05em; }
+  .mono .m-thread > .l2, .m-thread.mono > .l2 { background: var(--ink); opacity: .35; }
+  .m-thread > .d { left: .6em; top: .375em; width: .27em; height: .27em; border-radius: 50%; background: var(--acc); box-shadow: 0 0 0 .055em var(--ink); }
+  .m-thread > .r { left: .1em; top: .425em; width: .17em; height: .17em; border-radius: 50%; background: var(--surface, #fff); box-shadow: inset 0 0 0 .05em var(--ink); }
+  .tile .m-thread > .r { background: transparent; }
+
+  /* 2 · Note w: a lowercase w set on a small square note, its corner dot is the list colour */
+  .m-notew > .p { inset: .08em; border-radius: .16em; background: var(--acc); }
+  .mono .m-notew > .p, .m-notew.mono > .p { background: transparent; box-shadow: inset 0 0 0 .07em var(--ink); }
+  .m-notew > .w { inset: 0; display: grid; place-items: center; font-weight: 600; font-size: .66em; letter-spacing: -0.04em; line-height: 1; padding-bottom: .1em; color: #0A0A0A; }
+  .mono .m-notew > .w, .m-notew.mono > .w { color: var(--ink); }
+
+  /* 3 · Stack: three notes, one per device, fanned — the same note everywhere */
+  .m-stack > i { width: .56em; height: .56em; border-radius: .12em; }
+  .m-stack > .a { left: .08em; top: .3em; background: var(--acc2); transform: rotate(-12deg); }
+  .m-stack > .b { left: .36em; top: .3em; background: var(--acc3); transform: rotate(10deg); }
+  .m-stack > .c { left: .22em; top: .14em; background: var(--acc); box-shadow: 0 .03em .06em rgba(0,0,0,.18); }
+  .mono .m-stack > i, .m-stack.mono > i { background: transparent; box-shadow: inset 0 0 0 .06em var(--ink); }
+  .mono .m-stack > .c, .m-stack.mono > .c { background: var(--ink); }
+
+  /* 4 · Weave: two warp and two weft bands, over-under — literal, but square like a note */
+  .m-weave > i { background: var(--ink); border-radius: .03em; }
+  .m-weave > .h1 { left: .1em; top: .26em; width: .8em; height: .17em; }
+  .m-weave > .h2 { left: .1em; top: .57em; width: .8em; height: .17em; background: var(--acc); }
+  .m-weave > .v1 { left: .26em; top: .1em; width: .17em; height: .8em; }
+  .m-weave > .v2 { left: .57em; top: .1em; width: .17em; height: .8em; }
+  /* over-under: cut the under strand with a ground-coloured gap */
+  .m-weave > .x { width: .17em; height: .17em; background: var(--ink); }
+  .m-weave > .x1 { left: .26em; top: .26em; box-shadow: 0 -.04em 0 var(--gap-c), 0 .04em 0 var(--gap-c); z-index: 2; }
+  .m-weave > .x2 { left: .57em; top: .57em; box-shadow: 0 -.04em 0 var(--gap-c), 0 .04em 0 var(--gap-c); z-index: 2; }
+  .m-weave > .x3 { left: .57em; top: .26em; z-index: 3; box-shadow: -.04em 0 0 var(--gap-c), .04em 0 0 var(--gap-c); }
+  .m-weave > .x4 { left: .26em; top: .57em; z-index: 3; background: var(--acc); box-shadow: -.04em 0 0 var(--gap-c), .04em 0 0 var(--gap-c); }
+  .m-weave { --gap-c: var(--ground); }
+  .tile.tp .m-weave { --gap-c: #F5F5F3; } .tile.ti .m-weave { --gap-c: #141414; } .tile.tn .m-weave { --gap-c: var(--n0); }
+  .menubar .m-weave { --gap-c: #E9E9E7; } .t-dark .menubar .m-weave { --gap-c: #2A2A2A; } .tab .m-weave { --gap-c: var(--raised); } .lockup .m-weave { --gap-c: var(--surface); }
+
+  /* 5 · Dot w: the word's own w, ending in the 'now' dot */
+  .m-dotw > .w { inset: 0; display: grid; place-items: center; font-weight: 500; font-size: .92em; letter-spacing: -0.05em; line-height: 1; padding-bottom: .16em; color: var(--ink); }
+  .m-dotw > .d { right: .02em; top: .14em; width: .2em; height: .2em; border-radius: 50%; background: var(--acc); }
+
+  /* 6 · The bar: Weave's own face — the floating mini bar, dot + "next" line */
+  .m-bar > .p { left: .04em; right: .04em; top: .3em; height: .4em; border-radius: .2em; background: var(--ink); }
+  .m-bar > .d { left: .15em; top: .41em; width: .18em; height: .18em; border-radius: 50%; background: var(--acc); }
+  .m-bar > .t { left: .42em; top: .47em; width: .38em; height: .06em; border-radius: .03em; background: var(--surface, #fff); opacity: .85; }
+  .tile.ti .m-bar > .p { background: #F5F5F3; } .tile.ti .m-bar > .t { background: #141414; }
+  .mono .m-bar > .d, .m-bar.mono > .d { background: transparent; box-shadow: inset 0 0 0 .045em var(--bg-c, #fff); }
+  .menubar .m-bar > .t, .menubar .m-bar > .d { background: #E9E9E7; } .t-dark .menubar .m-bar > .t, .t-dark .menubar .m-bar > .d { background: #2A2A2A; }
+
+  /* 7 · Two notes, one thread: two devices, the same line running through both */
+  .m-two > .a, .m-two > .b { top: .24em; width: .4em; height: .52em; border-radius: .08em; }
+  .m-two > .a { left: .06em; background: var(--acc); }
+  .m-two > .b { right: .06em; background: var(--acc2); }
+  .mono .m-two > .a, .mono .m-two > .b, .m-two.mono > .a, .m-two.mono > .b { background: transparent; box-shadow: inset 0 0 0 .06em var(--ink); }
+  .m-two > .l { left: 0; right: 0; top: .46em; height: .08em; background: var(--ink); border-radius: .04em; }
+
+  /* 8 · Corner: a note whose corner lifts into a W-shaped thread — the sticky note, without the fold cliché */
+  .m-pin > .p { left: .1em; top: .1em; width: .8em; height: .8em; border-radius: .14em; background: var(--acc); }
+  .m-pin > .c { left: .5em; top: .1em; width: .4em; height: .4em; border-radius: 0 .14em 0 .4em; background: var(--ink); }
+  .mono .m-pin > .p, .m-pin.mono > .p { background: transparent; box-shadow: inset 0 0 0 .07em var(--ink); }
+
+  footer { margin-top: 28px; color: var(--muted); max-width: 760px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Weave — logo directions</h1>
+      <p>Built the way design 02 was: HTML/CSS on the design tokens (paper ground, near-black ink, the six list colours as the only hue). Each mark is shown big, as an app icon on three grounds, at true menu-bar and tab sizes in one colour, and next to the word. Pick by number; the chosen one gets converted to SVG.</p>
+    </div>
+    <button class="toggle" id="mode">Dark mode</button>
+  </header>
+  <div class="grid" id="grid"></div>
+  <footer>Exploration only — design 02 stays locked until a direction is approved. Hues: <code>--n0</code> yellow, <code>--n1</code> blue, <code>--n2</code> green from tokens.css.</footer>
+</div>
+<script>
+const C = [
+  { id: 'thread', name: 'Day thread', html: '<i class="l1"></i><i class="l2"></i><i class="r"></i><i class="d"></i>',
+    idea: 'The element only Weave has: today on one line, the lived part in ink, the next task as a dot in its list\'s colour.' },
+  { id: 'notew', name: 'Note w', html: '<i class="p"></i><i class="w">w</i>',
+    idea: 'A lowercase w on a small square note. Plain and friendly; the note colour can follow the user\'s first list.' },
+  { id: 'stack', name: 'Stack', html: '<i class="a"></i><i class="b"></i><i class="c"></i>',
+    idea: 'Three notes, one per device, fanned out — the same note on every screen.' },
+  { id: 'weave', name: 'Weave', html: '<i class="h1"></i><i class="h2"></i><i class="v1"></i><i class="v2"></i><i class="x x1"></i><i class="x x2"></i><i class="x x3"></i><i class="x x4"></i>',
+    idea: 'Two by two strands, over and under, in a square like a note. One strand carries the list colour.' },
+  { id: 'dotw', name: 'Dot w', html: '<i class="w">w</i><i class="d"></i>',
+    idea: 'Just the word\'s w in Geist, with the day thread\'s "next" dot beside it. Lightest touch, closest to the wordmark.' },
+  { id: 'bar', name: 'The bar', html: '<i class="p"></i><i class="d"></i><i class="t"></i>',
+    idea: 'Weave\'s own face: the floating mini bar — a dot and the "next 17:00" line. The product is the logo.' },
+  { id: 'two', name: 'Two notes, one thread', html: '<i class="a"></i><i class="b"></i><i class="l"></i>',
+    idea: 'Two devices, the same line running through both. Sync, said with two shapes and a line.' },
+  { id: 'pin', name: 'Lifted corner', html: '<i class="p"></i><i class="c"></i>',
+    idea: 'A square note whose corner is cut in ink — a sticky note without the folded-corner cliché.' },
+];
+const mark = (c, extra = '') => `<span class="m m-${c.id} ${extra}">${c.html}</span>`;
+document.getElementById('grid').innerHTML = C.map((c, i) => `
+  <article class="card">
+    <div class="hero">${mark(c)}</div>
+    <div class="body">
+      <div class="title"><span>${i + 1}</span><b>${c.name}</b></div>
+      <p class="idea">${c.idea}</p>
+      <div class="row">
+        <div class="cell"><div class="tile tp">${mark(c)}</div><span class="lbl">paper</span></div>
+        <div class="cell"><div class="tile ti">${mark(c)}</div><span class="lbl">ink</span></div>
+        <div class="cell"><div class="tile tn">${mark(c, 'mono')}</div><span class="lbl">note</span></div>
+        <div class="cell"><span style="font-size:32px">${mark(c)}</span><span class="lbl">32</span></div>
+        <div class="cell"><span style="font-size:16px">${mark(c)}</span><span class="lbl">16</span></div>
+      </div>
+      <div class="row">
+        <div class="menubar">${mark(c, 'mono')}<span>Wi-Fi</span><span>Tue 3 Nov 16:20</span></div>
+        <div class="tab">${mark(c)}<span>Weave</span></div>
+      </div>
+      <div class="lockup">${mark(c)}<span>weave</span></div>
+    </div>
+  </article>`).join('');
+const btn = document.getElementById('mode');
+btn.onclick = () => {
+  const dark = document.documentElement.classList.toggle('t-dark');
+  document.documentElement.classList.toggle('t-light', !dark);
+  btn.textContent = dark ? 'Light mode' : 'Dark mode';
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en" class="t-light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weave logo kit</title>
+<link rel="icon" href="favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../design-02/assets/tokens.css">
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: var(--font); background: var(--ground); color: var(--text); font-size: 14px; line-height: 1.5; padding: 40px 24px 80px; }
+  .wrap { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+  header { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
+  h1 { font-size: 24px; font-weight: 500; } h2 { font-size: 16px; font-weight: 500; }
+  header p, .muted { color: var(--muted); }
+  .toggle { font: inherit; border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: 6px; height: 32px; padding: 0 12px; cursor: pointer; }
+  section { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px 22px; display: flex; flex-direction: column; gap: 14px; }
+  .row { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+  .cell { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .lbl { font-size: 12px; color: var(--faint); font-variant-numeric: tabular-nums; }
+  img { display: block; }
+  .pad { padding: 16px; border-radius: 8px; }
+  .g-paper { background: #F5F5F3; } .g-ink { background: #141414; } .g-white { background: #fff; box-shadow: inset 0 0 0 1px var(--border); }
+  .lockup { display: flex; align-items: center; gap: 12px; font-size: 40px; font-weight: 500; letter-spacing: -0.035em; }
+  .stacked { flex-direction: column; gap: 10px; font-size: 30px; }
+  .sw { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .chip { width: 96px; height: 56px; border-radius: 6px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.06); }
+  .space { position: relative; padding: 26px; background: repeating-linear-gradient(45deg, transparent 0 6px, color-mix(in srgb, var(--n1) 18%, transparent) 6px 7px); border: 1px dashed var(--n1-ink); border-radius: 4px; }
+  .dont { position: relative; }
+  .dont::after { content: ""; position: absolute; inset: -6px; border: 2px solid var(--negative); border-radius: 8px; }
+  ul { padding-left: 18px; color: var(--muted); } li + li { margin-top: 4px; }
+  code { font-size: 13px; }
+  table { border-collapse: collapse; width: 100%; } td { padding: 6px 8px; border-top: 1px solid var(--rule); vertical-align: top; } td:first-child { white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Weave logo · Lifted corner (8a)</h1>
+      <p>A square note with its top-right corner lifted in ink. A sticky note without the folded-corner cliché: the note is picked up, within reach.</p>
+    </div>
+    <button class="toggle" id="mode">Dark mode</button>
+  </header>
+
+  <section>
+    <h2>Mark</h2>
+    <div class="row">
+      <div class="cell"><div class="pad g-paper"><img src="weave-mark.svg" width="160" height="160" alt="Weave mark"></div><span class="lbl">weave-mark.svg · primary</span></div>
+      <div class="cell"><div class="pad g-ink"><img src="weave-mark-reversed.svg" width="160" height="160" alt=""></div><span class="lbl">weave-mark-reversed.svg · on dark</span></div>
+      <div class="cell"><div class="pad g-white"><img src="weave-mark-black.svg" width="160" height="160" alt=""></div><span class="lbl">weave-mark-black.svg · one colour</span></div>
+      <div class="cell"><div class="pad g-ink"><img src="weave-mark-white.svg" width="160" height="160" alt=""></div><span class="lbl">weave-mark-white.svg · one colour</span></div>
+    </div>
+    <p class="muted">In one colour the corner is separated by a gap, since ink-on-ink would erase it. Construction: 256 grid, note 208 with radius 36; the corner is a quarter circle of radius 104 centred on the note's top-right corner (half the note's width).</p>
+  </section>
+
+  <section>
+    <h2>Name lockups</h2>
+    <div class="row">
+      <div class="pad g-paper"><div class="lockup" style="color:#0A0A0A"><img src="weave-mark.svg" width="52" height="52" alt=""><span>weave</span></div></div>
+      <div class="pad g-ink"><div class="lockup" style="color:#F2F2F2"><img src="weave-mark-reversed.svg" width="52" height="52" alt=""><span>weave</span></div></div>
+      <div class="pad g-paper"><div class="lockup stacked" style="color:#0A0A0A"><img src="weave-mark.svg" width="72" height="72" alt=""><span>weave</span></div></div>
+    </div>
+    <p class="muted">Geist 500, lowercase, tracking −3.5 %. The mark is 1.3× the cap height and sits 0.3× its own width from the word. The lockups here are live text; outline them to SVG paths before handing them to print or a store listing.</p>
+  </section>
+
+  <section>
+    <h2>Colour</h2>
+    <div class="row">
+      <div class="sw"><div class="chip" style="background:#F5C84C"></div>Note yellow · <code>--n0</code> #F5C84C</div>
+      <div class="sw"><div class="chip" style="background:#141414"></div>Ink · <code>--primary</code> #141414</div>
+      <div class="sw"><div class="chip" style="background:#F5F5F3"></div>Paper · <code>--ground</code> #F5F5F3</div>
+    </div>
+    <p class="muted">Yellow is the brand note. Inside the app the note may take the current list's colour (F7), with the corner always in ink:</p>
+    <div class="row">
+      <img src="weave-mark-n0.svg" width="56" height="56" alt=""><img src="weave-mark-n1.svg" width="56" height="56" alt=""><img src="weave-mark-n2.svg" width="56" height="56" alt=""><img src="weave-mark-n3.svg" width="56" height="56" alt=""><img src="weave-mark-n4.svg" width="56" height="56" alt=""><img src="weave-mark-n5.svg" width="56" height="56" alt="">
+    </div>
+  </section>
+
+  <section>
+    <h2>App icons and small sizes</h2>
+    <div class="row">
+      <div class="cell"><img src="app-icon-light.svg" width="128" height="128" alt=""><span class="lbl">app-icon-light.svg</span></div>
+      <div class="cell"><img src="app-icon-dark.svg" width="128" height="128" alt=""><span class="lbl">app-icon-dark.svg</span></div>
+      <div class="cell"><img src="png/app-icon-light-64.png" width="64" height="64" alt=""><span class="lbl">64</span></div>
+      <div class="cell"><img src="png/app-icon-light-32.png" width="32" height="32" alt=""><span class="lbl">32</span></div>
+      <div class="cell"><img src="png/app-icon-light-16.png" width="16" height="16" alt=""><span class="lbl">16</span></div>
+      <div class="cell"><div class="pad g-white" style="padding:10px"><img src="weave-mark-template.svg" width="22" height="22" alt=""></div><span class="lbl">menu-bar template · 22</span></div>
+    </div>
+    <p class="muted">The app icon is the note itself, full bleed. The menu bar and tray use the outline template (black on transparent; macOS tints it). The Android adaptive foreground keeps the mark inside the 66 dp safe zone.</p>
+  </section>
+
+  <section>
+    <h2>Clear space and minimum size</h2>
+    <div class="row">
+      <div class="space"><img src="weave-mark.svg" width="104" height="104" alt=""></div>
+      <ul>
+        <li>Clear space on every side: the note's corner radius × 3 (≈ ¼ of the mark).</li>
+        <li>Minimum: 16 px for the colour mark, 14 px for the template, 20 px tall for a lockup.</li>
+        <li>Below 24 px use the mark alone, never the lockup.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>Don't</h2>
+    <div class="row">
+      <div class="cell"><div class="dont"><img src="weave-mark.svg" width="72" height="72" alt="" style="transform:rotate(90deg)"></div><span class="lbl">rotate (the corner is top-right)</span></div>
+      <div class="cell"><div class="dont"><img src="weave-mark.svg" width="72" height="72" alt="" style="transform:scaleX(1.4)"></div><span class="lbl">stretch</span></div>
+      <div class="cell"><div class="dont"><img src="weave-mark.svg" width="72" height="72" alt="" style="filter:drop-shadow(0 6px 8px rgba(0,0,0,.35))"></div><span class="lbl">add shadows or effects</span></div>
+      <div class="cell"><div class="dont pad g-ink" style="padding:8px"><img src="weave-mark.svg" width="56" height="56" alt=""></div><span class="lbl">ink corner on dark</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Files</h2>
+    <table>
+      <tr><td><code>weave-mark*.svg</code></td><td>Masters: colour, reversed, black, white, and one per list colour (<code>-n0</code>…<code>-n5</code>).</td></tr>
+      <tr><td><code>weave-mark-template.svg</code></td><td>Menu-bar / tray outline. PNGs: <code>png/weaveTemplate.png</code> (16) and <code>@2x</code> (32), plus 18/22/36/44.</td></tr>
+      <tr><td><code>app-icon-*.svg</code></td><td>Full-bleed app icon, light and dark. PNGs 16–1024 in <code>png/</code>.</td></tr>
+      <tr><td><code>app-icon-android-fg.svg</code></td><td>Adaptive-icon foreground (use paper #F5F5F3 or yellow as the background layer). PNG at 432.</td></tr>
+      <tr><td><code>favicon.ico</code></td><td>16 / 32 / 48. PNGs <code>png/favicon-*.png</code>.</td></tr>
+    </table>
+    <p class="muted">Status: approved direction, not yet in the app. Adopting it replaces the placeholder mark in <code>docs/design-02/assets/icons.js</code> and is a flagged change to the locked design 02. Trademark clearance not checked; run a search before launch.</p>
+  </section>
+</div>
+<script>const b=document.getElementById('mode');b.onclick=()=>{const d=document.documentElement.classList.toggle('t-dark');document.documentElement.classList.toggle('t-light',!d);b.textContent=d?'Light mode':'Dark mode'};</script>
+</body>
+</html>
