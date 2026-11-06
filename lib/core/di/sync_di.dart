@@ -23,8 +23,10 @@ import 'core_di.dart';
 /// from a secondary window entrypoint such as `entrypoints/mini_bar_main.dart`:
 /// only one engine may run `SyncEngine`.
 ///
-/// Needs `registerCore` first. [signedIn] / [signedInNow] come from the
-/// session (Task 13); without them the status stays `localOnly`.
+/// Needs `registerCore` first. [signedIn] / [signedInNow] come from
+/// `SessionCubit` (`registerAccount`); without them the status stays
+/// `localOnly`. Only the first call's values are used: the status cubit is
+/// kept across re-registrations.
 /// [deviceName], [connectivity] and [checkOnline] default to the platform
 /// plugins; tests pass their own.
 ///
@@ -100,8 +102,8 @@ Future<void> registerSync(
   }, dispose: (c) => c.close());
 }
 
-/// Starts syncing once signed in (app start with a session, or after sign-in
-/// in Task 13): starts the engine and, in the background, registers this
+/// Starts syncing once signed in (bootstrap with a restored session, or
+/// `SessionCubit` after sign-in): starts the engine and, in the background, registers this
 /// device and caches device names.
 void startSync(GetIt sl) {
   sl<SyncEngine>().start();

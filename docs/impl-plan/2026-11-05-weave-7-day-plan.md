@@ -35,6 +35,7 @@
 | 3 | 2026-11-05 | **Tasks 9–10 done, reviewed and staged.** Transport interface + in-memory transport + cipher seam (reproduces the late-commit skip). ChangeMerger after 4 fix rounds and 3 reviews: text conflicts detected by base HLC (`b`), greater HLC wins on every device, every loser kept (JSON arrays with device name + HLC, same set on all devices), same-device chains don't conflict; delete forever remembered on the deleting device (`purged.<id>`, incl. purgeTrash, mini bar removed, undo unmarks); trash older than a local edit is undone; malformed HLCs ignored; clock overflow carries instead of throwing; one synced-field map. Two- and three-device convergence tests, no ping-pong. `flutter analyze` 0 issues, 184/184 tests. **Still waiting on the user:** Windows build check. Next: Task 11 (sync engine) — read the Task 11 items in "Carried into" first. |
 | 4 | 2026-11-05 | **Task 11 done, reviewed and staged.** SyncEngine: pull (seq order across pages, re-read window cursor−100, applied-id dedupe + cursor in the same transaction as the merge, bounded markers) then push (oldest first, batches of 200, delete only acked). Quarantine of unreadable changes blocks only that entity; other apply errors stop the pull at that row but still push, then back off 2…60 s. One pass at a time; stop/start resets connectivity; `unregisterSync` for sign-out (Task 13). Local device-name cache. `SyncStatusCubit` global, `localOnly` when signed out. Not yet wired into bootstrap — Task 12 does that with the Supabase transport. `flutter analyze` 0 issues, 226/226 tests. **Still waiting on the user:** Windows build check. Next: Task 12 (Supabase transport, realtime hints, devices — Day 3 gate). |
 | 5 | 2026-11-06 | **Task 12 done, reviewed and staged — Day 3 gate passed.** Supabase transport on the real dev project: A→B in 1588 / 1761 / 1729 / 1791 / 1810 ms (NFR1 < 3 s), offline-edit case converges. Push relies on RLS + `auth.uid()` default (no client `user_id`); realtime hints per device channel, token set before join, reopen on user change / error / server close; network, timeout and offline session refresh → offline, server errors → error; per-request timeouts, no hidden retries. Pull pages report `full` / `lastSeq` so a malformed row never stalls catch-up. Device names cached from `devices` (outside the merge transaction, stopped at sign-out). Sync wired in the main entrypoint, local-only fallback without Supabase or session. No migration needed. Run: `flutter test integration_test/sync_supabase_test.dart -d macos --flavor dev --dart-define-from-file=config/dev.json`. `flutter analyze` 0 issues, 255/255 tests. **Still waiting on the user:** Windows build check. Next: Task 13 (auth, session, bulk upload, sign out, delete account) — it calls `startSync` after sign-in and `unregisterSync` on sign-out. |
+| 6 | 2026-11-06 | **Task 13 done, reviewed and staged — Day 3 complete (Phase 2 · Sync).** Auth gateway (gotrue codes → `AuthError`, incl. `emailNotConfirmed`, `unavailable`), `SessionCubit` with `SessionResult` (ok / busy / pendingChanges / otherAccountData / failed), one action at a time. Local mode queues nothing; the outbox gate follows the owner key `Kv('account.user')`, written with the first snapshot. Sign-in snapshots local data, starts sync, `Uploading` → `SignedIn` (also when offline). Restored session re-checks the owner. Server-side sign-out stops sync but keeps data and queue; same-user re-sign-in just pushes the queue. User decisions: sign-out with unsynced edits tries to send, then asks (`discardPending`); another account's data on the device → ask first (`replaceOtherAccountData`), never mixed, never wiped on a failed check. Sign-out / delete: guarded wipe (prefs `pref.*` survive), new device id via one clock + `renew`. Delete account: RPC first, failure changes nothing. No migration. `flutter analyze` 0 issues, 303/303 tests. **Still waiting on the user:** Windows build check. Next: Phase 3, Task 14 (app shell, routing, sync badge, undo toast). |
 
 Carried into later tasks from reviews:
 - Task 10: the merger takes `ChangeWriter`; applying a list purge also deletes its tasks; late changes never bring back a purged list or task.
@@ -47,6 +48,7 @@ Carried into later tasks from reviews:
 - Known limit: after a pull fails at a row, push still runs; a stuck remote text change without `b` (old format) is then treated as sequential because the outbox is empty. No such payloads exist yet.
 - Task 13: the device id is captured by the clock, writer, `DeviceNames`, `ChangeMerger` and `SyncEngine`. On sign-out: `unregisterSync(sl)` (disposes the engine, unregisters the transport, cipher, `DeviceNames` and `ChangeMerger`; detaches the `SyncStatusCubit`), then wipe, then re-register `DeviceId`, `HlcClock` and `ChangeWriter` with the new id, then `registerSync` again. The global `SyncStatusCubit` is kept (widgets hold one instance) and `registerSync` re-attaches it to the new engine's status.
 - Tasks 14 and 15 refresh list and Up next streams every minute and on app resume (overdue is computed when a stream starts).
+- Tasks 14 and 20 (from Task 13): after a server-side sign-out the session is `LocalSession` and the badge shows local-only, yet edits keep queueing for the account (`Kv('account.user')` set, gate on). Show a "Signed out · sign in again to sync" state instead of plain local-only (owner key present while `LocalSession`), with Sign in as the action.
 - Logo locked 2026-11-05 (`docs/logo/kit`): Task 14 uses the mark in the sidebar brand and Windows title bar; Task 24 uses the tray template; Platform app icons are already in place (2026-11-05: Android legacy + adaptive with monochrome on paper #F5F5F3, iOS without alpha, macOS on the 824/1024 grid, Windows .ico, web incl. maskable and apple-touch, Linux window icon from `assets/brand/app_icon.png`); Task 26 only verifies them in release builds. Brand assets for the UI and tray are in `assets/brand/`.
 - Task 14 wires `weaveTheme` into `WeaveApp`. Add a `tick` colour token before Task 15.
 
@@ -96,7 +98,7 @@ Carried into later tasks from reviews:
 - Local-first:
   - Repositories touch only the local DB.
   - UI never awaits the network (NFR4).
-  - Synced writes go through `ChangeWriter`, which writes the row and the outbox in one transaction (NFR2).
+  - Synced writes go through `ChangeWriter`, which writes the row and the outbox in one transaction (NFR2). In local mode it writes no outbox row; sign-in snapshots the state instead (Task 13).
 - No `as` casts when parsing; null-safe defaults. Never log task text, list names or tokens. Log ids and counts only.
 - Widgets are `HookWidget`s (no `StatefulWidget`) and have no `_buildX` methods. User-facing strings are plain English literals for now; localization is deferred (D9).
 - Glossary terms in code: `pinnedToTop` and `showInMiniBar`. Never a bare `pinned`.
@@ -124,7 +126,7 @@ Task 1 logs these as deviations D2–D9 in the architecture playbook.
 2. **The same task text edited offline on two devices.** Neither edit may be lost silently. The greater HLC wins on every device; the other text becomes `conflictText` with the name of the device that wrote it. Several concurrent losers are all kept. _Test in Task 10:_ `concurrent text edits keep both`.
 3. **A device clock that is an hour fast or slow.** HLC `receive` must move the local clock past any remote HLC it has seen, so a later edit on the slow device still wins. _Test in Task 3:_ `receive moves clock past a remote clock that is ahead`.
 4. **The app is killed or the network fails mid-push.** Outbox rows are deleted only after the server acknowledges them, and the next start pushes them again. _Test in Task 11:_ `push failure keeps outbox rows`.
-5. **Signing out, then into a different account.** No data or cursor from the first account may leak. Sign-out wipes every table and resets `sync.cursor`. _Test in Task 13:_ `sign out wipes lists, items, outbox and cursor`.
+5. **Signing out, then into a different account.** No data or cursor from the first account may leak. Sign-out wipes every table and resets `sync.cursor`; only device prefs (`Kv` keys `pref.*`, minus `WeaveDatabase.accountPrefKeys`) survive. Data left by a server-side sign-out is owned (`Kv('account.user')`) and is never uploaded to another account. _Test in Task 13:_ `sign out wipes lists, items, outbox and cursor`.
 
 ---
 
@@ -700,28 +702,47 @@ Field maps live once in `lib/core/sync/synced_fields.dart`; purge keys and clean
     - `Future<void> signIn(String email, String password)`: throws `AuthFailure(AuthError code)`
     - `Future<void> signUp(String email, String password)`
     - `Future<void> signOut()`
-    - `Future<void> deleteAccount()`: `rpc('delete_account')`, then sign out
+    - `Future<void> deleteAccount()`: `rpc('delete_account')` only; the session signs out after the wipe
   - `class AuthUser { id, email }`
-  - `enum AuthError { wrongPassword, emailInUse, weakPassword, network, unknown }`
-  - `sealed class SessionState`: `LocalSession()`, `Uploading(int done, int total)`, `SignedIn(AuthUser)`, `SigningOut()`
-  - `class SessionCubit extends Cubit<SessionState>`, with `signIn(email, password)`, `signUp(...)`, `signOut()` and `deleteAccount()`
+  - `enum AuthError { wrongPassword, emailInUse, weakPassword, emailNotConfirmed, network, unavailable, unknown }`
+  - `sealed class SessionState`: `LocalSession()`, `SigningIn()`, `Uploading(int done, int total)`, `SignedIn(AuthUser)`, `SigningOut()`
+  - `sealed class SessionResult`: `SessionOk()`, `SessionBusy()`, `PendingChanges(int count)`, `OtherAccountData()`, `SessionFailed(AuthError)`
+  - `class SessionCubit extends Cubit<SessionState>`, with `restore()`, `signIn(email, password, {replaceOtherAccountData})`, `signUp(...)`, `signOut({discardPending})` and `deleteAccount()`, all returning `Future<SessionResult>`
   - `class BulkUploader { Future<int> enqueueAll(); }` writes one outbox change per existing list and item, with all fields and current HLCs. It returns the count. Progress is `total - outboxCount`.
 - Rules:
-  - Sign in when local data exists: `enqueueAll`, then `Uploading` until the outbox is empty, then `SignedIn`, then `syncEngine.start()`. That run pulls the account's existing data, and the merge combines them.
-  - Sign out: `syncEngine.stop()`, then `db.wipe()` (which includes `Kv`), then cancel all notifications, then `auth.signOut()`, then `LocalSession`. A new device id is generated on the next sign-in.
-  - Delete account: `auth.deleteAccount()`, then the same wipe, then `LocalSession`.
-  - App start with a stored Supabase session → `SignedIn` with no upload.
+  - Local mode (no account): `ChangeWriter` writes rows and per-field HLCs but **no outbox rows** (`OutboxGate` off), so the outbox never grows for local-only users. The gate follows the owner key below: on exactly while `Kv('account.user')` is set (read at startup by `registerCore`, on when the snapshot writes the key, off after a wipe).
+  - Ownership: `Kv('account.user')` names the account this device's data belongs to and was snapshotted for. It is written in the `enqueueAll` transaction (also when there is no local data) and cleared by the wipe.
+  - Sign in: auth → compare `account.user` with the user:
+    - another account: refused with `OtherAccountData`, nothing changed, auth signed out again; with `replaceOtherAccountData: true` the normal wipe runs first (without signing the new user out), then as below.
+    - otherwise: no owner → outbox on → `enqueueAll` (clears the outbox, snapshots, writes the key); same owner → no snapshot (the gate was on, so the outbox already holds every edit and purge marker) → `startSync` → `Uploading(done, total)`, `done = total − outbox count` → `SignedIn` when the outbox is empty, or as soon as the engine reports offline or error (`Uploading` is a UI phase; the outbox persists and the engine retries). Nothing queued: straight to `SignedIn`.
+  - App start with a stored session (`restore()`): owner is this user → `SignedIn`, sync starts, no upload. Missing or other owner → the sign-in rules above (an interrupted sign-in is completed; another account's data is refused and auth signed out). `restore()` never throws; its result is kept in `SessionCubit.startupResult`.
+  - Server-side sign-out (auth user becomes null while signed in; if it happens during our own action, it is handled when that action ends): `unregisterSync` → `registerSync` → `LocalSession`. No wipe: data, outbox, `account.user` and the gate stay, so edits (incl. delete forever) keep queueing for that account.
+  - Sign out: outbox not empty → one `syncNow` (≤ 5 s); still not empty and not `discardPending` → `PendingChanges(n)`, nothing changed. Then `unregisterSync` → `db.wipe()` (keeps `pref.` keys) → cancel all notifications (`NotificationCanceller`) → `auth.signOut()` (failure logged by type, ignored: local sign-out wins) → new device id → `registerSync` → `LocalSession`. A failing step is logged and the rest still runs.
+  - Delete account: `auth.deleteAccount()` (the RPC; state unchanged meanwhile; on failure `SessionFailed`, nothing changes locally), then `SigningOut` and the same wipe path, no pending check.
+  - One action at a time: any call while another runs or from a state that does not allow it returns `SessionBusy` and does nothing.
 
-- [ ] **Step 1: Write the failing tests** (fake `AuthGateway`, in-memory transport).
+- **Implementation decisions (Task 13):**
+  - Outbox policy: `OutboxGate` (`lib/core/sync/outbox_gate.dart`, registered in `registerCore`); the app's writer is `ChangeWriter(..., outboxEnabled: () => gate.enabled)`. The writer's default is always on (engines and tests without a session). **The gate follows the owner key**: `registerCore` sets it from `Kv('account.user')` before the app takes input (so an edit before `restore()` resolves is queued), the session turns it on before `enqueueAll` (an edit racing the snapshot is in it or queued after it), a server-side sign-out leaves it on, and the wipe path re-reads the key at the end (off, unless the wipe failed and the owner's data is still there). The other-account refusal leaves A's key and gate, so A's edits queue for A. `BulkUploader.enqueueAll(userId, {clearOutbox})` sends only fields that have an HLC (a field without one holds the table default, as the per-edit changes would have left it out), `b` from `text.b`, never `conflictText`/`conflictFrom`; lists before items. Same-owner re-sign-in takes no snapshot: with the gate following the key, every edit since the key was written (incl. purge markers after a server-side sign-out) is already in the outbox. `enqueueAll(userId)` is only for data without an owner.
+  - Device identity: one `DeviceId` holder, one `HlcClock` and one `ChangeWriter` for the app's lifetime. The id lives in `Kv('device.id')`; the wipe clears it and `hlc.last`. `renewDeviceIdentity(sl)` writes a fresh `newId()` and `hlc.last`, sets `DeviceId.value` and calls `HlcClock.renew(id)`, which keeps millis and counter so every new stamp is greater than every old one. Repositories and any other holder of the writer write with the new node without being re-created. Sync objects read the id when `registerSync` creates them.
+  - Wipe path (`SessionSync` hooks wired in `account_di.dart`): stop (`unregisterSync`) → `db.wipe()` → gate from the owner key → `cancelAll` → auth sign-out → renew device → register (`unregisterSync` again, a no-op unless stop failed, then the `SyncRegistrar`). Every step is try/logged so it always ends in `LocalSession` with fresh sync objects. The gate is not turned off before the wipe, so an edit made while sync stops is still queued if the wipe fails. A failed wipe makes `signOut`/`deleteAccount` return `SessionFailed(unknown)`. In the replace-other-account path the key is re-read after the wipe; if it is still there, auth is signed out again and the result is `SessionFailed(unknown)`, so another account's rows are never snapshotted into the new one.
+  - Restore: the cubit starts in `SigningIn` when a session is stored; bootstrap calls `restore()` (unawaited, local DB only) after `registerSync`. The session, not bootstrap, starts sync. Any unexpected error in attach (e.g. reading the key) ends in `LocalSession` with `SessionFailed(unknown)`, type logged only; after a fresh sign-in auth is signed out again, a restored session is kept for the next start.
+  - Upload watch: the engine's status stream does not replay, so the watch also checks `SessionSync.current` (the engine's `current`) when it begins; offline or error already → `SignedIn`.
+  - Auth events while busy: the listener drops a null user during an action; when any action ends, a syncing state with `auth.current == null` runs the server-sign-out path.
+  - Another account's data: auth is signed out again (safer than keeping a session that would sync on the next start); the replace flow needs the password again, which the dialog still has.
+  - Sign-up confirmation: no session from `signUp` → `SessionFailed(AuthError.emailNotConfirmed)`, still `LocalSession` (sign-in before confirming maps to the same code). With confirmation on, Supabase also answers an existing email that way, so it shows as `emailNotConfirmed`, not `emailInUse`.
+  - Error mapping (`mapAuthError`): gotrue codes first (`invalid_credentials`, `user_already_exists`/`email_exists`, `weak_password`, `email_not_confirmed`); message text only without a code. `AuthRetryableFetchException`, `IOException`, `TimeoutException` (15 s per call), http `ClientException` → network; else unknown. `UnavailableAuthGateway` (no backend) → `unavailable`. `AuthUser.toString` never includes the email.
+  - Wiring: `registerAccount(sl, auth:, registerSyncFor:, notifications:)`; `SessionCubit` is a global singleton; `SyncStatusCubit.signedIn` comes from `SessionCubit.signedIn` (true in `Uploading`/`SignedIn`). `NotificationCanceller` is a no-op until Task 21. If `enqueueAll` fails after auth, auth is signed out again, the gate goes off and the result is `SessionFailed(unknown)`.
+
+- [x] **Step 1: Write the failing tests** (fake `AuthGateway`, in-memory transport).
   - `signIn with local data emits Uploading then SignedIn`
   - `sign out wipes lists, items, outbox and cursor`
   - `deleteAccount calls gateway and wipes`
   - `wrong password surfaces AuthError.wrongPassword and stays LocalSession`
-  - `local mode never touches transport`: a transport spy records 0 calls
-- [ ] **Step 2:** Run the tests. Expected: FAIL.
-- [ ] **Step 3:** Implement. `supabase_flutter` persists the session on its own.
-- [ ] **Step 4:** Run the tests. Expected: PASS.
-- [ ] **Step 5: Checkpoint.** End of Day 3.
+  - `local mode never touches transport`: a transport spy records 0 calls (and no outbox rows are written)
+- [x] **Step 2:** Run the tests. Expected: FAIL.
+- [x] **Step 3:** Implement. `supabase_flutter` persists the session on its own.
+- [x] **Step 4:** Run the tests. Expected: PASS.
+- [x] **Step 5: Checkpoint.** End of Day 3.
 
 ---
 
@@ -950,6 +971,13 @@ General rule for every UI task:
     - Sign out: notes leave this device and stay in your account.
     - Delete account: the red button is enabled only when the typed email matches.
   - Esc and the scrim cancel every dialog except upload progress.
+  - From Task 13 (session results):
+    - Sign out → `PendingChanges(n)`: confirm "N changes haven't synced and will be lost. Sign out anyway?", then `signOut(discardPending: true)`.
+    - Sign in → `OtherAccountData`: confirm "This device has notes from another account. Remove them and sign in?", then `signIn(..., replaceOtherAccountData: true)` with the same email and password.
+    - `SessionFailed(emailNotConfirmed)` after sign-up: "Check your email to confirm, then sign in." `SessionBusy`: ignore (button already disabled by state).
+    - At startup `restore()` can end in `OtherAccountData` (a stored session for B, data of A on the device); it is kept in `SessionCubit.startupResult`. Show the same "notes from another account" prompt (asking for B's password again) instead of landing silently in local mode.
+    - Upload progress closes on its own when the session leaves `Uploading`, which also happens when sync goes offline or fails (the upload continues in the background, and the badge shows the state).
+    - Device prefs live in `Kv` under the `pref.` prefix and survive sign-out; a pref that points at account data must be listed in `WeaveDatabase.accountPrefKeys` (now `pref.captureListId`) so the wipe clears it.
 
 - [ ] **Step 1: Write the failing tests.**
   - `changing theme persists to Kv`

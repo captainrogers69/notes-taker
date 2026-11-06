@@ -207,4 +207,35 @@ void main() {
     expect(await db.select(db.kv).get(), isEmpty);
     expect(await db.select(db.miniBars).get(), isEmpty);
   });
+
+  test('local mode writes rows and hlcs but no outbox rows', () async {
+    var enabled = false;
+    final local = ChangeWriter(db, clock, outboxEnabled: () => enabled);
+    await local.write(EntityType.list, 'l1', {'name': 'A'});
+    await local.write(EntityType.item, 'i1', {'listId': 'l1', 'text': 'a'});
+    await local.write(EntityType.item, 'i1', {'text': 'b'});
+    expect(await db.select(db.outbox).get(), isEmpty);
+    final item = await db.select(db.items).getSingle();
+    expect(item.body, 'b');
+    expect(
+      _obj(item.fieldHlcs).keys,
+      containsAll(['listId', 'text', 'text.b']),
+    );
+    expect(await db.select(db.kv).get(), isNotEmpty, reason: 'hlc.last kept');
+
+    enabled = true;
+    await local.write(EntityType.list, 'l1', {'name': 'B'});
+    expect(await db.select(db.outbox).get(), hasLength(1));
+  });
+
+  test('wipe keeps device prefs but not account-bound ones', () async {
+    await writer.write(EntityType.list, 'l1', {'name': 'A'});
+    for (final k in ['pref.theme', 'pref.captureListId', 'device.id']) {
+      await db.into(db.kv).insert(KvCompanion.insert(key: k, value: 'x'));
+    }
+    await db.wipe();
+    final keys = (await db.select(db.kv).get()).map((r) => r.key);
+    expect(keys, ['pref.theme']);
+    expect(await db.select(db.lists).get(), isEmpty);
+  });
 }

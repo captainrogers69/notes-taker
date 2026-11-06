@@ -25,7 +25,7 @@ void main() {
       final clock = HlcClock('dev-a');
       sl
         ..registerSingleton<WeaveDatabase>(db)
-        ..registerSingleton<DeviceId>(const DeviceId('dev-a'))
+        ..registerSingleton<DeviceId>(DeviceId('dev-a'))
         ..registerSingleton<HlcClock>(clock)
         ..registerSingleton<ChangeWriter>(ChangeWriter(db, clock));
 
@@ -109,7 +109,7 @@ void main() {
     final clock = HlcClock('dev-a');
     sl
       ..registerSingleton<WeaveDatabase>(db)
-      ..registerSingleton<DeviceId>(const DeviceId('dev-a'))
+      ..registerSingleton<DeviceId>(DeviceId('dev-a'))
       ..registerSingleton<HlcClock>(clock)
       ..registerSingleton<ChangeWriter>(ChangeWriter(db, clock));
     final client = SupabaseClient(

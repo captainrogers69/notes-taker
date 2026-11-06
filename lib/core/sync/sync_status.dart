@@ -12,8 +12,8 @@ enum SyncStatus { localOnly, synced, syncing, offline, error }
 /// a new device id (`unregisterSync` / `registerSync`), and `registerSync`
 /// calls [attach] with the new engine's status, so widgets keep one cubit.
 ///
-/// Auth arrives in Task 13; until then [signedIn] is null and the cubit
-/// stays [SyncStatus.localOnly] (the app has no account yet).
+/// [signedIn] comes from `SessionCubit.signedIn` (true while `Uploading` or
+/// `SignedIn`); without it the cubit stays [SyncStatus.localOnly].
 class SyncStatusCubit extends Cubit<SyncStatus> {
   SyncStatusCubit({
     Stream<SyncStatus>? status,

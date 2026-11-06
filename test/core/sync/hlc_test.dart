@@ -127,4 +127,20 @@ void main() {
       prev = next;
     }
   });
+
+  test('renew changes the node and stays monotonic', () {
+    // 'zzz' sorts after 'aaa': a naive node swap would go backwards.
+    final clock = HlcClock('zzz', now: () => 1000);
+    final stamps = [clock.tick(), clock.tick()];
+    clock.renew('aaa');
+    expect(clock.node, 'aaa');
+    expect(clock.last.node, 'aaa');
+    stamps
+      ..add(clock.tick())
+      ..add(clock.receive(Hlc(1000, 0, 'other')));
+    expect(stamps[2].node, 'aaa');
+    for (var i = 1; i < stamps.length; i++) {
+      expect(stamps[i].compareTo(stamps[i - 1]), greaterThan(0), reason: '$i');
+    }
+  });
 }

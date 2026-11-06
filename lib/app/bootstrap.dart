@@ -1,11 +1,17 @@
+import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'package:flutter/widgets.dart';
+import 'package:get_it/get_it.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
+import '../core/auth/auth_gateway.dart';
+import '../core/auth/supabase_auth_gateway.dart';
+import '../core/di/account_di.dart';
 import '../core/di/core_di.dart';
 import '../core/di/sync_di.dart';
+import '../features/account/presentation/session_cubit.dart';
 import '../core/sync/supabase_sync_transport.dart';
 import '../core/sync/sync_status.dart';
 import 'app_config.dart';
@@ -40,28 +46,36 @@ Future<SupabaseClient?> _initSupabase(AppConfig config) async {
   }
 }
 
-/// Registers sync with the Supabase transport and starts it when a session
-/// was restored. Signed out (or no Supabase) the app stays local-only and
-/// the status cubit shows `localOnly`; Task 13 calls `startSync` after
-/// sign-in.
+/// Registers the session and sync. Without Supabase the app is local-only:
+/// a plain `SyncStatusCubit` (`localOnly`) and an auth gateway that always
+/// fails. Otherwise sync is registered with the Supabase transport and the
+/// signed-in signal comes from the [SessionCubit], which starts sync itself
+/// ([SessionCubit.restore] for a restored session, or after sign-in).
 Future<void> _registerSync(SupabaseClient? client) async {
   if (client == null) {
+    registerAccount(sl, auth: const UnavailableAuthGateway());
     sl.registerLazySingleton<SyncStatusCubit>(
       SyncStatusCubit.new,
       dispose: (c) => c.close(),
     );
     return;
   }
-  final auth = client.auth;
-  final signedInNow = auth.currentUser != null;
-  await registerSync(
+  Future<void> syncFor(GetIt sl) {
+    final session = sl<SessionCubit>();
+    return registerSync(
+      sl,
+      transport: SupabaseSyncTransport(client, deviceId: sl<DeviceId>().value),
+      signedIn: session.signedIn,
+      signedInNow: session.signedInNow,
+    );
+  }
+
+  registerAccount(
     sl,
-    transport: SupabaseSyncTransport(client, deviceId: sl<DeviceId>().value),
-    // Read the current user per event: the auth stream replays old events.
-    signedIn: auth.onAuthStateChange
-        .map((_) => auth.currentUser != null)
-        .distinct(),
-    signedInNow: signedInNow,
+    auth: SupabaseAuthGateway(client),
+    registerSyncFor: syncFor,
   );
-  if (signedInNow) startSync(sl);
+  await syncFor(sl);
+  // Local only (no network wait): starts sync when the session is kept.
+  unawaited(sl<SessionCubit>().restore());
 }

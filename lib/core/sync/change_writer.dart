@@ -16,13 +16,28 @@ import 'synced_fields.dart';
 /// A write that includes item `text` also records the text HLC it replaced
 /// (the base): as `b` on the outbox `text` entry and locally under
 /// [textBaseKey]. The merger uses it to tell sequential from concurrent edits.
+///
+/// [outboxEnabled] is checked per write: while it returns false (local mode,
+/// no account) the row and its per-field HLCs are still written but no
+/// outbox row is, so the outbox does not grow for local-only users. Sign-in
+/// snapshots the whole state into the outbox instead (`BulkUploader`). The
+/// app wires it to `OutboxGate` (see `registerCore`); the default (always on)
+/// suits engines and tests that sync without a session.
 class ChangeWriter {
-  ChangeWriter(this._db, this._clock, {int Function()? now})
-    : _now = now ?? (() => DateTime.now().millisecondsSinceEpoch);
+  ChangeWriter(
+    this._db,
+    this._clock, {
+    int Function()? now,
+    bool Function()? outboxEnabled,
+  }) : _now = now ?? (() => DateTime.now().millisecondsSinceEpoch),
+       _outboxEnabled = outboxEnabled ?? _always;
+
+  static bool _always() => true;
 
   final WeaveDatabase _db;
   final HlcClock _clock;
   final int Function() _now;
+  final bool Function() _outboxEnabled;
 
   Map<String, FieldSpec> _map(EntityType t) =>
       t == EntityType.list ? listFields : itemFields;
@@ -64,24 +79,26 @@ class ChangeWriter {
         ...values,
         'field_hlcs': Variable<String>(jsonEncode(hlcs)),
       });
-      await _db
-          .into(_db.outbox)
-          .insert(
-            OutboxCompanion.insert(
-              changeId: newId(),
-              entityType: type.apiValue,
-              entityId: id,
-              fields: jsonEncode({
-                for (final e in fields.entries)
-                  e.key: {
-                    'v': e.value,
-                    'h': hlc,
-                    if (e.key == 'text') 'b': ?textBase,
-                  },
-              }),
-              createdAt: _now(),
-            ),
-          );
+      if (_outboxEnabled()) {
+        await _db
+            .into(_db.outbox)
+            .insert(
+              OutboxCompanion.insert(
+                changeId: newId(),
+                entityType: type.apiValue,
+                entityId: id,
+                fields: jsonEncode({
+                  for (final e in fields.entries)
+                    e.key: {
+                      'v': e.value,
+                      'h': hlc,
+                      if (e.key == 'text') 'b': ?textBase,
+                    },
+                }),
+                createdAt: _now(),
+              ),
+            );
+      }
       await _db
           .into(_db.kv)
           .insertOnConflictUpdate(

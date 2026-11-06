@@ -38,10 +38,23 @@ class WeaveDatabase extends _$WeaveDatabase {
     },
   );
 
-  /// Clears every table.
+  /// Kv keys with this prefix are device preferences (theme, mini bar
+  /// opacity, …): they survive [wipe].
+  static const prefPrefix = 'pref.';
+
+  /// Preferences that point at account data; [wipe] clears them.
+  static const accountPrefKeys = {'pref.captureListId'};
+
+  /// Clears every table (sign-out), except device preferences in `Kv`
+  /// ([prefPrefix], minus [accountPrefKeys]).
   Future<void> wipe() => transaction(() async {
     for (final table in allTables) {
+      if (table == kv) continue;
       await delete(table).go();
     }
+    await (delete(kv)..where(
+          (t) => t.key.like('$prefPrefix%').not() | t.key.isIn(accountPrefKeys),
+        ))
+        .go();
   });
 }
