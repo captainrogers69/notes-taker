@@ -40,7 +40,10 @@ class PhoneTabBar extends StatelessWidget {
     final t = context.tokens;
     final p = platform ?? defaultTargetPlatform;
     final material = p == TargetPlatform.android || p == TargetPlatform.fuchsia;
-    final inset = MediaQuery.viewPaddingOf(context).bottom;
+    // The keyboard covers the gesture bar and home indicator.
+    final inset = MediaQuery.viewInsetsOf(context).bottom > 0
+        ? 0.0
+        : MediaQuery.viewPaddingOf(context).bottom;
     return Container(
       decoration: BoxDecoration(
         color: material ? t.ground : t.surface,

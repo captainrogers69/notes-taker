@@ -16,6 +16,10 @@ abstract class ListsRepository {
   /// device-only, D7).
   Stream<Set<String>> watchShownInMiniBar();
 
+  /// Shows or hides list [id]'s mini bar on this device (not synced, so no
+  /// change is written). Hiding forgets its window geometry.
+  Future<void> setShownInMiniBar(String id, {required bool shown});
+
   /// Creates a list ordered after the last one; returns its id.
   Future<String> create(String name, NoteColor color);
 

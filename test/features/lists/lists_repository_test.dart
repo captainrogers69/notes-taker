@@ -318,4 +318,48 @@ void main() {
     expect(seen.first, isEmpty);
     expect(seen.last, {'l1'});
   });
+
+  test(
+    'setShownInMiniBar writes this device only, and twice is fine',
+    () async {
+      final n = (await db.select(db.outbox).get()).length;
+      await repo.setShownInMiniBar('l1', shown: true);
+      await repo.setShownInMiniBar('l1', shown: true);
+      expect(await repo.watchShownInMiniBar().first, {'l1'});
+      await repo.setShownInMiniBar('l1', shown: false);
+      expect(await repo.watchShownInMiniBar().first, isEmpty);
+      expect((await db.select(db.outbox).get()).length, n);
+    },
+  );
+
+  test('nextDue is the earliest timed open task that is not overdue', () async {
+    now = DateTime(2026, 11, 5, 10, 0);
+    final id = await repo.create('L', NoteColor.blue);
+    Future<void> item(
+      String i, {
+      required String date,
+      int? minutes,
+      bool done = false,
+    }) => writer.write(EntityType.item, i, {
+      'listId': id,
+      'kind': 'task',
+      'text': i,
+      'done': done,
+      'indent': 0,
+      'sortKey': i,
+      'dueDate': date,
+      'dueMinutes': minutes,
+    });
+
+    expect((await repo.watch(id).first)?.nextDue, isNull);
+    await item('late', date: '2026-11-05', minutes: 540);
+    await item('untimed', date: '2026-11-05');
+    await item('done', date: '2026-11-05', minutes: 660, done: true);
+    expect((await repo.watch(id).first)?.nextDue, isNull);
+    await item('tomorrow', date: '2026-11-06', minutes: 60);
+    await item('later', date: '2026-11-05', minutes: 1020);
+    final next = (await repo.watch(id).first)?.nextDue;
+    expect(next?.date, DateTime(2026, 11, 5));
+    expect(next?.minutes, 1020);
+  });
 }

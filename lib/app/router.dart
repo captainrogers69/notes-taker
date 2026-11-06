@@ -1,8 +1,10 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/lists/presentation/list_page.dart';
 import '../features/up_next/presentation/up_next_page.dart';
 import 'shell/app_shell.dart';
+import 'shell/phone_lists_page.dart';
 import 'shell/placeholder_pages.dart';
 import 'shell/shell_actions.dart';
 
@@ -51,12 +53,16 @@ GoRouter buildRouter({ShellActions? actions, String initialLocation = '/'}) {
           route(AppRoute.upNext, (_) => const UpNextPage()),
           route(
             AppRoute.list,
-            (s) => ListPlaceholder(listId: s.pathParameters['id'] ?? ''),
+            (s) => ListPage(
+              key: ValueKey(s.pathParameters['id']),
+              listId: s.pathParameters['id'] ?? '',
+              isNew: s.uri.queryParameters['new'] == '1',
+            ),
           ),
           route(AppRoute.archive, (_) => const ArchivePlaceholder()),
           route(AppRoute.search, (_) => const SearchPlaceholder()),
           route(AppRoute.settings, (_) => const SettingsPlaceholder()),
-          route(AppRoute.lists, (_) => const ListsPlaceholder()),
+          route(AppRoute.lists, (_) => PhoneListsPage(actions: a)),
         ],
       ),
     ],

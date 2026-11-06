@@ -38,6 +38,7 @@
 | 6 | 2026-11-06 | **Task 13 done, reviewed and staged — Day 3 complete (Phase 2 · Sync).** Auth gateway (gotrue codes → `AuthError`, incl. `emailNotConfirmed`, `unavailable`), `SessionCubit` with `SessionResult` (ok / busy / pendingChanges / otherAccountData / failed), one action at a time. Local mode queues nothing; the outbox gate follows the owner key `Kv('account.user')`, written with the first snapshot. Sign-in snapshots local data, starts sync, `Uploading` → `SignedIn` (also when offline). Restored session re-checks the owner. Server-side sign-out stops sync but keeps data and queue; same-user re-sign-in just pushes the queue. User decisions: sign-out with unsynced edits tries to send, then asks (`discardPending`); another account's data on the device → ask first (`replaceOtherAccountData`), never mixed, never wiped on a failed check. Sign-out / delete: guarded wipe (prefs `pref.*` survive), new device id via one clock + `renew`. Delete account: RPC first, failure changes nothing. No migration. `flutter analyze` 0 issues, 303/303 tests. **Still waiting on the user:** Windows build check. Next: Phase 3, Task 14 (app shell, routing, sync badge, undo toast). |
 | 7 | 2026-11-06 | **Task 14 done, reviewed and staged.** App shell: go_router (one ShellRoute, `/list/:id` deep links, unknown → Up next, `/lists` → Up next on wide windows), desktop sidebar 256/224 and phone tab bars (iOS / Android), sync badge in sidebar and sheet styles (one sign-in entry point when signed out: the user row), undo toast (4 s, replaces, runs once, disposal-safe), ⌘K / ⌘N via an autofocus FocusScope, minute tick re-reads Up next only. Weave mark as a CustomPainter, pixel-tested against the kit (corner = quarter disc centred on (232,24); reversed in dark). Added flutter_svg for the icons.js set. Review fixed 13 items. Build needs `-t lib/main_dev.dart`. `flutter analyze` 0 issues, 341/341 tests. **Still waiting on the user:** Windows build check; visual check of the shell against the 03 prototype on macOS + Android. Next: Task 15 (Up next + quick capture). |
 | 8 | 2026-11-06 | **Task 15 done, reviewed and staged.** Up next: day thread (desktop) and day strip (phone), Today + Later this week, `ItemTile`, `QuickCaptureField` with parse read-back and list chip, Undo on tick, minute tick aligned to the wall clock (`MinuteTicker`, shell too). Review fixed 15 items: instant keyboard ticks, phone add bar without an empty line, read-back wording per 03 `parsePreview`, no lost typing (`onSubmit` returns `Future<bool>`), tick/undo race, `ShellLayout` moved to `lib/core/widgets/` (import cycle gone), `DayThread.strip` removed, real `shouldRepaint`, IME guard, phone geometry, field border and semantics. `flutter analyze` 0 issues, 370/370 tests, macOS dev debug build OK. New copy not in 03: "Make a list first", "Couldn't add that. Try again." **Still waiting on the user:** visual check of Up next against the 03 prototype on macOS + Android; Windows build check. Next: Task 16 (list screen). |
+| 9 | 2026-11-06 | **Task 16 staged, independent review done, Critical and Important fixes staged except one proposal (Tab trap; see Task 16).** List screen on note paper (760 px), inline editing (Enter, Backspace, Tab, Alt+↑/↓, drag), Done group, hide done, Uncheck all, colour, pin, mini bar button, Share (copy as text / Markdown), archive / trash with Undo, one-step New list, phone Lists tab, add bar and top bar. Fixed a Task 14 bug: the phone body was 0 px wide in the full shell, so every phone screen was blank (regression test added). Phone add bar now sits above the keyboard. `flutter analyze` 0 issues, 420/420 tests. **Still waiting on the user:** the list-screen order decision, two-device tick check (Step 4), visual check against 03 on macOS + Android, Windows build check. Next: Task 17. |
 
 Carried into later tasks from reviews:
 - Task 10: the merger takes `ChangeWriter`; applying a list purge also deletes its tasks; late changes never bring back a purged list or task.
@@ -844,7 +845,7 @@ General rule for every UI task:
 
 **Files:**
 
-- Create: `lib/features/lists/presentation/{list_cubit.dart,list_page.dart,widgets/list_header.dart,widgets/list_more_menu.dart,widgets/done_group.dart,widgets/color_picker.dart}`, `lib/features/lists/presentation/new_list_dialog.dart`
+- Create: `lib/features/lists/presentation/{list_cubit.dart,list_page.dart,widgets/list_header.dart,widgets/list_more_menu.dart,widgets/list_item_row.dart,widgets/done_group.dart,widgets/color_picker.dart}`, `lib/app/shell/phone_lists_page.dart`, `lib/features/items/domain/usecases/add_item_below.dart`
 - Test: `test/features/lists/list_page_test.dart`
 
 **Interfaces:**
@@ -863,7 +864,18 @@ General rule for every UI task:
   - `ListMoreMenu` (•••): Rename · Colour · Pin to top · **Show in mini bar** (desktop only, writes `MiniBars`) · Due date for the list · Hide done tasks · Uncheck all · Archive · Delete. Archive, Delete and Uncheck all show an Undo toast.
   - A selected task opens the details panel beside the list on desktop and a bottom sheet on phones (Task 17).
 
-- [ ] **Step 1: Write the failing tests.**
+- **Implementation decisions (Task 16; 03 wins over this plan's list above):**
+  - Add row under the rows on the note (03 `.capture.inline`, no read-back), not at the top; phones use the add bar. The ruled slack below it is a fixed 3 lines; the card does not stretch to the window.
+  - Order stays the approved time order, so only untimed open tasks can be moved (Alt+↑/↓, drag). Dated tasks, text lines and done tasks keep their place. Untimed tasks are newest first, so up on screen is a higher `sortKey`.
+  - Inline edits write 500 ms after typing stops, on blur, Enter and leaving the screen, and at once when the app goes to the background or quits (`InlineEdit`). A field with nothing unsaved follows the store, so another device's edit shows at once and a blur never writes it back. A row made by Enter on this screen and left blank is removed, but not while the app is in the background, and never a blank row from another device. Clearing an existing task and leaving restores its text; Backspace on empty deletes it, with Undo if it had text. Esc leaves the row and clears the selection (03). `AddItemBelow` is new.
+  - Remaining window: text typed under 500 ms before another device's edit arrives is written over that edit, with no conflict kept. Saved edits go through the merger as usual.
+  - `ItemTile` gets `listRow`, `titleField`, `leading`, `trailing`, `selected`, `ruleColor`. `QuickCaptureField` gets `inline`, `ruleColor`, `semanticLabel`. `TaskList.nextDue` and `ListsRepository.setShownInMiniBar` are new.
+  - ••• holds Pin, Hide done, Archive, Delete list… (03). Rename is the title, colour is the dot, Uncheck all is on the Done bar, and Show in mini bar is a title-row button (macOS / Windows only; the phone's bar / widget toggle is left out). `showHidden` is dropped: Show clears `hideDone`, as 03 does.
+  - New list has no dialog (03 `newlist`): "Untitled list", next palette colour, name selected. `new_list_dialog.dart` is not created.
+  - Share: copy as text / Markdown only. "Share as image…" and the "Edited …" note are not built (no edit time is stored).
+  - Selecting a row only highlights it until Task 17's panel exists. **Carried to Task 17:** "Due date for the list" in ••• and its panel (03 `listDetails`); the title's due chip already renders. Drag does not auto-scroll a long list.
+
+- [x] **Step 1: Write the failing tests.**
   - `add field adds parsed task at correct position`
   - `Done group collapsed shows count`
   - `hide done replaces group with "2 done, hidden · Show"`
@@ -871,10 +883,10 @@ General rule for every UI task:
   - `Tab indents to 1, Shift+Tab back to 0`
   - `archive from menu navigates to Up next and shows undo`
   - `uncheck all reopens all done`
-- [ ] **Step 2:** Run the tests. Expected: FAIL.
-- [ ] **Step 3:** Implement.
+- [x] **Step 2:** Run the tests. Expected: FAIL.
+- [x] **Step 3:** Implement.
 - [ ] **Step 4:** Run the tests. Expected: PASS. **Manual check on two devices:** macOS dev profile plus Android, both signed in. Ticking on one shows up on the other within 3 s.
-- [ ] **Step 5: Checkpoint.** End of Day 4.
+- [x] **Step 5: Checkpoint.** End of Day 4 (Step 4's two-device check still to do).
 
 ---
 

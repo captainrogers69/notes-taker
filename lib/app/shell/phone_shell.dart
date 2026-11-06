@@ -6,16 +6,20 @@ import '../../core/theme/weave_theme.dart';
 import '../../core/widgets/pressable.dart';
 import '../../core/widgets/undo_toast.dart';
 import '../../core/widgets/weave_icons.dart';
+import '../../features/lists/presentation/list_page.dart';
 import '../../features/up_next/presentation/up_next_page.dart';
 import '../router.dart';
 import 'app_shell.dart';
 import 'tab_bar.dart';
 
 /// The add bar pinned above the tabs on Up next and list screens (design
-/// playbook §9 Layouts): Up next's `QuickCaptureField` (Task 15); the list
-/// screen returns its own in Task 16.
-Widget? phoneAddBar(ShellLocation location) => switch (location.route) {
-  AppRoute.upNext => const UpNextAddBar(),
+/// playbook §9 Layouts), each with its own `QuickCaptureField`.
+Widget? phoneAddBar(ShellLocation location) => switch (location) {
+  ShellLocation(route: AppRoute.upNext) => const UpNextAddBar(),
+  ShellLocation(route: AppRoute.list, :final listId?) => ListAddBar(
+    key: ValueKey(listId),
+    listId: listId,
+  ),
   _ => null,
 };
 
@@ -67,35 +71,54 @@ class PhoneShell extends StatelessWidget {
       },
       child: Material(
         color: t.ground,
-        child: Column(
-          children: [
-            SizedBox(height: MediaQuery.viewPaddingOf(context).top),
-            if (sub) _TopBar(platform: platform),
-            Expanded(
-              child: Stack(
-                children: [
-                  Positioned.fill(child: child),
-                  UndoToastLayer(controller: toast, bottom: toastGap),
-                ],
-              ),
-            ),
-            if (bar != null)
-              // `.paddbar`: padding 8 12 8, 1 px border above, surface.
-              Container(
-                padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                decoration: BoxDecoration(
-                  color: t.surface,
-                  border: Border(top: BorderSide(color: t.border)),
+        // No Scaffold here: this keeps the add bar above the keyboard.
+        child: Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.viewInsetsOf(context).bottom,
+          ),
+          child: Column(
+            // The body's Stack holds only positioned children, so it takes its
+            // width from here: without stretch it would be 0 wide.
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(height: MediaQuery.viewPaddingOf(context).top),
+              if (sub)
+                _TopBar(
+                  platform: platform,
+                  actions: switch (location.listId) {
+                    final id? when route == AppRoute.list => ListTopActions(
+                      key: ValueKey(id),
+                      listId: id,
+                    ),
+                    _ => null,
+                  },
                 ),
-                child: bar,
+              Expanded(
+                child: Stack(
+                  children: [
+                    Positioned.fill(child: child),
+                    UndoToastLayer(controller: toast, bottom: toastGap),
+                  ],
+                ),
               ),
-            PhoneTabBar(
-              current: tab,
-              upNextCount: upNextCount,
-              platform: platform,
-              onSelect: (r) => context.goNamed(r.name),
-            ),
-          ],
+              if (bar != null)
+                // `.paddbar`: padding 8 12 8, 1 px border above, surface.
+                Container(
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                  decoration: BoxDecoration(
+                    color: t.surface,
+                    border: Border(top: BorderSide(color: t.border)),
+                  ),
+                  child: bar,
+                ),
+              PhoneTabBar(
+                current: tab,
+                upNextCount: upNextCount,
+                platform: platform,
+                onSelect: (r) => context.goNamed(r.name),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -104,11 +127,12 @@ class PhoneShell extends StatelessWidget {
 
 /// `.ptop`: 48 high, padding 0 8. Back: iOS "‹ Lists" (chevron + parent
 /// name, 16 px); Android a plain ← (the system back does the same).
-/// Screen actions (Share, •••) are added by the list screen (Task 16).
+/// [actions]: the list screen's Share and •••, on the right.
 class _TopBar extends StatelessWidget {
-  const _TopBar({this.platform});
+  const _TopBar({this.platform, this.actions});
 
   final TargetPlatform? platform;
+  final Widget? actions;
 
   @override
   Widget build(BuildContext context) {
@@ -157,6 +181,8 @@ class _TopBar extends StatelessWidget {
                   ),
                 ),
               ),
+            const Spacer(),
+            ?actions,
           ],
         ),
       ),

@@ -1,11 +1,13 @@
 import 'package:flutter/widgets.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/di/core_di.dart';
+import '../../core/domain/note_color_id.dart';
 import '../../core/sync/sync_engine.dart';
+import '../../features/lists/domain/repositories/lists_repository.dart';
 
-/// Shell actions whose flows belong to later tasks. The defaults are stubs
-/// those tasks replace in [ShellActions.standard]:
-/// - [newList]: "New list" and ⌘N / Ctrl+N. Task 16 (`new_list_dialog.dart`).
+/// Shell actions; the flows of later tasks are stubs in
+/// [ShellActions.standard]:
 /// - [signIn]: the local-mode user row and "Signed out · sign in again to
 ///   sync". Task 20 (`sign_in_dialog.dart`).
 class ShellActions {
@@ -17,8 +19,7 @@ class ShellActions {
 
   /// The app's actions, from DI.
   factory ShellActions.standard() => ShellActions(
-    // Task 16: open the new-list flow here.
-    newList: _stub,
+    newList: _newList,
     // Task 20: open the sign-in dialog here.
     signIn: _stub,
     retrySync: () async {
@@ -31,6 +32,17 @@ class ShellActions {
 
   /// "Sync error · retrying": one sync pass now.
   final Future<void> Function() retrySync;
+
+  /// 03 `newlist`: no dialog. Makes "Untitled list" in the next palette
+  /// colour and opens it with the name selected.
+  static Future<void> _newList(BuildContext context) async {
+    final router = GoRouter.of(context);
+    final repo = sl<ListsRepository>();
+    final count = (await repo.watchActive().first).length;
+    final color = NoteColor.values[count % NoteColor.values.length];
+    final id = await repo.create('Untitled list', color);
+    router.go('/list/${Uri.encodeComponent(id)}?new=1');
+  }
 
   static void _stub(BuildContext context) {}
   static Future<void> _noRetry() async {}

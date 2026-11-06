@@ -28,6 +28,9 @@ class QuickCaptureField extends HookWidget {
     required this.onSubmit,
     this.lists = const [],
     this.phoneBar = false,
+    this.inline = false,
+    this.ruleColor,
+    this.semanticLabel = 'Add a task',
     this.now,
     this.focusNode,
     this.placeholder = 'Add a task… try “dentist fri 10am”',
@@ -46,6 +49,14 @@ class QuickCaptureField extends HookWidget {
 
   /// The phone add bar: 44 high, 16 px text, chip at most 112 wide.
   final bool phoneBar;
+
+  /// The list note's add row (03 `.capture.inline`): 44 high, no box, a
+  /// [ruleColor] line above, no parse line.
+  final bool inline;
+  final Color? ruleColor;
+
+  /// What a screen reader calls the field.
+  final String semanticLabel;
 
   /// The clock for the read-back (default: now).
   final DateTime Function()? now;
@@ -133,25 +144,33 @@ class QuickCaptureField extends HookWidget {
 
     final box = Container(
       key: boxKey,
-      height: phoneBar ? 44 : 40,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: t.surface,
-        borderRadius: BorderRadius.circular(t.radiusControl),
-      ),
+      height: phoneBar || inline ? 44 : 40,
+      padding: inline
+          ? const EdgeInsets.only(left: 4)
+          : const EdgeInsets.symmetric(horizontal: 12),
+      decoration: inline
+          ? null
+          : BoxDecoration(
+              color: t.surface,
+              borderRadius: BorderRadius.circular(t.radiusControl),
+            ),
       // The border is drawn on top, so the chip's tap area keeps the
       // field's full height (44 in the phone add bar).
-      foregroundDecoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(t.radiusControl),
-        border: Border.all(color: focus.hasFocus ? t.text : t.control),
-      ),
+      foregroundDecoration: inline
+          ? BoxDecoration(
+              border: Border(top: BorderSide(color: ruleColor ?? t.rule)),
+            )
+          : BoxDecoration(
+              borderRadius: BorderRadius.circular(t.radiusControl),
+              border: Border.all(color: focus.hasFocus ? t.text : t.control),
+            ),
       child: Row(
         children: [
           WeaveIcon(WeaveIcons.plus, color: t.text),
           const SizedBox(width: 10),
           Expanded(
             child: Semantics(
-              label: 'Add a task',
+              label: semanticLabel,
               child: TextField(
                 controller: controller,
                 focusNode: focus,
@@ -196,7 +215,7 @@ class QuickCaptureField extends HookWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         box,
-        if (!phoneBar || readBack != null)
+        if (!inline && (!phoneBar || readBack != null))
           Padding(
             // `.parse`: 10 below the field (6 4 0 in the add bar), 20 high.
             padding: phoneBar

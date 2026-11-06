@@ -15,6 +15,7 @@ class TaskList extends Equatable {
     this.deletedAt,
     this.openCount = 0,
     this.overdueCount = 0,
+    this.nextDue,
   });
 
   final String id;
@@ -31,6 +32,9 @@ class TaskList extends Equatable {
   final int openCount;
   final int overdueCount;
 
+  /// The earliest timed open task that is not overdue.
+  final DueSpec? nextDue;
+
   @override
   List<Object?> get props => [
     id,
@@ -44,5 +48,6 @@ class TaskList extends Equatable {
     deletedAt,
     openCount,
     overdueCount,
+    nextDue,
   ];
 }

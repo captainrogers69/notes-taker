@@ -37,14 +37,20 @@ class ListsRepositoryImpl implements ListsRepository {
         .customSelect(
           '''
 SELECT l.*, COALESCE(c.open_count, 0) AS open_count,
-       COALESCE(c.overdue_count, 0) AS overdue_count
+       COALESCE(c.overdue_count, 0) AS overdue_count,
+       c.next_due AS next_due
 FROM lists l
 LEFT JOIN (
   SELECT list_id, COUNT(*) AS open_count,
          SUM(CASE WHEN due_date < ?1
                     OR (due_date = ?1 AND due_minutes IS NOT NULL
                         AND due_minutes < ?2)
-                  THEN 1 ELSE 0 END) AS overdue_count
+                  THEN 1 ELSE 0 END) AS overdue_count,
+         MIN(CASE WHEN due_minutes IS NOT NULL
+                   AND (due_date > ?1
+                        OR (due_date = ?1 AND due_minutes >= ?2))
+                  THEN due_date || ' ' || printf('%04d', due_minutes) END)
+           AS next_due
   FROM items
   WHERE kind = 'task' AND done = 0 AND deleted_at IS NULL
   GROUP BY list_id
@@ -61,6 +67,13 @@ $_order
         )
         .watch()
         .map((rows) => rows.map(_toList).toList());
+  }
+
+  /// 'yyyy-MM-dd mmmm' (see `_watch`).
+  static DueSpec? _nextDue(String? v) {
+    if (v == null) return null;
+    final at = v.lastIndexOf(' ');
+    return DueSpec.decode(v.substring(0, at), int.parse(v.substring(at + 1)));
   }
 
   TaskList _toList(QueryRow r) {
@@ -84,6 +97,7 @@ $_order
       deletedAt: at('deleted_at'),
       openCount: r.read<int>('open_count'),
       overdueCount: r.read<int>('overdue_count'),
+      nextDue: _nextDue(r.read<String?>('next_due')),
     );
   }
 
@@ -97,6 +111,20 @@ $_order
           .map((r) => r.read(_db.miniBars.listId))
           .watch()
           .map((ids) => {...ids.nonNulls});
+
+  @override
+  Future<void> setShownInMiniBar(String id, {required bool shown}) async {
+    if (shown) {
+      await _db
+          .into(_db.miniBars)
+          .insert(
+            MiniBarsCompanion.insert(listId: id),
+            mode: InsertMode.insertOrIgnore,
+          );
+    } else {
+      await (_db.delete(_db.miniBars)..where((t) => t.listId.equals(id))).go();
+    }
+  }
 
   @override
   Stream<List<TaskList>> watchArchived() =>

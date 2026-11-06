@@ -56,7 +56,7 @@ class FakeItemsStore extends Fake implements ItemsRepository {
     _changed.add(null);
   }
 
-  Stream<List<Item>> _watch(List<Item> Function() q) => Stream.multi((m) {
+  Stream<List<Item>> watch(List<Item> Function() q) => Stream.multi((m) {
     m.add(q());
     final s = _changed.stream.listen((_) => m.add(q()));
     m.onCancel = s.cancel;
@@ -87,7 +87,7 @@ class FakeItemsStore extends Fake implements ItemsRepository {
   @override
   Stream<List<Item>> watchUpNext(DateTime now) {
     upNextAt.add(now);
-    return _watch(
+    return watch(
       () =>
           _tasks((i) => !i.done && !i.due!.date.isAfter(_day(now)))
             ..sort((a, b) => _byDue(a, b, now)),
@@ -98,7 +98,7 @@ class FakeItemsStore extends Fake implements ItemsRepository {
   Stream<List<Item>> watchLaterThisWeek(DateTime now) {
     final today = _day(now);
     final end = DateTime(now.year, now.month, now.day + 6);
-    return _watch(
+    return watch(
       () => _tasks(
         (i) =>
             !i.done && i.due!.date.isAfter(today) && !i.due!.date.isAfter(end),
@@ -109,7 +109,7 @@ class FakeItemsStore extends Fake implements ItemsRepository {
   @override
   Stream<List<Item>> watchDoneToday(DateTime now) {
     doneTodayAt.add(now);
-    return _watch(
+    return watch(
       () =>
           _tasks((i) => i.done && i.due!.date == _day(now))
             ..sort((a, b) => _byDue(a, b, now)),
@@ -145,6 +145,11 @@ class FakeItemsStore extends Fake implements ItemsRepository {
           'dueDate' => i.due?.encodeDate(),
           'dueMinutes' => i.due?.minutes,
           'reminders' => '[]',
+          'listId' => i.listId,
+          'text' => i.text,
+          'sortKey' => i.sortKey,
+          'indent' => i.indent,
+          'deletedAt' => i.deletedAt?.millisecondsSinceEpoch,
           _ => null,
         },
     };
@@ -163,6 +168,7 @@ class FakeItemsStore extends Fake implements ItemsRepository {
     final dueDate = f('dueDate', old?.due?.encodeDate());
     final dueMinutes = f('dueMinutes', old?.due?.minutes);
     final doneAt = f('doneAt', old?.doneAt?.millisecondsSinceEpoch);
+    final deletedAt = f('deletedAt', old?.deletedAt?.millisecondsSinceEpoch);
     put(
       Item(
         id: id,
@@ -175,12 +181,15 @@ class FakeItemsStore extends Fake implements ItemsRepository {
         doneAt: doneAt is int
             ? DateTime.fromMillisecondsSinceEpoch(doneAt, isUtc: true)
             : null,
-        indent: 0,
+        indent: f('indent', old?.indent ?? 0) as int,
         sortKey: '${f('sortKey', old?.sortKey ?? 'a')}',
         due: DueSpec.decode(
           dueDate is String ? dueDate : null,
           dueMinutes is int ? dueMinutes : null,
         ),
+        deletedAt: deletedAt is int
+            ? DateTime.fromMillisecondsSinceEpoch(deletedAt, isUtc: true)
+            : null,
       ),
     );
   }

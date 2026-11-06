@@ -29,6 +29,12 @@ class ItemTile extends HookWidget {
     this.color = NoteColor.yellow,
     this.phone = false,
     this.rule = true,
+    this.ruleColor,
+    this.listRow = false,
+    this.titleField,
+    this.leading,
+    this.trailing,
+    this.selected = false,
   });
 
   final Item item;
@@ -50,6 +56,26 @@ class ItemTile extends HookWidget {
 
   /// The 1 px rule above the row (off for the first row of a list).
   final bool rule;
+
+  /// The rule's colour (null: `rule`; the list note tints it).
+  final Color? ruleColor;
+
+  /// The list screen's row (03 `itemRow`): honours the task's indent, shows
+  /// its reminder and repeat chips, sizes the time to its content and hides
+  /// it once done.
+  final bool listRow;
+
+  /// Replaces the title (the list's inline editor on desktop).
+  final Widget? titleField;
+
+  /// Before the tick (the list's drag grip).
+  final Widget? leading;
+
+  /// At the row's end (the list's details chevron).
+  final Widget? trailing;
+
+  /// `.row.sel`: the row whose details are open.
+  final bool selected;
 
   static const _tickFill = Duration(milliseconds: 120);
 
@@ -129,7 +155,7 @@ class ItemTile extends HookWidget {
     );
 
     Widget? when;
-    if (due != null) {
+    if (due != null && !(listRow && item.done)) {
       final label = rowDueLabel(due, now);
       final style = t.numeric.copyWith(
         fontSize: t.fsSmall,
@@ -160,7 +186,7 @@ class ItemTile extends HookWidget {
         excludeSemantics: true,
         // `.row .when`: 116 px right-aligned on desktop; sized to content
         // (at least 48) on phones (C10, D8).
-        child: phone
+        child: phone || listRow
             ? ConstrainedBox(
                 constraints: const BoxConstraints(minWidth: 48),
                 child: Align(
@@ -189,24 +215,37 @@ class ItemTile extends HookWidget {
     final body = Row(
       children: [
         Expanded(
-          child: Pressable(
-            onTap: onTap,
-            hoverColor: Colors.transparent,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: phone ? 48 : t.rowHeight),
-              child: Row(
-                children: [
-                  Expanded(child: title),
-                  if (name != null) ...[
-                    const SizedBox(width: 12),
-                    _ListName(name: name, color: color, brightness: b),
-                  ],
-                ],
+          child:
+              titleField ??
+              Pressable(
+                onTap: onTap,
+                hoverColor: Colors.transparent,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: phone ? 48 : t.rowHeight,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(child: title),
+                      if (name != null) ...[
+                        const SizedBox(width: 12),
+                        _ListName(name: name, color: color, brightness: b),
+                      ],
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
         ),
+        if (listRow && item.reminders.isNotEmpty) ...[
+          const SizedBox(width: 12),
+          _Bells(count: item.reminders.length),
+        ],
+        if (listRow && item.repeat != null) ...[
+          const SizedBox(width: 8),
+          ExcludeSemantics(child: WeaveIcon(WeaveIcons.repeat, color: t.muted)),
+        ],
         if (when != null) ...[const SizedBox(width: 12), when],
+        if (trailing case final tr?) ...[const SizedBox(width: 4), tr],
       ],
     );
     // 03 geometry: the circle 8 px in, the title at 38. Desktop: a 24 px
@@ -234,6 +273,7 @@ class ItemTile extends HookWidget {
               padding: const EdgeInsets.only(left: 5, right: 8),
               child: Row(
                 children: [
+                  ?leading,
                   check,
                   const SizedBox(width: 9),
                   Expanded(child: body),
@@ -251,16 +291,29 @@ class ItemTile extends HookWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(height: 1, color: rule ? t.rule : Colors.transparent),
+          Container(
+            height: 1,
+            color: rule ? ruleColor ?? t.rule : Colors.transparent,
+          ),
           MouseRegion(
             onEnter: (_) => hover.value = true,
             onExit: (_) => hover.value = false,
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: hover.value ? t.hover : null,
+                color: selected
+                    ? t.raised
+                    : hover.value
+                    ? t.hover
+                    : null,
                 borderRadius: BorderRadius.circular(t.radiusControl),
               ),
-              child: row,
+              // `.items .row.indent`: 38 instead of 8.
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: listRow && item.indent > 0 ? 30 : 0,
+                ),
+                child: row,
+              ),
             ),
           ),
         ],
@@ -334,6 +387,35 @@ class _Check extends HookWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// `.bells`: the bell, and the number when there are several.
+class _Bells extends StatelessWidget {
+  const _Bells({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    return Semantics(
+      label: count == 1 ? '1 reminder' : '$count reminders',
+      excludeSemantics: true,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          WeaveIcon(WeaveIcons.bell, color: t.muted),
+          if (count > 1) ...[
+            const SizedBox(width: 2),
+            Text(
+              '$count',
+              style: t.numeric.copyWith(fontSize: t.fsSmall, color: t.muted),
+            ),
+          ],
+        ],
       ),
     );
   }

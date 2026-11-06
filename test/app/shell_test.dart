@@ -9,7 +9,20 @@ import 'package:mocktail/mocktail.dart';
 import 'package:weave/app/router.dart';
 import 'package:weave/app/shell/app_shell.dart';
 import 'package:weave/app/shell/phone_shell.dart';
-import 'package:weave/app/shell/placeholder_pages.dart';
+import 'package:weave/features/items/domain/usecases/add_item_below.dart';
+import 'package:weave/features/items/domain/usecases/delete_item.dart';
+import 'package:weave/features/items/domain/usecases/edit_text.dart';
+import 'package:weave/features/items/domain/usecases/indent_item.dart';
+import 'package:weave/features/items/domain/usecases/move_item.dart';
+import 'package:weave/features/items/domain/usecases/uncheck_all.dart';
+import 'package:weave/features/lists/domain/usecases/archive_list.dart';
+import 'package:weave/features/lists/domain/usecases/trash_list.dart';
+import 'package:weave/features/lists/domain/usecases/update_list.dart';
+import 'package:weave/features/lists/presentation/list_cubit.dart';
+import 'package:weave/features/lists/presentation/list_page.dart';
+
+import '../features/lists/list_fakes.dart';
+import 'package:weave/app/shell/phone_lists_page.dart';
 import 'package:weave/app/shell/shell_actions.dart';
 import 'package:weave/app/shell/shell_cubit.dart';
 import 'package:weave/app/shell/sidebar.dart';
@@ -170,6 +183,26 @@ void _setUp({
         deviceCount: () => Stream.value(devices),
       ),
     );
+  final listItems = FakeListItems();
+  final listStore = FakeListStore()..put(up.taskList('l1', 'Errands'));
+  sl.registerFactoryParam<ListCubit, String, void>(
+    (id, _) => ListCubit(
+      listId: id,
+      items: listItems,
+      lists: listStore,
+      addItem: AddItem(listItems),
+      addItemBelow: AddItemBelow(listItems),
+      toggleDone: ToggleDone(listItems),
+      editText: EditText(listItems),
+      deleteItem: DeleteItem(listItems),
+      indentItem: IndentItem(listItems),
+      moveItem: MoveItem(listItems),
+      uncheckAll: UncheckAll(listItems),
+      updateList: UpdateList(listStore),
+      archiveList: ArchiveList(listStore),
+      trashList: TrashList(listStore),
+    ),
+  );
   // Up next reads its own sources, so the shell's counts stay its own.
   final upItems = up.FakeItemsStore();
   final upLists = up.FakeLists()..active.add([up.taskList('l1', 'Errands')]);
@@ -344,7 +377,7 @@ void main() {
           router: buildRouter(actions: spy.actions, initialLocation: '/lists'),
         ),
       );
-      expect(find.byType(ListsPlaceholder), findsNothing);
+      expect(find.byType(PhoneListsPage), findsNothing);
       expect(find.byType(UpNextPage), findsOneWidget);
     });
 
@@ -373,8 +406,58 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      // The placeholder titles the list screen with the list's name.
-      expect(find.text('Errands'), findsNWidgets(2));
+      final page = tester.widget<ListPage>(find.byType(ListPage));
+      expect(page.listId, 'l1');
+      expect(page.isNew, isFalse);
+    });
+
+    testWidgets('phone: the screen fills the width', (tester) async {
+      _setUp();
+      await _pumpApp(tester, _phone);
+      expect(tester.getSize(find.byType(UpNextPage)).width, _phone.width);
+    });
+
+    testWidgets('phone: the add bar rides above the keyboard', (tester) async {
+      _setUp();
+      await _pumpApp(tester, _phone);
+      final field = find.byType(QuickCaptureField);
+      final before = tester.getBottomLeft(field).dy;
+      tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+      addTearDown(tester.view.resetViewInsets);
+      await tester.pumpAndSettle();
+      expect(tester.getBottomLeft(field).dy, lessThan(_phone.height - 300));
+      expect(tester.getBottomLeft(field).dy, lessThan(before));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('phone Lists tab: notes, then New list and Archive', (
+      tester,
+    ) async {
+      _setUp();
+      lists.active.add([_list('l1', 'Errands', open: 4)]);
+      await _pumpApp(tester, _phone);
+      await tester.tap(find.text('Lists'));
+      await tester.pumpAndSettle();
+      expect(find.byType(PhoneListsPage), findsOneWidget);
+      expect(find.text('1 lists · 4 open'), findsOneWidget);
+      expect(find.text('4 left'), findsOneWidget);
+      await tester.tap(find.text('New list'));
+      await tester.pumpAndSettle();
+      expect(spy.newList, 1);
+
+      // Into a list: back, Share, •••, its own add bar.
+      await tester.tap(find.text('Errands'));
+      await tester.pumpAndSettle();
+      expect(find.byType(ListPage), findsOneWidget);
+      expect(find.byType(ListTopActions), findsOneWidget);
+      expect(find.byType(ListAddBar), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(ListAddBar),
+          matching: find.byType(QuickCaptureField),
+        ),
+        findsOneWidget,
+      );
     });
   });
 

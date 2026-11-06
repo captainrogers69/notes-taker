@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/widgets/shell_layout.dart';
-import 'shell_cubit.dart';
 
 // Placeholders for screens later tasks build. Each shows only its title
 // (no invented UI) and is replaced whole by its task:
-// - ListPlaceholder → Task 16 (`list_page.dart`)
 // - ArchivePlaceholder, SearchPlaceholder → Task 19
 // - SettingsPlaceholder → Task 20 (`settings_page.dart`)
-// - ListsPlaceholder (phone Lists tab) → Task 16
 
 class PlaceholderPage extends StatelessWidget {
   const PlaceholderPage({super.key, required this.title});
@@ -22,25 +18,6 @@ class PlaceholderPage extends StatelessWidget {
       padding: ShellLayout.of(context).padding,
       children: [Text(title, style: Theme.of(context).textTheme.headlineSmall)],
     );
-  }
-}
-
-class ListPlaceholder extends StatelessWidget {
-  const ListPlaceholder({super.key, required this.listId});
-
-  final String listId;
-
-  @override
-  Widget build(BuildContext context) {
-    final name = context.select<ShellCubit, String>(
-      (c) =>
-          c.state.lists
-              .where((l) => l.id == listId)
-              .map((l) => l.name)
-              .firstOrNull ??
-          '',
-    );
-    return PlaceholderPage(title: name);
   }
 }
 
@@ -65,11 +42,4 @@ class SettingsPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       const PlaceholderPage(title: 'Settings');
-}
-
-class ListsPlaceholder extends StatelessWidget {
-  const ListsPlaceholder({super.key});
-
-  @override
-  Widget build(BuildContext context) => const PlaceholderPage(title: 'Lists');
 }
