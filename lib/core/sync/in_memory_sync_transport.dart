@@ -79,15 +79,13 @@ class InMemorySyncTransport implements SyncTransport {
   }
 
   @override
-  Future<List<PulledChange>> pull({
-    required int afterSeq,
-    int limit = 500,
-  }) async {
+  Future<PulledPage> pull({required int afterSeq, int limit = 500}) async {
     _checkOnline();
-    return _server.visible
+    final rows = _server.visible
         .where((p) => p.seq > afterSeq)
         .take(limit)
         .toList(growable: false);
+    return PulledPage(rows, full: rows.length >= limit);
   }
 
   /// Advisory, broadcast, no replay: a hint may be missed or coalesced, so

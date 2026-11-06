@@ -45,19 +45,30 @@ class _SpyTransport implements SyncTransport {
     pushedIds.addAll(changes.map((c) => c.changeId));
   }
 
+  /// Seqs left out of returned pages, as a transport drops malformed rows
+  /// (the page keeps its raw `full` / `lastSeq`).
+  Set<int> dropSeqs = {};
+
   @override
-  Future<List<PulledChange>> pull({
-    required int afterSeq,
-    int limit = 500,
-  }) async {
+  Future<PulledPage> pull({required int afterSeq, int limit = 500}) async {
     calls.add('pull');
     pullStarted?.complete();
     pullStarted = null;
     final gate = pullGate;
     if (gate != null) await gate.future;
     final page = await inner.pull(afterSeq: afterSeq, limit: limit);
-    if (!scramble || page.isEmpty) return page;
-    return [...page.reversed, page.first];
+    final rows = [
+      for (final r in page.rows)
+        if (!dropSeqs.contains(r.seq)) r,
+    ];
+    if (!scramble || rows.isEmpty) {
+      return PulledPage(rows, full: page.full, lastSeq: page.lastSeq);
+    }
+    return PulledPage(
+      [...rows.reversed, rows.first],
+      full: page.full,
+      lastSeq: page.lastSeq,
+    );
   }
 
   @override
@@ -516,6 +527,29 @@ void main() {
       expect(await c.items(), hasLength(4));
       expect(await c.kv('sync.cursor'), '5');
       expect(c.transport.calls.where((x) => x == 'pull').length, 3);
+    });
+
+    test('a full page with a dropped malformed row keeps paging', () async {
+      final c = _Device('dev-c', server, pageSize: 2);
+      addTearDown(c.close);
+      await _seedList(a, items: 4); // seqs 1..5
+      await a.engine.syncNow();
+      c.transport.dropSeqs = {2}; // the transport skipped a malformed row
+      await c.engine.syncNow();
+      expect(c.merger.appliedEntities, ['l1', 'i2', 'i3', 'i4']);
+      expect(await c.kv('sync.cursor'), '5');
+      expect(c.transport.calls.where((x) => x == 'pull').length, 3);
+    });
+
+    test('a full page of only malformed rows still pages on', () async {
+      final c = _Device('dev-c', server, pageSize: 2);
+      addTearDown(c.close);
+      await _seedList(a, items: 4);
+      await a.engine.syncNow();
+      c.transport.dropSeqs = {1, 2};
+      await c.engine.syncNow();
+      expect(c.merger.appliedEntities, ['i2', 'i3', 'i4']);
+      expect(await c.kv('sync.cursor'), '5');
     });
 
     test('applied markers are pruned below the re-read window', () async {

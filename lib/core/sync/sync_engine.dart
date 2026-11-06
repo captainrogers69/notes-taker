@@ -90,6 +90,7 @@ class SyncEngine {
     this._connectivity,
     this._checkOnline,
     this._timing = const SyncTiming(),
+    this._onForeignDevices,
     int Function()? now,
     void Function(String message)? log,
     this.pageSize = 500,
@@ -115,6 +116,11 @@ class SyncEngine {
   final Stream<bool>? _connectivity;
   final Future<bool> Function()? _checkOnline;
   final SyncTiming _timing;
+
+  /// Called with the other devices' ids in each pulled page, before it is
+  /// applied, so their names can be cached for conflict labels (the merge
+  /// itself only reads the local cache). Errors are logged and ignored.
+  final Future<void> Function(Set<String> deviceIds)? _onForeignDevices;
   final int Function() _now;
   final void Function(String) _log;
   final int pageSize;
@@ -328,7 +334,8 @@ class SyncEngine {
     var last = after;
     while (true) {
       final page = await _transport.pull(afterSeq: after, limit: pageSize);
-      final rows = [...page]..sort((x, y) => x.seq.compareTo(y.seq));
+      final rows = [...page.rows]..sort((x, y) => x.seq.compareTo(y.seq));
+      await _noteDevices(rows);
       for (final row in rows) {
         if (_stopped) return null;
         if (row.seq <= last) continue;
@@ -340,11 +347,29 @@ class SyncEngine {
           return e;
         }
       }
-      if (page.length < pageSize || _stopped) break;
-      after = last;
+      // A full raw page means more may follow, even when malformed rows were
+      // left out of it; page on from its last raw seq.
+      final next = math.max(last, page.lastSeq ?? last);
+      if (!page.full || _stopped || next <= after) break;
+      after = next;
     }
     await _prune();
     return null;
+  }
+
+  Future<void> _noteDevices(List<PulledChange> rows) async {
+    final hook = _onForeignDevices;
+    if (hook == null) return;
+    final ids = {
+      for (final r in rows)
+        if (r.change.deviceId != _deviceId) r.change.deviceId,
+    };
+    if (ids.isEmpty) return;
+    try {
+      await hook(ids);
+    } on Object catch (e) {
+      _log('device names refresh failed: ${e.runtimeType}');
+    }
   }
 
   Future<void> _handle(PulledChange row, Map<String, int> blocked) async {

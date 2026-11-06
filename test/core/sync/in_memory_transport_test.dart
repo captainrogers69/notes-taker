@@ -23,7 +23,7 @@ void main() {
     final a = InMemorySyncTransport.newServer()('a');
     await a.push([change('1')]);
     await a.push([change('1'), change('2')]);
-    final rows = await a.pull(afterSeq: 0);
+    final rows = (await a.pull(afterSeq: 0)).rows;
     expect(rows.map((r) => r.change.changeId), ['1', '2']);
     expect(rows.map((r) => r.seq), [1, 2]);
   });
@@ -31,9 +31,9 @@ void main() {
   test('pull afterSeq returns only newer rows in order', () async {
     final a = InMemorySyncTransport.newServer()('a');
     await a.push([change('1'), change('2'), change('3')]);
-    final rows = await a.pull(afterSeq: 1);
+    final rows = (await a.pull(afterSeq: 1)).rows;
     expect(rows.map((r) => r.seq), [2, 3]);
-    expect((await a.pull(afterSeq: 0, limit: 2)).length, 2);
+    expect((await a.pull(afterSeq: 0, limit: 2)).rows.length, 2);
   });
 
   test('hints fire for other clients, not the pusher', () async {
@@ -69,7 +69,7 @@ void main() {
     );
     a.offline = false;
     await a.push([change('1')]);
-    expect((await a.pull(afterSeq: 0)).length, 1);
+    expect((await a.pull(afterSeq: 0)).rows.length, 1);
   });
 
   test('devices are shared across clients', () async {
@@ -88,12 +88,12 @@ void main() {
       a.commitOutOfOrder();
       await a.push([change('1')]); // seq 1, held
       await b.push([change('2', device: 'b')]); // seq 2, visible
-      expect((await b.pull(afterSeq: 0)).map((r) => r.seq), [2]);
-      expect(await b.pull(afterSeq: 2), isEmpty);
+      expect((await b.pull(afterSeq: 0)).rows.map((r) => r.seq), [2]);
+      expect((await b.pull(afterSeq: 2)).rows, isEmpty);
       b.releaseHeld();
-      expect(await b.pull(afterSeq: 2), isEmpty); // cursor skipped seq 1
-      expect((await b.pull(afterSeq: 0)).map((r) => r.seq), [1, 2]);
-      expect((await b.pull(afterSeq: max(0, 2 - 100))).map((r) => r.seq), [
+      expect((await b.pull(afterSeq: 2)).rows, isEmpty); // cursor skipped seq 1
+      expect((await b.pull(afterSeq: 0)).rows.map((r) => r.seq), [1, 2]);
+      expect((await b.pull(afterSeq: max(0, 2 - 100))).rows.map((r) => r.seq), [
         1,
         2,
       ]);
@@ -111,7 +111,7 @@ void main() {
       await a.push([change('0')]);
       await a.push([change('1')]);
       await a.push([change('2')]);
-      expect((await a.pull(afterSeq: 0)).map((r) => r.seq), [1, 3]);
+      expect((await a.pull(afterSeq: 0)).rows.map((r) => r.seq), [1, 3]);
     },
   );
 
@@ -154,7 +154,7 @@ void main() {
   test('duplicate inside one batch stores once', () async {
     final a = InMemorySyncTransport.newServer()('a');
     await a.push([change('1'), change('1')]);
-    expect((await a.pull(afterSeq: 0)).length, 1);
+    expect((await a.pull(afterSeq: 0)).rows.length, 1);
   });
 
   test('duplicate of a held row is not re-stored and keeps its seq', () async {
@@ -165,7 +165,7 @@ void main() {
     await a.push([change('1')]);
     await a.push([change('2')]);
     a.releaseHeld();
-    final rows = await a.pull(afterSeq: 0);
+    final rows = (await a.pull(afterSeq: 0)).rows;
     expect(rows.map((r) => (r.seq, r.change.changeId)), [(1, '1'), (2, '2')]);
   });
 
@@ -176,7 +176,7 @@ void main() {
       throwsA(isA<SyncOfflineException>()),
     );
     a.offline = false;
-    expect(await a.pull(afterSeq: 0), isEmpty);
+    expect((await a.pull(afterSeq: 0)).rows, isEmpty);
   });
 
   group('cipher', () {

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -7,11 +8,13 @@ import 'package:get_it/get_it.dart';
 import '../database/weave_database.dart';
 import '../sync/change_merger.dart';
 import '../sync/change_writer.dart';
+import '../sync/device_directory.dart';
 import '../sync/device_names.dart';
 import '../sync/hlc_clock.dart';
 import '../sync/passthrough_payload_cipher.dart';
 import '../sync/payload_cipher.dart';
 import '../sync/sync_engine.dart';
+import '../sync/supabase_sync_transport.dart';
 import '../sync/sync_status.dart';
 import '../sync/sync_transport.dart';
 import 'core_di.dart';
@@ -24,6 +27,9 @@ import 'core_di.dart';
 /// session (Task 13); without them the status stays `localOnly`.
 /// [deviceName], [connectivity] and [checkOnline] default to the platform
 /// plugins; tests pass their own.
+///
+/// Takes ownership of [transport]: [unregisterSync] disposes it.
+/// Registers nothing that touches the network until [startSync].
 ///
 /// The device id is captured by the engine, [DeviceNames] and (through the
 /// clock and writer) the merger. To change it (sign-out, Task 13): call
@@ -39,6 +45,7 @@ Future<void> registerSync(
   Future<bool> Function()? checkOnline,
   Stream<bool>? signedIn,
   bool signedInNow = false,
+  String? platform,
 }) async {
   final db = sl<WeaveDatabase>();
   final deviceId = sl<DeviceId>().value;
@@ -47,6 +54,13 @@ Future<void> registerSync(
   sl.registerSingleton<PayloadCipher>(cipher);
   sl.registerSingleton<DeviceNames>(
     DeviceNames(db, selfId: deviceId, selfName: selfName),
+  );
+  sl.registerSingleton<DeviceDirectory>(
+    DeviceDirectory(
+      transport: transport,
+      names: sl<DeviceNames>(),
+      platform: platform ?? Platform.operatingSystem,
+    ),
   );
   sl.registerLazySingleton<ChangeMerger>(
     () => ChangeMerger(
@@ -65,6 +79,7 @@ Future<void> registerSync(
       deviceId: deviceId,
       connectivity: connectivity ?? connectivityOnline(),
       checkOnline: checkOnline ?? isOnlineNow,
+      onForeignDevices: sl<DeviceDirectory>().ensureKnown,
     ),
   );
   if (sl.isRegistered<SyncStatusCubit>()) {
@@ -85,8 +100,17 @@ Future<void> registerSync(
   }, dispose: (c) => c.close());
 }
 
-/// Disposes the engine and unregisters everything [registerSync] made except
-/// the [SyncStatusCubit], which is detached and re-attached by the next
+/// Starts syncing once signed in (app start with a session, or after sign-in
+/// in Task 13): starts the engine and, in the background, registers this
+/// device and caches device names.
+void startSync(GetIt sl) {
+  sl<SyncEngine>().start();
+  unawaited(sl<DeviceDirectory>().start());
+}
+
+/// Disposes the engine and the transport (its realtime channel and auth
+/// listener) and unregisters everything [registerSync] made except the
+/// [SyncStatusCubit], which is detached and re-attached by the next
 /// [registerSync].
 Future<void> unregisterSync(GetIt sl) async {
   if (sl.isRegistered<SyncStatusCubit>() &&
@@ -97,9 +121,18 @@ Future<void> unregisterSync(GetIt sl) async {
     await sl.unregister<SyncEngine>(disposingFunction: (e) => e.dispose());
   }
   await _drop<ChangeMerger>(sl);
+  if (sl.isRegistered<DeviceDirectory>()) {
+    await sl.unregister<DeviceDirectory>(disposingFunction: (d) => d.dispose());
+  }
   await _drop<DeviceNames>(sl);
   await _drop<PayloadCipher>(sl);
-  await _drop<SyncTransport>(sl);
+  if (sl.isRegistered<SyncTransport>()) {
+    await sl.unregister<SyncTransport>(
+      disposingFunction: (t) async {
+        if (t is SupabaseSyncTransport) await t.dispose();
+      },
+    );
+  }
 }
 
 Future<void> _drop<T extends Object>(GetIt sl) async {
