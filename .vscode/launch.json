@@ -1,0 +1,38 @@
+{
+  // Weave launch configurations. There is no lib/main.dart: each flavor has its own entry point.
+  // Secrets come from config/<flavor>.json (gitignored; copy config/dev.example.json).
+  // --flavor applies to Android, iOS and macOS only; use the "no flavor" entry on Windows/Linux/web.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Weave dev",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main_dev.dart",
+      "args": ["--flavor", "dev", "--dart-define-from-file=config/dev.json"]
+    },
+    {
+      "name": "Weave dev (profile)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile",
+      "program": "lib/main_dev.dart",
+      "args": ["--flavor", "dev", "--dart-define-from-file=config/dev.json"]
+    },
+    {
+      "name": "Weave dev (no flavor: Windows/Linux/web)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main_dev.dart",
+      "args": ["--dart-define-from-file=config/dev.json"]
+    },
+    {
+      "name": "Weave prod (release)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release",
+      "program": "lib/main_prod.dart",
+      "args": ["--flavor", "prod", "--dart-define-from-file=config/prod.json"]
+    }
+  ]
+}
