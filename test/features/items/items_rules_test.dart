@@ -189,6 +189,36 @@ void main() {
     expect(ids, ['over', 'ok']);
   });
 
+  test(
+    'doneToday lists done tasks due today from live lists, by time',
+    () async {
+      await list('L');
+      await list('A', archivedAt: 5);
+      await item(
+        'late',
+        'L',
+        dueDate: '2026-11-05',
+        dueMinutes: 900,
+        done: true,
+      );
+      await item(
+        'early',
+        'L',
+        dueDate: '2026-11-05',
+        dueMinutes: 540,
+        done: true,
+      );
+      await item('untimed', 'L', dueDate: '2026-11-05', done: true);
+      await item('open', 'L', dueDate: '2026-11-05', dueMinutes: 600);
+      await item('past', 'L', dueDate: '2026-11-04', done: true);
+      await item('arch', 'A', dueDate: '2026-11-05', done: true);
+      final ids = (await repo.watchDoneToday(now).first)
+          .map((i) => i.id)
+          .toList();
+      expect(ids, ['early', 'late', 'untimed']);
+    },
+  );
+
   test('laterThisWeek includes day +6, excludes day +7', () async {
     await list('L');
     await item('d1', 'L', dueDate: '2026-11-06');

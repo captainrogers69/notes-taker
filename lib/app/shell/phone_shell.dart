@@ -6,14 +6,18 @@ import '../../core/theme/weave_theme.dart';
 import '../../core/widgets/pressable.dart';
 import '../../core/widgets/undo_toast.dart';
 import '../../core/widgets/weave_icons.dart';
+import '../../features/up_next/presentation/up_next_page.dart';
 import '../router.dart';
 import 'app_shell.dart';
 import 'tab_bar.dart';
 
 /// The add bar pinned above the tabs on Up next and list screens (design
-/// playbook §9 Layouts). Tasks 15 and 16 return their `QuickCaptureField`
-/// here; until then there is none.
-Widget? phoneAddBar(ShellLocation location) => null;
+/// playbook §9 Layouts): Up next's `QuickCaptureField` (Task 15); the list
+/// screen returns its own in Task 16.
+Widget? phoneAddBar(ShellLocation location) => switch (location.route) {
+  AppRoute.upNext => const UpNextAddBar(),
+  _ => null,
+};
 
 /// Phones and windows under 720: top bar (only on screens pushed inside
 /// the Lists tab: back to Lists) · screen · add bar · tab bar. No brand row

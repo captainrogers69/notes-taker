@@ -48,3 +48,24 @@ String dueLabel(DueSpec due, DateTime now) {
   final m = due.minutes;
   return m == null ? day : '$day ${fmtClock(m)}';
 }
+
+/// Overdue as the Up next and list queries define it: due on an earlier
+/// day, or today at a time already past. A task due today without a time
+/// is not overdue.
+bool isOverdue(DueSpec due, DateTime now) {
+  final today = DateTime(now.year, now.month, now.day);
+  final day = DateTime(due.date.year, due.date.month, due.date.day);
+  if (day.isBefore(today)) return true;
+  final m = due.minutes;
+  return day == today && m != null && m < now.hour * 60 + now.minute;
+}
+
+/// A row's time (03 `dueLabel`): '17:00' today, 'Today' today without a
+/// time, otherwise [dueLabel] ('Tomorrow 10:00', 'Fri 10:00', 'Thu 12 Nov').
+String rowDueLabel(DueSpec due, DateTime now) {
+  final today = DateTime(now.year, now.month, now.day);
+  final day = DateTime(due.date.year, due.date.month, due.date.day);
+  if (day != today) return dueLabel(due, now);
+  final m = due.minutes;
+  return m == null ? 'Today' : fmtClock(m);
+}

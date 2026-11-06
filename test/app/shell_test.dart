@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc_test/bloc_test.dart';
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -28,7 +29,15 @@ import 'package:weave/features/account/presentation/session_cubit.dart';
 import 'package:weave/features/items/domain/entities/item.dart';
 import 'package:weave/features/items/domain/repositories/items_repository.dart';
 import 'package:weave/features/lists/domain/entities/task_list.dart';
+import 'package:weave/features/items/domain/usecases/add_item.dart';
+import 'package:weave/features/items/domain/usecases/toggle_done.dart';
 import 'package:weave/features/lists/domain/repositories/lists_repository.dart';
+import 'package:weave/core/widgets/quick_capture_field.dart';
+import 'package:weave/features/up_next/presentation/capture_cubit.dart';
+import 'package:weave/features/up_next/presentation/up_next_cubit.dart';
+import 'package:weave/features/up_next/presentation/up_next_page.dart';
+
+import '../features/up_next/up_next_fakes.dart' as up;
 
 /// A stream source that replays its latest value to every new listener
 /// (as a Drift watch query does).
@@ -159,6 +168,24 @@ void _setUp({
         lists: lists,
         items: items,
         deviceCount: () => Stream.value(devices),
+      ),
+    );
+  // Up next reads its own sources, so the shell's counts stay its own.
+  final upItems = up.FakeItemsStore();
+  final upLists = up.FakeLists()..active.add([up.taskList('l1', 'Errands')]);
+  sl
+    ..registerFactory<UpNextCubit>(
+      () => UpNextCubit(
+        items: upItems,
+        lists: upLists,
+        toggleDone: ToggleDone(upItems),
+      ),
+    )
+    ..registerFactory<CaptureCubit>(
+      () => CaptureCubit(
+        lists: upLists,
+        addItem: AddItem(upItems),
+        capturePref: () => Stream.value(null),
       ),
     );
 }
@@ -301,7 +328,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byType(Sidebar), findsOneWidget);
-      expect(find.byType(UpNextPlaceholder), findsOneWidget);
+      expect(find.byType(UpNextPage), findsOneWidget);
     });
 
     testWidgets('/lists on a wide window is Up next from the first frame', (
@@ -318,7 +345,7 @@ void main() {
         ),
       );
       expect(find.byType(ListsPlaceholder), findsNothing);
-      expect(find.byType(UpNextPlaceholder), findsOneWidget);
+      expect(find.byType(UpNextPage), findsOneWidget);
     });
 
     testWidgets('a tab opens its screen', (tester) async {
@@ -504,6 +531,29 @@ void main() {
   });
 
   group('counts', () {
+    test('the Up next count is re-read on the wall-clock minute', () {
+      fakeAsync((async) {
+        final lists = FakeLists();
+        final items = FakeItems();
+        final start = DateTime(2026, 11, 3, 23, 59, 50);
+        final c = ShellCubit(
+          lists: lists,
+          items: items,
+          now: () => start.add(async.elapsed),
+        );
+        async.flushMicrotasks();
+        expect(items.upNextAt, [start]);
+        async.elapse(const Duration(seconds: 10));
+        expect(items.upNextAt.last, DateTime(2026, 11, 4));
+        async.elapse(const Duration(seconds: 59));
+        expect(items.upNextAt, hasLength(2));
+        async.elapse(const Duration(seconds: 1));
+        expect(items.upNextAt.last, DateTime(2026, 11, 4, 0, 1));
+        unawaited(c.close());
+        async.flushMicrotasks();
+      });
+    });
+
     testWidgets('sidebar counts update when the stream emits', (tester) async {
       _setUp();
       lists.active.add([_list('l1', 'Errands', open: 4)]);
@@ -605,7 +655,12 @@ void main() {
     ) async {
       _setUp();
       await _pumpApp(tester, _wide);
-      await tester.tap(find.byType(EditableText));
+      await tester.tap(
+        find.descendant(
+          of: find.byType(Sidebar),
+          matching: find.byType(EditableText),
+        ),
+      );
       await tester.pump();
       FocusManager.instance.primaryFocus?.unfocus();
       await tester.pump();
@@ -620,6 +675,48 @@ void main() {
       expect(searchField(tester).focusNode.hasFocus, isTrue);
     });
 
+    testWidgets('Ctrl+K and Ctrl+N work while the capture field has focus', (
+      tester,
+    ) async {
+      _setUp();
+      await _pumpApp(tester, _wide);
+      final capture = find.descendant(
+        of: find.byType(QuickCaptureField),
+        matching: find.byType(EditableText),
+      );
+      // Up next does not take focus on its own (03: no autofocus).
+      expect(tester.widget<EditableText>(capture).focusNode.hasFocus, isFalse);
+      await tester.tap(capture);
+      await tester.pump();
+      expect(tester.widget<EditableText>(capture).focusNode.hasFocus, isTrue);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyN);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      expect(spy.newList, 1);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyK);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pump();
+      expect(searchField(tester).focusNode.hasFocus, isTrue);
+    });
+
+    testWidgets('phone add bar holds the capture field on Up next only', (
+      tester,
+    ) async {
+      _setUp();
+      await _pumpApp(tester, _phone);
+      final bar = find.byType(PhoneTabBar);
+      expect(find.byType(UpNextAddBar), findsOneWidget);
+      // The add bar sits just above the tabs.
+      expect(
+        tester.getRect(find.byType(UpNextAddBar)).bottom,
+        lessThanOrEqualTo(tester.getRect(bar).top),
+      );
+      await tester.tap(find.descendant(of: bar, matching: find.text('Search')));
+      await tester.pumpAndSettle();
+      expect(find.byType(QuickCaptureField), findsNothing);
+    });
+
     testWidgets('Ctrl+N starts a new list', (tester) async {
       _setUp();
       await _pumpApp(tester, _wide);
@@ -628,7 +725,12 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
       expect(spy.newList, 1);
       // Also from the search field, and from the sidebar row.
-      await tester.tap(find.byType(EditableText));
+      await tester.tap(
+        find.descendant(
+          of: find.byType(Sidebar),
+          matching: find.byType(EditableText),
+        ),
+      );
       await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
       await tester.sendKeyEvent(LogicalKeyboardKey.keyN);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);

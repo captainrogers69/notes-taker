@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/up_next/presentation/up_next_page.dart';
 import 'shell/app_shell.dart';
 import 'shell/placeholder_pages.dart';
 import 'shell/shell_actions.dart';
@@ -24,8 +25,8 @@ enum AppRoute {
 }
 
 /// The router: every route sits inside the [AppShell] (sidebar on desktop,
-/// tab bar on phones). Pages that later tasks build are placeholders now
-/// (see `placeholder_pages.dart`).
+/// tab bar on phones). Pages that later tasks build are placeholders for
+/// now (see `placeholder_pages.dart`).
 GoRouter buildRouter({ShellActions? actions, String initialLocation = '/'}) {
   final a = actions ?? ShellActions.standard();
   GoRoute route(AppRoute r, Widget Function(GoRouterState s) page) => GoRoute(
@@ -47,7 +48,7 @@ GoRouter buildRouter({ShellActions? actions, String initialLocation = '/'}) {
         builder: (context, state, child) =>
             AppShell(location: state, actions: a, child: child),
         routes: [
-          route(AppRoute.upNext, (_) => const UpNextPlaceholder()),
+          route(AppRoute.upNext, (_) => const UpNextPage()),
           route(
             AppRoute.list,
             (s) => ListPlaceholder(listId: s.pathParameters['id'] ?? ''),

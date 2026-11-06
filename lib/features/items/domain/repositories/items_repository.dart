@@ -10,6 +10,11 @@ abstract class ItemsRepository {
   /// deleted. "Now" is fixed when the stream is created.
   Stream<List<Item>> watchUpNext(DateTime now);
 
+  /// Done tasks due today from lists that are neither archived nor deleted,
+  /// by due time (untimed last). Up next keeps them at the end of Today,
+  /// struck through, and as hollow marks on the day thread.
+  Stream<List<Item>> watchDoneToday(DateTime now);
+
   /// Open tasks due after today and within 6 days.
   Stream<List<Item>> watchLaterThisWeek(DateTime now);
 

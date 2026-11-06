@@ -146,6 +146,18 @@ class ItemsRepositoryImpl implements ItemsRepository {
   }
 
   @override
+  Stream<List<Item>> watchDoneToday(DateTime now) {
+    return _watch(
+      'SELECT i.* FROM items i JOIN lists l ON l.id = i.list_id '
+      "WHERE i.kind = 'task' AND i.done = 1 AND i.deleted_at IS NULL "
+      'AND i.due_date = ?1 AND $_liveList '
+      'ORDER BY (i.due_minutes IS NULL) ASC, i.due_minutes ASC, i.id ASC',
+      [Variable<String>(_date(now))],
+      withLists: true,
+    );
+  }
+
+  @override
   Stream<List<Item>> watchLaterThisWeek(DateTime now) {
     final end = DateTime(now.year, now.month, now.day + 6);
     return _watch(

@@ -12,6 +12,7 @@ class Pressable extends HookWidget {
     super.key,
     required this.child,
     this.onTap,
+    this.onActivate,
     this.color,
     this.hoverColor,
     this.radius,
@@ -23,6 +24,11 @@ class Pressable extends HookWidget {
 
   final Widget child;
   final VoidCallback? onTap;
+
+  /// Keyboard activation (Enter / Space); defaults to [onTap]. Lets a
+  /// control skip motion that only a pointer gets (keyboard-triggered UI is
+  /// instant, design playbook §4 Motion).
+  final VoidCallback? onActivate;
 
   /// Fill at rest (null: none).
   final Color? color;
@@ -56,7 +62,7 @@ class Pressable extends HookWidget {
       actions: {
         ActivateIntent: CallbackAction<ActivateIntent>(
           onInvoke: (_) {
-            onTap?.call();
+            (onActivate ?? onTap)?.call();
             return null;
           },
         ),

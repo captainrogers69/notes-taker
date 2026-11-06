@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../core/helpers/minute_ticker.dart';
 import '../../features/items/domain/repositories/items_repository.dart';
 import '../../features/lists/domain/entities/task_list.dart';
 import '../../features/lists/domain/repositories/lists_repository.dart';
@@ -56,7 +57,7 @@ class ShellState extends Equatable {
 }
 
 /// What the sidebar and the tab bar count. The Up next count reads "now"
-/// when its stream starts, so it is re-created every [refreshEvery];
+/// when its stream starts, so it is re-created on every wall-clock minute;
 /// [refresh] (the shell calls it on app resume) re-creates every source.
 class ShellCubit extends Cubit<ShellState> {
   ShellCubit({
@@ -64,18 +65,17 @@ class ShellCubit extends Cubit<ShellState> {
     required this._items,
     this._deviceCount,
     DateTime Function()? now,
-    Duration refreshEvery = const Duration(minutes: 1),
   }) : _now = now ?? DateTime.now,
        super(const ShellState()) {
     refresh();
-    _ticker = Timer.periodic(refreshEvery, (_) => _watchUpNext());
+    _ticker = MinuteTicker(_watchUpNext, now: _now);
   }
 
   final ListsRepository _lists;
   final ItemsRepository _items;
   final Stream<int> Function()? _deviceCount;
   final DateTime Function() _now;
-  Timer? _ticker;
+  MinuteTicker? _ticker;
   final _subs = <StreamSubscription<Object?>>[];
   StreamSubscription<Object?>? _upNext;
   var _archived = 0;

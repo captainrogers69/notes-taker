@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'shell_actions.dart';
+import '../../core/widgets/shell_layout.dart';
 import 'shell_cubit.dart';
 
 // Placeholders for screens later tasks build. Each shows only its title
 // (no invented UI) and is replaced whole by its task:
-// - UpNextPlaceholder → Task 15 (`up_next_page.dart`)
 // - ListPlaceholder → Task 16 (`list_page.dart`)
 // - ArchivePlaceholder, SearchPlaceholder → Task 19
 // - SettingsPlaceholder → Task 20 (`settings_page.dart`)
@@ -24,13 +23,6 @@ class PlaceholderPage extends StatelessWidget {
       children: [Text(title, style: Theme.of(context).textTheme.headlineSmall)],
     );
   }
-}
-
-class UpNextPlaceholder extends StatelessWidget {
-  const UpNextPlaceholder({super.key});
-
-  @override
-  Widget build(BuildContext context) => const PlaceholderPage(title: 'Up next');
 }
 
 class ListPlaceholder extends StatelessWidget {

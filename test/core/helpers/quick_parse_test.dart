@@ -111,10 +111,18 @@ void main() {
         'Due Tomorrow 18:00',
       );
       expect(parseReadBack(quickParse('plain', now), now), '');
-      expect(
-        parseReadBack(quickParse('tea in 30 min', now), now),
-        'Reminder in 30 min · Today 15:30',
-      );
+      // 03 data.js `parsePreview`, branch by branch (now = Thu 15:00).
+      String rb(String raw) => parseReadBack(quickParse(raw, now), now);
+      expect(rb('tea in 30 min'), 'Reminder in 30 min · 15:30');
+      expect(rb('tea in 90 min'), 'Reminder in 1.5 h · 16:30');
+      expect(rb('tea in 60 min'), 'Reminder in 1 h · 16:00');
+      expect(rb('tea in 2 h'), 'Reminder in 2 h · 17:00');
+      expect(rb('tea in 10 h'), 'Reminder in 10 h · Tomorrow 01:00');
+      expect(rb('call 6pm'), 'Due today 18:00');
+      expect(rb('call today'), 'Due today');
+      expect(rb('call tonight'), 'Due today 20:00');
+      expect(rb('call tomorrow'), 'Due Tomorrow');
+      expect(rb('call tomorrow 6pm'), 'Due Tomorrow 18:00');
     });
   });
 

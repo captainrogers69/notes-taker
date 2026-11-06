@@ -101,17 +101,25 @@ ParsedCapture quickParse(String raw, DateTime now) {
   );
 }
 
-/// Read-back line shown under the add field, e.g. 'Due Tomorrow 18:00'.
+/// Read-back line shown under the add field (03 data.js `parsePreview`):
+/// 'Due today 18:00', 'Due Tomorrow 18:00', 'Reminder in 1.5 h · 16:30'.
 String parseReadBack(ParsedCapture p, DateTime now) {
   final due = p.due;
   if (due == null) return '';
-  final label = dueLabel(due, now);
   final timer = p.timerMinutes;
   if (timer != null) {
-    final span = timer >= 60 && timer % 60 == 0
-        ? '${timer ~/ 60} h'
-        : '$timer min';
-    return 'Reminder in $span · $label';
+    final span = timer >= 60 ? '${_hours(timer)} h' : '$timer min';
+    return 'Reminder in $span · ${rowDueLabel(due, now)}';
   }
-  return 'Due $label';
+  final today = DateTime(now.year, now.month, now.day);
+  final day = DateTime(due.date.year, due.date.month, due.date.day);
+  final m = due.minutes;
+  if (day != today) return 'Due ${dueLabel(due, now)}';
+  return m == null ? 'Due today' : 'Due today ${fmtClock(m)}';
+}
+
+/// 60 -> '1', 90 -> '1.5', 100 -> '1.7'.
+String _hours(int minutes) {
+  final h = (minutes / 60).toStringAsFixed(1);
+  return h.endsWith('.0') ? h.substring(0, h.length - 2) : h;
 }
