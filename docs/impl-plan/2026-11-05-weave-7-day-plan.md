@@ -36,6 +36,7 @@
 | 4 | 2026-11-05 | **Task 11 done, reviewed and staged.** SyncEngine: pull (seq order across pages, re-read window cursor−100, applied-id dedupe + cursor in the same transaction as the merge, bounded markers) then push (oldest first, batches of 200, delete only acked). Quarantine of unreadable changes blocks only that entity; other apply errors stop the pull at that row but still push, then back off 2…60 s. One pass at a time; stop/start resets connectivity; `unregisterSync` for sign-out (Task 13). Local device-name cache. `SyncStatusCubit` global, `localOnly` when signed out. Not yet wired into bootstrap — Task 12 does that with the Supabase transport. `flutter analyze` 0 issues, 226/226 tests. **Still waiting on the user:** Windows build check. Next: Task 12 (Supabase transport, realtime hints, devices — Day 3 gate). |
 | 5 | 2026-11-06 | **Task 12 done, reviewed and staged — Day 3 gate passed.** Supabase transport on the real dev project: A→B in 1588 / 1761 / 1729 / 1791 / 1810 ms (NFR1 < 3 s), offline-edit case converges. Push relies on RLS + `auth.uid()` default (no client `user_id`); realtime hints per device channel, token set before join, reopen on user change / error / server close; network, timeout and offline session refresh → offline, server errors → error; per-request timeouts, no hidden retries. Pull pages report `full` / `lastSeq` so a malformed row never stalls catch-up. Device names cached from `devices` (outside the merge transaction, stopped at sign-out). Sync wired in the main entrypoint, local-only fallback without Supabase or session. No migration needed. Run: `flutter test integration_test/sync_supabase_test.dart -d macos --flavor dev --dart-define-from-file=config/dev.json`. `flutter analyze` 0 issues, 255/255 tests. **Still waiting on the user:** Windows build check. Next: Task 13 (auth, session, bulk upload, sign out, delete account) — it calls `startSync` after sign-in and `unregisterSync` on sign-out. |
 | 6 | 2026-11-06 | **Task 13 done, reviewed and staged — Day 3 complete (Phase 2 · Sync).** Auth gateway (gotrue codes → `AuthError`, incl. `emailNotConfirmed`, `unavailable`), `SessionCubit` with `SessionResult` (ok / busy / pendingChanges / otherAccountData / failed), one action at a time. Local mode queues nothing; the outbox gate follows the owner key `Kv('account.user')`, written with the first snapshot. Sign-in snapshots local data, starts sync, `Uploading` → `SignedIn` (also when offline). Restored session re-checks the owner. Server-side sign-out stops sync but keeps data and queue; same-user re-sign-in just pushes the queue. User decisions: sign-out with unsynced edits tries to send, then asks (`discardPending`); another account's data on the device → ask first (`replaceOtherAccountData`), never mixed, never wiped on a failed check. Sign-out / delete: guarded wipe (prefs `pref.*` survive), new device id via one clock + `renew`. Delete account: RPC first, failure changes nothing. No migration. `flutter analyze` 0 issues, 303/303 tests. **Still waiting on the user:** Windows build check. Next: Phase 3, Task 14 (app shell, routing, sync badge, undo toast). |
+| 7 | 2026-11-06 | **Task 14 done, reviewed and staged.** App shell: go_router (one ShellRoute, `/list/:id` deep links, unknown → Up next, `/lists` → Up next on wide windows), desktop sidebar 256/224 and phone tab bars (iOS / Android), sync badge in sidebar and sheet styles (one sign-in entry point when signed out: the user row), undo toast (4 s, replaces, runs once, disposal-safe), ⌘K / ⌘N via an autofocus FocusScope, minute tick re-reads Up next only. Weave mark as a CustomPainter, pixel-tested against the kit (corner = quarter disc centred on (232,24); reversed in dark). Added flutter_svg for the icons.js set. Review fixed 13 items. Build needs `-t lib/main_dev.dart`. `flutter analyze` 0 issues, 341/341 tests. **Still waiting on the user:** Windows build check; visual check of the shell against the 03 prototype on macOS + Android. Next: Task 15 (Up next + quick capture). |
 
 Carried into later tasks from reviews:
 - Task 10: the merger takes `ChangeWriter`; applying a list purge also deletes its tasks; late changes never bring back a purged list or task.
@@ -777,16 +778,25 @@ General rule for every UI task:
   - Layout switch: width ≥ 720 → `DesktopShell` (sidebar 256 / 224 under 1100); otherwise `PhoneShell` with the tab bar Up next · Lists · Search · Settings. The tab bar uses iOS styling (filled icon for the current tab) or Material styling (pill) from `defaultTargetPlatform`.
   - Sidebar: search field (⌘K / Ctrl+K), Up next, lists (dot, name, open count), "New list" (⌘N / Ctrl+N), Archive and trash, the sync line, and the user row.
 
-- [ ] **Step 1: Write the failing tests.**
+- **Implementation decisions (Task 14):**
+  - Routing: `go_router` (already in pubspec, named by the architecture playbook). `buildRouter({ShellActions? actions})` in `lib/app/router.dart`: one `ShellRoute` → `AppShell` (≥ 720 `DesktopShell`, else `PhoneShell`), pages without transitions. The router's `redirect` sends `/lists` to Up next on a wide window (prototype: the sidebar lists them; the shell also redirects when a window is widened on `/lists`), and `onException` sends unknown paths to Up next. System back on phones: inside the Lists tab → Lists; other tabs → Up next; only Up next leaves the app. `ShellLocation.of(uri)` gives the current route and list id.
+  - Placeholders (title only, in `lib/app/shell/placeholder_pages.dart`) for Up next (Task 15), list (16), archive and search (19), settings (20) and the phone Lists tab (Task 16). The phone add bar is `phoneAddBar(location)` in `phone_shell.dart` (null until Tasks 15 / 16 return their `QuickCaptureField`); the list screen adds its own Share / ••• to the phone top bar (Task 16).
+  - Later flows are stubs in `ShellActions.standard()`: `newList` (Task 16, ⌘N / Ctrl+N and "New list") and `signIn` (Task 20, local user row and the signed-out sync line). `retrySync` runs `SyncEngine.syncNow()`.
+  - Sidebar data: `ShellCubit` (factory, `registerApp` in `lib/app/app_di.dart`): `watchActive`, `watchUpNext(now).length`, archived + trashed counts, `ListsRepository.watchShownInMiniBar()` (mini_bars ids: screen icon + note paper) and `DeviceNames.watchCount(db)` (cached device names, local only) for "Synced · N devices". `watchUpNext` is re-subscribed every minute; every source on app resume (`useOnAppLifecycleStateChange`). Shortcuts sit above a `FocusScope(autofocus)` so they survive a field losing focus.
+  - Sync copy: two locked prototypes word it differently, so `SyncStatusBadge` has two styles. `sheet` (01, this task's list, Task 23): "Offline · saved here", "Can't sync" + Retry. `sidebar` (03 `SYNC`): "Offline · changes saved here", "Sync error · retrying" (tap retries). Both: "Synced · N devices" (1 → "1 device"), "Syncing…", "On this Mac/PC/phone only", and "Signed out · sign in again to sync" when `SessionCubit.accountSignedOut` (`LocalSession` with the owner key set, read from the `OutboxGate`): the sheet style adds a Sign in button; in the sidebar the line is text only and the user row (shown as "Local mode" only in `LocalSession`) is the one Sign in (C4).
+  - Undo toast: `UndoToast.show(context, message, [undo])` finds the shell's `UndoToastScope`; `UndoToastLayer` is drawn by each shell (desktop: window bottom 24; phone: 12 above the add bar or tab bar). 4 s, then a 150 ms fade; enter = fade 180 ms + 16 px rise 200 ms; a replacing toast does not replay the rise; Undo runs at most once; the Undo focus ring is `onPrimary`; reduced motion → instant.
+  - Weave mark: `WeaveMark` (CustomPainter from the kit's 256-grid path, cropped to the note like `icons.js`; the corner is a quarter disc r 104 centred on the note's top-right corner (232, 24)), reversed corner (#F5F5F3) in dark per the kit. Icons: `flutter_svg` draws the `icons.js` set verbatim (`WeaveIcons` / `WeaveIcon`). Tokens: `tick` (#111, from app.css) and `sidebarWidthNarrow` (224); theme `titleSmall` 15/500 for the brand.
+
+- [x] **Step 1: Write the failing tests.**
   - `wide layout shows sidebar with lists and counts`
   - `narrow layout shows 4 tabs`
   - `badge shows "Offline · saved here" for offline`
   - `undo toast calls undo when tapped and disappears after 4 s`
   - `Ctrl+K focuses search`
-- [ ] **Step 2:** Run the tests. Expected: FAIL.
-- [ ] **Step 3:** Implement.
-- [ ] **Step 4:** Run the tests. Expected: PASS. Then run the app on macOS and an Android emulator and compare with the prototype.
-- [ ] **Step 5: Checkpoint.**
+- [x] **Step 2:** Run the tests. Expected: FAIL.
+- [x] **Step 3:** Implement.
+- [x] **Step 4:** Run the tests. Expected: PASS. Then run the app on macOS and an Android emulator and compare with the prototype. (Tests and `flutter build macos --debug --flavor dev -t lib/main_dev.dart --dart-define-from-file=config/dev.json` pass; the side-by-side visual check on macOS and Android is still for the user.)
+- [x] **Step 5: Checkpoint.**
 
 ### Task 15: Up next screen with day thread and quick capture
 
@@ -820,6 +830,8 @@ General rule for every UI task:
 - [ ] **Step 5: Checkpoint.**
 
 ### Task 16: List screen
+
+> Carried from Task 14: Task 16 also owns the **phone Lists tab** (`/lists`, replacing the placeholder): the list of lists with counts, as in the 03 iOS / Android prototypes.
 
 **Files:**
 

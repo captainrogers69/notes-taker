@@ -92,6 +92,13 @@ $_order
       _watch('l.archived_at IS NULL AND l.deleted_at IS NULL');
 
   @override
+  Stream<Set<String>> watchShownInMiniBar() =>
+      (_db.selectOnly(_db.miniBars)..addColumns([_db.miniBars.listId]))
+          .map((r) => r.read(_db.miniBars.listId))
+          .watch()
+          .map((ids) => {...ids.nonNulls});
+
+  @override
   Stream<List<TaskList>> watchArchived() =>
       _watch('l.archived_at IS NOT NULL AND l.deleted_at IS NULL');
 

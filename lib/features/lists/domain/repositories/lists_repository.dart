@@ -12,6 +12,10 @@ abstract class ListsRepository {
   Stream<List<TaskList>> watchTrashed();
   Stream<TaskList?> watch(String id);
 
+  /// Ids of the lists shown in the mini bar on this device (`mini_bars`,
+  /// device-only, D7).
+  Stream<Set<String>> watchShownInMiniBar();
+
   /// Creates a list ordered after the last one; returns its id.
   Future<String> create(String name, NoteColor color);
 

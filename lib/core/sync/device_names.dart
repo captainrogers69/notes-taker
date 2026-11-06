@@ -1,3 +1,5 @@
+import 'package:drift/drift.dart';
+
 import '../database/weave_database.dart';
 
 /// Local cache of device names, for conflict labels. Read inside the merge
@@ -10,6 +12,18 @@ class DeviceNames {
   static const fallback = 'Another device';
 
   static String key(String deviceId) => 'device.name.$deviceId';
+
+  /// How many devices the cache knows (this one included once the devices
+  /// table was read). For "Synced · N devices": local, no network; the
+  /// wipe at sign-out clears it.
+  static Stream<int> watchCount(WeaveDatabase db) {
+    final count = db.kv.key.count();
+    return (db.selectOnly(db.kv)
+          ..addColumns([count])
+          ..where(db.kv.key.like('device.name.%')))
+        .map((r) => r.read(count) ?? 0)
+        .watchSingle();
+  }
 
   final WeaveDatabase _db;
   final String selfId;

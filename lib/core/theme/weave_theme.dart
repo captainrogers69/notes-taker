@@ -19,6 +19,8 @@ ThemeData weaveTheme(Brightness b) {
   final textTheme = TextTheme(
     // Screen title 24/500, -0.01em
     headlineSmall: style(t.fsTitle, FontWeight.w500, letterSpacing: -0.24),
+    // Sidebar brand "Weave" 15/500 (app.css `.brand b`)
+    titleSmall: style(15, FontWeight.w500),
     // Card title, sheet list name 16/500
     titleMedium: style(t.fsSection, FontWeight.w500),
     // Body, tasks, fields 14/400

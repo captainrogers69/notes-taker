@@ -50,6 +50,11 @@ class WeaveTokens extends ThemeExtension<WeaveTokens> {
   final double paperMix; // --paper-mix (22% / 16%)
 
   // ---- Shared ----
+  /// The tick mark on a list-colour fill, both modes (`.check svg { color:
+  /// #111 }` in app.css / weave.css; not a tokens.css property). Never white
+  /// on yellow or green (design playbook §4).
+  Color get tick => const Color(0xFF111111);
+
   String get font => 'Geist'; // --font (fallbacks in [fontFallback])
   List<String> get fontFallback => const ['Inter', 'system-ui']; // --font
 
@@ -61,6 +66,8 @@ class WeaveTokens extends ThemeExtension<WeaveTokens> {
   double get rowHeight => 44; // --row-height
   double get controlHeight => 36; // --control-height
   double get sidebarWidth => 256; // --sidebar-width
+  double get sidebarWidthNarrow =>
+      224; // --sidebar-width under 1100 px (app.css)
 
   double get fsTitle => 24; // --fs-title
   double get fsSection => 16; // --fs-section

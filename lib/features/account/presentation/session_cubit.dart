@@ -228,6 +228,17 @@ class SessionCubit extends Cubit<SessionState> {
 
   bool get signedInNow => state.syncs;
 
+  /// The account while sync runs ([Uploading], [SignedIn]), else null.
+  AuthUser? get currentUser => state.syncs ? _auth.current : null;
+
+  /// True in [LocalSession] while this device's data still belongs to an
+  /// account (owner key set, so the [OutboxGate] is on and edits queue for
+  /// it): after a server-side sign-out (also after a restart), or a refused
+  /// sign-in onto another account's data. The sync badge then reads
+  /// "Signed out · sign in again to sync" instead of local-only. Re-read on
+  /// every state change: the gate only changes together with one.
+  bool get accountSignedOut => state is LocalSession && _outbox.enabled;
+
   /// Resolves a session restored at app start (state [SigningIn]). Starts
   /// sync when it ends signed in; call once after `registerSync`. Never
   /// throws: an error ends in [LocalSession] (auth kept; the next start

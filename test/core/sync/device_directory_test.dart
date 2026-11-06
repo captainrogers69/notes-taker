@@ -210,4 +210,21 @@ void main() {
     expect(await b.names.nameOf('dev-a'), 'Phone');
     expect(b.transport.deviceCalls, 1, reason: 'shared, not a second read');
   });
+
+  test('watchCount counts cached device names', () async {
+    final db = WeaveDatabase.memory();
+    addTearDown(db.close);
+    final names = DeviceNames(db, selfId: 'a', selfName: 'Mac');
+    final seen = <int>[];
+    final sub = DeviceNames.watchCount(db).listen(seen.add);
+    await pumpEventQueue();
+    await names.upsert({'a': 'Mac', 'b': 'Pixel 8', 'c': ''});
+    await db
+        .into(db.kv)
+        .insert(KvCompanion.insert(key: 'device.id', value: 'a'));
+    await pumpEventQueue();
+    await sub.cancel();
+    expect(seen.first, 0);
+    expect(seen.last, 2, reason: 'empty names skipped, other keys ignored');
+  });
 }

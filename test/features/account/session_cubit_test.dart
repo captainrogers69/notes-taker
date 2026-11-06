@@ -510,6 +510,27 @@ void main() {
       expect(_events, ['auth.signIn']);
     });
 
+    test(
+      'accountSignedOut: only after a server-side sign-out (badge)',
+      () async {
+        expect(app.session.accountSignedOut, isFalse, reason: 'local mode');
+        await app.signedInAndSynced();
+        expect(app.session.accountSignedOut, isFalse, reason: 'signed in');
+        expect(app.session.currentUser, _user);
+
+        app.auth.expire();
+        await pumpEventQueue();
+        expect(app.session.state, const LocalSession());
+        expect(app.session.accountSignedOut, isTrue, reason: 'owner kept');
+        expect(app.session.currentUser, isNull);
+
+        await app.session.signIn('a@example.com', 'pw');
+        await app.untilSignedIn();
+        await app.session.signOut();
+        expect(app.session.accountSignedOut, isFalse, reason: 'wiped');
+      },
+    );
+
     test('server-side sign-out keeps data and outbox, stops sync', () async {
       await app.signedInAndSynced();
       app.transport.inner.offline = true;

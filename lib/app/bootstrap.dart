@@ -15,6 +15,7 @@ import '../features/account/presentation/session_cubit.dart';
 import '../core/sync/supabase_sync_transport.dart';
 import '../core/sync/sync_status.dart';
 import 'app_config.dart';
+import 'app_di.dart';
 import 'weave_app.dart';
 
 /// Main app entrypoint wiring. Secondary window entrypoints (the mini bar)
@@ -25,6 +26,7 @@ Future<void> bootstrap(AppConfig config) async {
   tz.initializeTimeZones();
   await registerCore(sl, config);
   await _registerSync(supabase);
+  registerApp(sl);
   runApp(const WeaveApp());
 }
 

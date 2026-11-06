@@ -307,4 +307,15 @@ void main() {
     expect((await db.select(db.outbox).get()).length, n);
     expect(await db.select(db.lists).get(), hasLength(1));
   });
+
+  test('watchShownInMiniBar follows the mini_bars table', () async {
+    final seen = <Set<String>>[];
+    final sub = repo.watchShownInMiniBar().listen(seen.add);
+    await pumpEventQueue();
+    await db.into(db.miniBars).insert(MiniBarsCompanion.insert(listId: 'l1'));
+    await pumpEventQueue();
+    await sub.cancel();
+    expect(seen.first, isEmpty);
+    expect(seen.last, {'l1'});
+  });
 }
